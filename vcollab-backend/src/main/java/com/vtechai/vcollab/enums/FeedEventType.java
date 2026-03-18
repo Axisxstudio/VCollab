@@ -1,0 +1,15 @@
+package com.vtechai.vcollab.enums;
+
+public enum FeedEventType {
+    LIKE_CREATED,
+    LIKE_REMOVED,
+    SAVE_CREATED,
+    SAVE_REMOVED,
+    COMMENT_CREATED,
+    COMMENT_REMOVED,
+    SHARE_CREATED,
+    FOLLOW_CREATED,
+    FOLLOW_REMOVED,
+    PROJECT_REQUEST_CREATED,
+    PROJECT_REQUEST_UPDATED
+}

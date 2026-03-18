@@ -1,0 +1,610 @@
+/* ─── Shell ─────────────────────────────────────────────────────────────── */
+.edit-profile-shell {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Cover & Avatar ─────────────────────────────────────────────────────── */
+.edit-profile-visuals {
+  position: relative;
+  margin-bottom: 60px;
+}
+
+.edit-cover-wrapper {
+  height: 240px;
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  box-shadow: var(--shadow-md);
+}
+
+.edit-cover-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s;
+}
+
+.edit-cover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.edit-cover-wrapper:hover .edit-cover-overlay {
+  opacity: 1;
+}
+
+.edit-avatar-overlap {
+  position: absolute;
+  bottom: -50px;
+  left: 40px;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 5px solid var(--color-surface);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  z-index: 10;
+  overflow: hidden;
+}
+
+.edit-avatar-overlap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.edit-avatar-overlap .edit-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  cursor: pointer;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  gap: 4px;
+}
+
+.edit-avatar-overlap:hover .edit-avatar-overlay {
+  opacity: 1;
+}
+
+/* ─── Form ───────────────────────────────────────────────────────────────── */
+.edit-profile-form {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.form-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+}
+
+.form-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.form-header h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.form-header svg {
+  color: var(--color-primary);
+}
+
+.edit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edit-field label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.edit-input-wrapper {
+  position: relative;
+}
+
+.edit-input-wrapper svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.edit-input-wrapper input,
+.edit-input-wrapper textarea,
+.edit-input-wrapper select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  background: #f8fafc;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.edit-input-wrapper textarea {
+  padding-top: 12px;
+  min-height: 120px;
+}
+
+.edit-input-wrapper input:focus,
+.edit-input-wrapper textarea:focus,
+.edit-input-wrapper select:focus {
+  background: #fff;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-light);
+  outline: none;
+}
+
+.edit-field-full {
+  grid-column: span 2;
+}
+
+/* ─── Role Badge ──────────────────────────────────────────────────────────── */
+.role-badge-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: none;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #dbeafe 0%, #ede9fe 100%);
+  color: var(--color-primary);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: 1px solid #bfdbfe;
+}
+
+.role-note {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* ─── Education Type Cards ───────────────────────────────────────────────── */
+.edu-type-section {
+  margin-top: 24px;
+}
+
+.edu-type-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.edu-type-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.edu-type-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.25s;
+  font-family: inherit;
+  text-align: center;
+}
+
+.edu-type-card span {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+}
+
+.edu-type-card small {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.edu-type-card svg {
+  color: #94a3b8;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.edu-type-card:hover {
+  border-color: var(--color-primary);
+  background: #f0f7ff;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.1);
+}
+
+.edu-type-card:hover svg {
+  color: var(--color-primary);
+  transform: scale(1.1);
+}
+
+.edu-type-card.selected {
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.15);
+}
+
+.edu-type-card.selected svg,
+.edu-type-card.selected span {
+  color: var(--color-primary);
+}
+
+/* ─── Education Flow Section ─────────────────────────────────────────────── */
+.edu-flow-section {
+  margin-top: 24px;
+  border: 1px solid #e0f2fe;
+  border-radius: 16px;
+  padding: 24px;
+  background: #f0f9ff;
+  overflow: hidden;
+}
+
+.edu-flow-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.edu-flow-header svg {
+  color: var(--color-primary);
+}
+
+.edu-flow-header h4 {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+/* ─── Grade Chip Grid (School) ───────────────────────────────────────────── */
+.grade-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.grade-chip {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.grade-chip:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: #eff6ff;
+}
+
+.grade-chip.selected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+/* ─── University Wizard Stepper ──────────────────────────────────────────── */
+.wizard-stepper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28px;
+  gap: 0;
+}
+
+.wizard-step-item {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 0;
+}
+
+.wizard-step-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  color: #94a3b8;
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+
+.wizard-step-circle.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+.wizard-step-circle.completed {
+  border-color: #22c55e;
+  background: #22c55e;
+  color: #fff;
+}
+
+.wizard-step-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-left: 8px;
+  white-space: nowrap;
+  transition: color 0.3s;
+}
+
+.wizard-step-label.active {
+  color: var(--color-primary);
+}
+
+.wizard-step-connector {
+  flex: 1;
+  height: 2px;
+  background: #e2e8f0;
+  margin: 0 8px;
+  transition: background 0.3s;
+}
+
+.wizard-step-connector.completed {
+  background: #22c55e;
+}
+
+/* ─── Wizard Step Content ────────────────────────────────────────────────── */
+.wizard-step-content {
+  min-height: 120px;
+  margin-bottom: 20px;
+}
+
+.wizard-step-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── Year Chip Row (University) ─────────────────────────────────────────── */
+.year-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.year-chip {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.year-chip:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: #eff6ff;
+}
+
+.year-chip.selected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+/* ─── Wizard Navigation ──────────────────────────────────────────────────── */
+.wizard-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.wizard-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.wizard-done-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+/* ─── Actions ────────────────────────────────────────────────────────────── */
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: var(--space-4);
+  position: sticky;
+  bottom: 24px;
+  z-index: 50;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-save {
+  min-width: 160px;
+  padding: 12px 24px;
+  height: 48px;
+  border-radius: var(--radius-xl);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-cancel {
+  padding: 12px 24px;
+  border-radius: var(--radius-xl);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+/* ─── Toast ──────────────────────────────────────────────────────────────── */
+.upload-feedback {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 1000;
+  animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.feedback-card {
+  padding: 16px 20px;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-xl);
+  min-width: 300px;
+}
+
+.feedback-card.success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.feedback-card.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .edit-grid {
+    grid-template-columns: 1fr;
+  }
+  .edit-field-full {
+    grid-column: span 1;
+  }
+  .edit-avatar-overlap {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .edu-type-cards {
+    grid-template-columns: 1fr;
+  }
+  .wizard-stepper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .wizard-step-connector {
+    display: none;
+  }
+  .wizard-step-item {
+    flex: none;
+    gap: 10px;
+  }
+}

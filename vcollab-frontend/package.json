@@ -1,0 +1,33 @@
+{
+  "name": "vcollab-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --experimental-specifier-resolution=node --test src/**/*.test.js"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.3.4",
+    "@stomp/stompjs": "^7.0.0",
+    "@tanstack/react-query": "^5.51.1",
+    "antd": "^5.17.0",
+    "axios": "^1.7.2",
+    "framer-motion": "^11.2.10",
+    "lucide-react": "^0.577.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.51.2",
+    "react-router-dom": "^6.23.1",
+    "recharts": "^3.8.0",
+    "sockjs-client": "^1.6.1",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.1"
+  }
+}

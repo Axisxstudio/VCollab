@@ -1,0 +1,273 @@
+/* ─── Audience Panel Shell ───────────────────────────────────────────────── */
+.audience-panel {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+/* ─── Toggle Header ──────────────────────────────────────────────────────── */
+.audience-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.audience-toggle:hover {
+  background: #f8fafc;
+}
+
+.audience-toggle.open {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.audience-toggle-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.audience-toggle-left svg {
+  color: var(--color-primary);
+}
+
+.audience-active-badge {
+  background: #22c55e;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+}
+
+.audience-toggle-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.audience-current-type {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: #eff6ff;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.toggle-chevron {
+  color: #94a3b8;
+  transition: transform 0.25s;
+}
+
+.toggle-chevron.rotated {
+  transform: rotate(180deg);
+}
+
+/* ─── Body ───────────────────────────────────────────────────────────────── */
+.audience-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+}
+
+.audience-section {
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.audience-section:last-child {
+  border-bottom: none;
+}
+
+.audience-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ─── Target Type Grid ───────────────────────────────────────────────────── */
+.target-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.target-type-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 12px 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.target-type-btn span {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.target-type-btn small {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.target-type-btn svg:first-child {
+  color: #94a3b8;
+  transition: color 0.2s;
+}
+
+.target-type-btn:hover {
+  border-color: var(--color-primary);
+  background: #eff6ff;
+}
+
+.target-type-btn:hover svg:first-child,
+.target-type-btn.selected svg:first-child {
+  color: var(--color-primary);
+}
+
+.target-type-btn.selected {
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.1);
+}
+
+.target-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 18px;
+  height: 18px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+/* ─── Filter Chips ───────────────────────────────────────────────────────── */
+.filter-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px;
+  border-radius: 8px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: inherit;
+}
+
+.filter-chip:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: #eff6ff;
+}
+
+.filter-chip.selected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+}
+
+.filter-chip.small {
+  padding: 4px 10px;
+  font-size: 0.78rem;
+}
+
+/* ─── Text Input ─────────────────────────────────────────────────────────── */
+.audience-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  background: #f8fafc;
+  transition: all 0.2s;
+}
+
+.audience-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  background: #fff;
+  outline: none;
+}
+
+.institution-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────────── */
+.audience-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12px;
+}
+
+.audience-clear-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ef4444;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.audience-clear-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}

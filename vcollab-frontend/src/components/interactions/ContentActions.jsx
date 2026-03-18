@@ -1,0 +1,424 @@
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Bookmark,
+  Heart,
+  MessageCircle,
+  RotateCcw,
+  Share2,
+  ShieldAlert,
+  MoreVertical,
+  User,
+  Flag,
+  X
+} from "lucide-react";
+import { getLikeStatus, likeContent, unlikeContent } from "../../services/like.service";
+import { getSaveStatus, saveContent, unsaveContent } from "../../services/save.service";
+import { shareContent } from "../../services/share.service";
+import { createReport } from "../../services/report.service";
+import { routes } from "../../config/routes";
+
+const REPORT_REASONS = [
+  { value: "SPAM", label: "Spam" },
+  { value: "ABUSE", label: "Abuse" },
+  { value: "INAPPROPRIATE_CONTENT", label: "Inappropriate Content" },
+  { value: "COPYRIGHT", label: "Copyright" },
+  { value: "MISLEADING", label: "Fake or Misleading" },
+  { value: "OTHER", label: "Other" }
+];
+
+export default function ContentActions({
+  contentType,
+  contentId,
+  counts = {},
+  queryKeys = [],
+  shareUrl,
+  layout = "default",
+  disabled = false,
+  disabledReason = "This content is inactive right now.",
+  authorUsername // New prop
+}) {
+  const queryClient = useQueryClient();
+  const reportRef = useRef(null);
+  const successRef = useRef(null);
+  const moreMenuRef = useRef(null);
+  const [busyStates, setBusyStates] = useState({
+    like: false,
+    save: false,
+    share: false,
+    report: false
+  });
+  const [reportOpen, setReportOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const [reportReason, setReportReason] = useState(REPORT_REASONS[0].value);
+  const [reportNote, setReportNote] = useState("");
+  const [reportFeedback, setReportFeedback] = useState("");
+  const [isReported, setIsReported] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+
+  const { data: likeStatus } = useQuery({
+    queryKey: ["like-status", contentType, contentId],
+    queryFn: () => getLikeStatus(contentType, contentId),
+    enabled: Boolean(contentType && contentId && !disabled)
+  });
+
+  const { data: saveStatus } = useQuery({
+    queryKey: ["save-status", contentType, contentId],
+    queryFn: () => getSaveStatus(contentType, contentId),
+    enabled: Boolean(contentType && contentId && !disabled)
+  });
+
+  useEffect(() => {
+    if (!reportOpen && !showSuccessPopup && !moreMenuOpen) return;
+
+    const handleEsc = (event) => {
+      if (event.key === "Escape") {
+        setReportOpen(false);
+        setMoreMenuOpen(false);
+        setShowSuccessPopup(false);
+      }
+    };
+
+    const handleClickOutside = (event) => {
+      if (reportOpen && reportRef.current && !reportRef.current.contains(event.target)) {
+        setReportOpen(false);
+      }
+      if (moreMenuOpen && moreMenuRef.current && !moreMenuRef.current.contains(event.target)) {
+        setMoreMenuOpen(false);
+      }
+      if (showSuccessPopup && successRef.current && !successRef.current.contains(event.target)) {
+        setShowSuccessPopup(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEsc);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("keydown", handleEsc);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [reportOpen, showSuccessPopup, moreMenuOpen]);
+
+  const handleLike = async () => {
+    if (disabled) return;
+    if (busyStates.like) return;
+    setBusyStates(prev => ({ ...prev, like: true }));
+    try {
+      if (likeStatus?.liked) {
+        await unlikeContent(contentType, contentId);
+      } else {
+        await likeContent(contentType, contentId);
+      }
+
+      await Promise.all([
+        ...queryKeys.map(key => queryClient.invalidateQueries({ queryKey: key })),
+        queryClient.invalidateQueries({ queryKey: ["like-status", contentType, contentId] })
+      ]);
+    } finally {
+      setBusyStates(prev => ({ ...prev, like: false }));
+    }
+  };
+
+  const handleSave = async () => {
+    if (disabled) return;
+    if (busyStates.save) return;
+    setBusyStates(prev => ({ ...prev, save: true }));
+    try {
+      if (saveStatus?.saved) {
+        await unsaveContent(contentType, contentId);
+      } else {
+        await saveContent(contentType, contentId);
+      }
+
+      await Promise.all([
+        ...queryKeys.map(key => queryClient.invalidateQueries({ queryKey: key })),
+        queryClient.invalidateQueries({ queryKey: ["save-status", contentType, contentId] })
+      ]);
+    } finally {
+      setBusyStates(prev => ({ ...prev, save: false }));
+      setMoreMenuOpen(false);
+    }
+  };
+
+  const handleShare = async () => {
+    if (disabled) return;
+    if (busyStates.share) return;
+    setBusyStates(prev => ({ ...prev, share: true }));
+    try {
+      const destination =
+        shareUrl || (typeof window !== "undefined" && window.location?.href
+          ? window.location.href
+          : "");
+
+      if (destination) {
+        try {
+          await navigator.clipboard?.writeText(destination);
+        } catch (error) {
+          // ignore
+        }
+      }
+
+      await shareContent(contentType, contentId);
+
+      await Promise.all(
+        queryKeys.map(key => queryClient.invalidateQueries({ queryKey: key }))
+      );
+    } finally {
+      setBusyStates(prev => ({ ...prev, share: false }));
+    }
+  };
+
+  const handleReport = async () => {
+    if (disabled) return;
+    if (busyStates.report) return;
+    setBusyStates(prev => ({ ...prev, report: true }));
+    setReportFeedback("");
+    try {
+      await createReport({
+        contentType,
+        contentId,
+        reason: reportReason,
+        description: reportNote.trim() || undefined
+      });
+      setReportNote("");
+      setReportOpen(false);
+      setIsReported(true);
+      setShowSuccessPopup(true);
+    } catch (error) {
+      const message = error?.response?.data?.message || "Unable to submit report.";
+      setReportFeedback(message);
+    } finally {
+      setBusyStates(prev => ({ ...prev, report: false }));
+    }
+  };
+
+  const profilePath = authorUsername ? routes.profile.replace(":username", authorUsername) : null;
+
+  return (
+    <div className="action-area">
+      {/* 3-Dot More Menu Button (Absolute positioned like Instagram) */}
+      <div className="feed-top-right-actions" ref={moreMenuRef}>
+        <button
+          className="top-action-btn"
+          onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+          disabled={disabled}
+          title="More options"
+        >
+          <MoreVertical size={22} strokeWidth={2.5} />
+        </button>
+
+        {moreMenuOpen && (
+          <div className="user-nav-dropdown" style={{
+            width: "220px",
+            top: "40px",
+            right: "0",
+            animation: "slideInUp 0.15s ease-out"
+          }}>
+            <button
+              className="dropdown-item dropdown-item--danger"
+              onClick={() => { !isReported && setReportOpen(true); setMoreMenuOpen(false); }}
+              disabled={isReported}
+            >
+              <Flag size={18} fill={isReported ? "currentColor" : "none"} />
+              {isReported ? "Reported" : "Report"}
+            </button>
+            <button className={`dropdown-item ${saveStatus?.saved ? "active-save" : ""}`} onClick={handleSave} disabled={busyStates.save}>
+              <Bookmark size={18} fill={saveStatus?.saved ? "currentColor" : "none"} />
+              {saveStatus?.saved ? "Remove from favorite" : "Add to favorite"}
+            </button>
+            {profilePath && (
+              <Link to={profilePath} className="dropdown-item" onClick={() => setMoreMenuOpen(false)}>
+                <User size={18} />
+                About this account
+              </Link>
+            )}
+            <div className="dropdown-divider"></div>
+            <button className="dropdown-item" onClick={() => setMoreMenuOpen(false)} style={{ justifyContent: "center", color: "#64748b" }}>
+              Cancel
+            </button>
+          </div>
+        )}
+      </div>
+
+      {layout === "facebook" ? (
+        <>
+          <div className="feed-reaction-summary-pro">
+            <div className="reaction-counts-pro">
+              <div className="reaction-icon-group-pro">
+                <div className="reaction-icon-mini like">
+                  <Heart size={10} fill="#fff" />
+                </div>
+                {counts.saveCount > 0 && (
+                  <div className="reaction-icon-mini heart">
+                    <Bookmark size={10} fill="#fff" />
+                  </div>
+                )}
+              </div>
+              <span>{counts.likeCount || 0} Likes</span>
+            </div>
+            <div className="reaction-counts-pro">
+              <span>{counts.commentCount || 0} Comments</span>
+              <span>|</span>
+              <span>{counts.shareCount || 0} Shares</span>
+            </div>
+          </div>
+
+          <div className="feed-actions-pro" style={{ padding: "4px 8px" }}>
+            <button
+              className={`feed-action-btn-pro ${likeStatus?.liked ? "active-like" : ""}`}
+              onClick={handleLike}
+              disabled={disabled || busyStates.like}
+              title={disabled ? disabledReason : likeStatus?.liked ? "Unlike" : "Like"}
+            >
+              {busyStates.like ? (
+                <RotateCcw size={18} className="spin" />
+              ) : (
+                <Heart size={20} fill={likeStatus?.liked ? "currentColor" : "none"} />
+              )}
+              <span>Like</span>
+            </button>
+            <button
+              className="feed-action-btn-pro"
+              disabled={true}
+              title={disabled ? disabledReason : "Open comments on the detail page"}
+            >
+              <MessageCircle size={20} />
+              <span>Comment</span>
+            </button>
+            <button
+              className="feed-action-btn-pro"
+              onClick={handleShare}
+              disabled={disabled || busyStates.share}
+              title={disabled ? disabledReason : "Share"}
+            >
+              {busyStates.share ? <RotateCcw size={18} className="spin" /> : <Share2 size={20} />}
+              <span>Share</span>
+            </button>
+
+            <button
+              className={`feed-action-btn-pro ${saveStatus?.saved ? "active-save" : ""}`}
+              onClick={handleSave}
+              disabled={disabled || busyStates.save}
+              title={disabled ? disabledReason : saveStatus?.saved ? "Remove from saves" : "Save"}
+              style={{ marginLeft: "auto", flex: "0 0 auto", width: "auto", padding: "6px 12px" }}
+            >
+              {busyStates.save ? (
+                <RotateCcw size={18} className="spin" />
+              ) : (
+                <Bookmark size={20} fill={saveStatus?.saved ? "currentColor" : "none"} />
+              )}
+              <span>Save</span>
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="action-bar-pro">
+          <button
+            className={`action-btn-pro ${likeStatus?.liked ? "active" : ""}`}
+            type="button"
+            onClick={handleLike}
+            disabled={disabled || busyStates.like}
+            title={disabled ? disabledReason : likeStatus?.liked ? "Unlike" : "Like"}
+          >
+            {busyStates.like ? <RotateCcw size={18} className="spin" /> : <Heart size={18} fill={likeStatus?.liked ? "currentColor" : "none"} />}
+            <span>{counts.likeCount ?? 0}</span>
+          </button>
+
+          <button
+            className="action-btn-pro"
+            type="button"
+            disabled={true}
+            title={disabled ? disabledReason : "Open comments on the detail page"}
+          >
+            <MessageCircle size={18} />
+            <span>{counts.commentCount ?? 0}</span>
+          </button>
+
+          <button
+            className={`action-btn-pro ${saveStatus?.saved ? "active" : ""}`}
+            type="button"
+            onClick={handleSave}
+            disabled={disabled || busyStates.save}
+            title={disabled ? disabledReason : saveStatus?.saved ? "Remove from saves" : "Save"}
+          >
+            {busyStates.save ? <RotateCcw size={18} className="spin" /> : <Bookmark size={18} fill={saveStatus?.saved ? "currentColor" : "none"} />}
+            <span>{counts.saveCount ?? 0}</span>
+          </button>
+
+          <button
+            className="action-btn-pro"
+            type="button"
+            onClick={handleShare}
+            disabled={disabled || busyStates.share}
+            title={disabled ? disabledReason : "Share"}
+          >
+            {busyStates.share ? <RotateCcw size={18} className="spin" /> : <Share2 size={18} />}
+            <span>{counts.shareCount ?? 0}</span>
+          </button>
+        </div>
+      )}
+
+      {showSuccessPopup && (
+        <div className="report-overlay-pro">
+          <div className="report-modal-pro" ref={successRef}>
+            <div className="report-modal-body" style={{ textAlign: "center", padding: "30px 20px" }}>
+              <div style={{ color: "#10b981", marginBottom: "16px" }}>
+                <ShieldAlert size={48} />
+              </div>
+              <h3 style={{ marginBottom: "8px" }}>Report Submitted</h3>
+              <p style={{ color: "#64748b", fontSize: "0.9rem", marginBottom: "20px" }}>
+                Thank you for helping keep VCollab safe. Our moderators will review this content shortly.
+              </p>
+              <button className="btn-primary" onClick={() => setShowSuccessPopup(false)}>
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {reportOpen && (
+        <div className="report-overlay-pro">
+          <div className="report-modal-pro" ref={reportRef}>
+            <div className="report-modal-header">
+              <h3>Report Content</h3>
+              <button type="button" className="close-btn" onClick={() => setReportOpen(false)}>
+                <RotateCcw size={18} />
+              </button>
+            </div>
+            <div className="report-modal-body">
+              <div className="report-field">
+                <label>Reason for reporting</label>
+                <select value={reportReason} onChange={(event) => setReportReason(event.target.value)}>
+                  {REPORT_REASONS.map((reason) => (
+                    <option key={reason.value} value={reason.value}>
+                      {reason.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="report-field">
+                <label>Additional Notes (Optional)</label>
+                <textarea
+                  rows="3"
+                  value={reportNote}
+                  placeholder="Help our moderators understand the issue..."
+                  onChange={(event) => setReportNote(event.target.value)}
+                />
+              </div>
+              <button className="btn-glow-danger" type="button" onClick={handleReport} disabled={busyStates.report}>
+                {busyStates.report ? "Submitting..." : "Submit Report"}
+              </button>
+              <button className="btn-glass" type="button" style={{ marginTop: '8px' }} onClick={() => setReportOpen(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {reportFeedback && <div className="comment-feedback-toast">{reportFeedback}</div>}
+    </div>
+  );
+}

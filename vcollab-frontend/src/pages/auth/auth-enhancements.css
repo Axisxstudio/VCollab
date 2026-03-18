@@ -1,0 +1,76 @@
+/* Registration Enhancements */
+.input-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.input-status.checking {
+  color: #3182ce;
+}
+
+.input-status.available {
+  color: #38a169;
+}
+
+.input-status.unavailable {
+  color: #e53e3e;
+}
+
+.password-strength-meter {
+  height: 6px;
+  background: #edf2f7;
+  border-radius: 3px;
+  margin: 10px 0 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.password-strength-bar {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.password-strength-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Strength Colors & Widths */
+.strength-0 .password-strength-bar { width: 5%; background: #e53e3e; }
+.strength-1 .password-strength-bar { width: 25%; background: #e53e3e; }
+.strength-2 .password-strength-bar { width: 50%; background: #ecc94b; }
+.strength-3 .password-strength-bar { width: 75%; background: #48bb78; }
+.strength-4 .password-strength-bar { width: 100%; background: #38a169; }
+
+.strength-0-text { color: #e53e3e; }
+.strength-1-text { color: #e53e3e; }
+.strength-2-text { color: #d69e2e; }
+.strength-3-text { color: #38a169; }
+.strength-4-text { color: #38a169; }
+
+.username-input-wrapper {
+  position: relative;
+}
+
+.username-spinner {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #3182ce;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: translateY(-50%) rotate(360deg); }
+}
