@@ -1,6 +1,9 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, CalendarDays, Folder, MessageSquareText, UserRound } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, CalendarDays, Folder, MessageSquareText, UserRound, Mail, User } from "lucide-react";
+import ContactOwnerModal from "../../components/messaging/ContactOwnerModal";
+import ShareModal from "../../components/interactions/ShareModal";
 import MediaGallery from "../../components/media/MediaGallery";
 import ContentActions from "../../components/interactions/ContentActions";
 import CommentThread from "../../components/comments/CommentThread";
@@ -13,6 +16,7 @@ import { buildShareUrl } from "../../utils/discovery";
 import { useAuthStore } from "../../store/authStore";
 import useFeedUpdates from "../../websocket/useFeedUpdates";
 import { formatTimeAgo } from "../../utils/date";
+import SEO from "../../components/seo/SEO";
 
 const getAvatarContent = (author) => {
   if (author?.profileImage) {
@@ -28,6 +32,8 @@ export default function PostDetailPage() {
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
   const currentUser = useAuthStore((state) => state.user);
+  const [isContactOpen, setIsContactOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
   const isAuthenticated = Boolean(token);
   const { data, isLoading } = useQuery({
     queryKey: ["post", id],
@@ -67,6 +73,7 @@ export default function PostDetailPage() {
   const detailPath = getContentDetailPath("POST", id);
   const profilePath = data.author?.username ? routes.profile.replace(":username", data.author.username) : routes.home;
   const landingPostsHref = `${routes.landing}#posts`;
+  const contactContext = `Post: ${data.content?.substring(0, 30) || "Conversation"}...`;
   const authorLabel = (
     <>
       {getAvatarContent(data.author)}
@@ -76,6 +83,12 @@ export default function PostDetailPage() {
 
   return (
     <div className="section detail-page-shell">
+      <SEO 
+        title={`Post by ${data.author?.fullName || data.author?.username}`} 
+        description={data.content?.substring(0, 160) || `Read this post on VCollab.`} 
+        keywords={data.tags?.join(", ")}
+        image={galleryItems[0]?.url || "/VCollab_hero.png"}
+      />
       <div className="card detail-page-card">
         <div className="detail-page-header">
           <div className="detail-page-header-top">
@@ -138,12 +151,66 @@ export default function PostDetailPage() {
             </div>
             <div className="tag-list">
               {data.tags.map((tag) => (
-                <span key={tag} className="tag-chip">{tag}</span>
+                <span key={tag} className="tag-hash">#{tag}</span>
               ))}
             </div>
           </section>
         )}
 
+        {/* Contact Owner Section */}
+        <div className="contact-owner-card">
+          <div className="contact-owner-info">
+            {data.author?.profileImage ? (
+              <img src={data.author.profileImage} alt="Owner" className="contact-owner-avatar" />
+            ) : (
+              <div className="contact-owner-avatar" style={{ background: 'var(--color-primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <User size={24} />
+              </div>
+            )}
+            <div className="contact-owner-details">
+              <h4>{data.author?.fullName || data.author?.username}</h4>
+              <p>Talk to owner about post or request details</p>
+            </div>
+          </div>
+          <button 
+            className="btn-contact-owner"
+            onClick={() => {
+              if (!isAuthenticated) {
+                const params = new URLSearchParams({
+                  userId: String(data.author?.id || ""),
+                  context: contactContext
+                });
+                navigate(routes.login, {
+                  state: {
+                    from: {
+                      pathname: routes.messages,
+                      search: `?${params.toString()}`
+                    }
+                  }
+                });
+                return;
+              }
+              setIsContactOpen(true);
+            }}
+          >
+            <Mail size={18} /> Contact Owner
+          </button>
+        </div>
+
+        <ShareModal 
+          isOpen={isShareOpen}
+          onClose={() => setIsShareOpen(false)}
+          url={window.location.href}
+          title={data.title || "Post"}
+        />
+
+        <ContactOwnerModal
+          isOpen={isContactOpen}
+          onClose={() => setIsContactOpen(false)}
+          owner={data.author}
+          context={contactContext}
+        />
+      
         <ContentActions
           contentType="POST"
           contentId={id}

@@ -81,13 +81,7 @@ export default function BlogListPage() {
     setViewMode("All");
   };
 
-  if (isLoading) {
-    return <div className="card">Loading blogs...</div>;
-  }
 
-  if (isError) {
-    return <div className="card">We could not load blogs right now.</div>;
-  }
 
   const blogs = data?.content || [];
   const prioritizedBlogs = sortContentForViewerPriority(
@@ -165,10 +159,14 @@ export default function BlogListPage() {
 
       <div className="discovery-results-header">
         <h3>{viewMode === "Mine" ? "My Blog Results" : "Global Blog Results"}</h3>
-        <span className="discovery-results-meta">{resultsMeta}</span>
+        <span className="discovery-results-meta">{isLoading ? "Loading..." : resultsMeta}</span>
       </div>
 
-      {visibleBlogs.length === 0 ? (
+      {isLoading ? (
+        <div className="card">Loading blogs...</div>
+      ) : isError ? (
+        <div className="card discovery-empty">We could not load blogs right now.</div>
+      ) : visibleBlogs.length === 0 ? (
         <div className="card discovery-empty">
           <h3>No blogs match these filters right now</h3>
           <p>

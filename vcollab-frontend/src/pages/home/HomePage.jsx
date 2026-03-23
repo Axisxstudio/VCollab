@@ -290,6 +290,9 @@ export default function HomePage() {
                   shareUrl={buildShareUrl(detailPath)}
                   layout="facebook"
                   authorUsername={item.author?.username}
+                  title={item.title}
+                  author={item.author}
+                  mediaUrl={galleryItems[0]?.url}
                 />
 
                 <div className="content-surface__footer">

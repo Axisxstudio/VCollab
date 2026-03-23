@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../../validation/auth.schema";
 import { login } from "../../services/auth.service";
 import { useAuthStore } from "../../store/authStore";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { routes } from "../../config/routes";
 import { roles } from "../../config/constants";
 import logoImg from "../../assets/logo.png";
@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [error, setError] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const setAuth = useAuthStore((state) => state.setAuth);
+  const location = useLocation();
   const navigate = useNavigate();
   const {
     register,
@@ -29,9 +30,13 @@ export default function LoginPage() {
       setAuth(data.token, data.user);
 
       if (data.user.role === roles.SUPER_ADMIN) {
-        navigate(routes.adminDashboard);
+        navigate(routes.adminDashboard, { replace: true });
       } else {
-        navigate(routes.home);
+        const from = location.state?.from;
+        const destination = from?.pathname
+          ? `${from.pathname}${from.search || ""}${from.hash || ""}`
+          : routes.home;
+        navigate(destination, { replace: true });
       }
     } catch (err) {
       const message = err?.response?.data?.message || "Login failed. Please check your credentials.";

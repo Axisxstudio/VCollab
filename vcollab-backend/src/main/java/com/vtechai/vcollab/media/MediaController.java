@@ -32,6 +32,9 @@ public class MediaController {
         if (contentType != null && contentType.startsWith("video/")) {
             return MediaType.VIDEO;
         }
+        if (contentType != null && contentType.equalsIgnoreCase("application/pdf")) {
+            return MediaType.DOCUMENT;
+        }
         return MediaType.IMAGE;
     }
 }

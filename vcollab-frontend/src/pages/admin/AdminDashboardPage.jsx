@@ -1,4 +1,4 @@
-﻿import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
@@ -7,6 +7,8 @@ import {
   CirclePlus,
   FileDown,
   FolderKanban,
+  History,
+  LayoutTemplate,
   NotebookTabs,
   ShieldAlert,
   TriangleAlert,
@@ -19,37 +21,62 @@ import {
   listAdminReports,
   listAdminWarnings
 } from "../../services/admin.service";
+import "../../styles/admin-dashboard.css";
 import { formatDate } from "../../utils/discovery";
 import useFeedUpdates from "../../websocket/useFeedUpdates";
 
-const QUICK_ACTIONS = [
+const QUICK_CREATE_ACTIONS = [
   {
     title: "Create project",
-    description: "Publish a new project with one or more images from the admin workspace.",
+    description: "Publish a new project record",
     to: routes.projectCreate,
     icon: FolderKanban
   },
   {
     title: "Create post",
-    description: "Share announcements or updates with rich media and immediate visibility.",
+    description: "Share a platform update",
     to: routes.postCreate,
     icon: NotebookTabs
   },
   {
     title: "Create blog",
-    description: "Draft a professional article with cover media and additional attachments.",
+    description: "Draft a new long-form article",
     to: routes.blogCreate,
     icon: BookOpenText
-  },
-  {
-    title: "Export records",
-    description: "Download PDF records for audits, moderation reviews, and reporting.",
-    to: routes.adminExports,
-    icon: FileDown
   }
 ];
 
+const DASHBOARD_ACTIONS = [
+  {
+    title: "Exports",
+    to: routes.adminExports,
+    icon: FileDown
+  },
+  {
+    title: "Users",
+    to: routes.adminUsers,
+    icon: Users
+  },
+  {
+    title: "Audit",
+    to: routes.adminAuditLogs,
+    icon: History
+  },
+  {
+    title: "CMS",
+    to: routes.adminCmsBlocks,
+    icon: LayoutTemplate
+  }
+];
+
+function formatCount(value) {
+  return new Intl.NumberFormat("en-US").format(value ?? 0);
+}
+
 export default function AdminDashboardPage() {
+  const [quickCreateOpen, setQuickCreateOpen] = useState(false);
+  const quickCreateRef = useRef(null);
+
   useFeedUpdates({
     queryKeys: [["admin", "summary"], ["admin", "reports", "preview"], ["admin", "warnings", "preview"]]
   });
@@ -95,17 +122,40 @@ export default function AdminDashboardPage() {
 
     return [...reports, ...warnings]
       .sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt))
-      .slice(0, 8);
+      .slice(0, 6);
   }, [reportsData, warningsData]);
+
+  useEffect(() => {
+    const handlePointerDown = (event) => {
+      if (quickCreateRef.current && !quickCreateRef.current.contains(event.target)) {
+        setQuickCreateOpen(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setQuickCreateOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
 
   const summaryCards = [
     {
       key: "users",
       label: "Platform users",
       value: summary?.totalUsers ?? 0,
-      helper: `${summary?.activeUsers ?? 0} active · ${summary?.suspendedUsers ?? 0} suspended`,
+      helper: `${summary?.activeUsers ?? 0} active / ${summary?.suspendedUsers ?? 0} suspended`,
       icon: Users,
-      tone: "primary"
+      tone: "primary",
+      to: routes.adminUsers
     },
     {
       key: "projects",
@@ -113,15 +163,17 @@ export default function AdminDashboardPage() {
       value: summary?.totalProjects ?? 0,
       helper: "All tracked project records",
       icon: FolderKanban,
-      tone: "secondary"
+      tone: "secondary",
+      to: routes.adminProjects
     },
     {
       key: "content",
       label: "Posts and blogs",
       value: (summary?.totalPosts ?? 0) + (summary?.totalBlogs ?? 0),
-      helper: `${summary?.totalPosts ?? 0} posts · ${summary?.totalBlogs ?? 0} blogs`,
+      helper: `${summary?.totalPosts ?? 0} posts / ${summary?.totalBlogs ?? 0} blogs`,
       icon: NotebookTabs,
-      tone: "accent"
+      tone: "accent",
+      to: routes.adminPosts
     },
     {
       key: "moderation",
@@ -129,13 +181,53 @@ export default function AdminDashboardPage() {
       value: (summary?.pendingReports ?? 0) + (summary?.openWarnings ?? 0),
       helper: `${summary?.pendingReports ?? 0} reports · ${summary?.openWarnings ?? 0} warnings`,
       icon: ShieldAlert,
-      tone: "warning"
+      tone: "warning",
+      to: routes.adminReports
+    }
+  ];
+
+  const focusCards = [
+    {
+      key: "pendingReports",
+      label: "Pending reports",
+      value: summary?.pendingReports ?? 0,
+      helper: "Needs review",
+      icon: ShieldAlert,
+      tone: "warning",
+      to: routes.adminReports
+    },
+    {
+      key: "openWarnings",
+      label: "Open warnings",
+      value: summary?.openWarnings ?? 0,
+      helper: "User follow-up",
+      icon: TriangleAlert,
+      tone: "accent",
+      to: routes.adminWarnings
+    },
+    {
+      key: "activeUsers",
+      label: "Active users",
+      value: summary?.activeUsers ?? 0,
+      helper: "Accounts in good standing",
+      icon: Users,
+      tone: "primary",
+      to: routes.adminUsers
+    },
+    {
+      key: "suspendedUsers",
+      label: "Suspended users",
+      value: summary?.suspendedUsers ?? 0,
+      helper: "Restricted access",
+      icon: Activity,
+      tone: "secondary",
+      to: routes.adminUsers
     }
   ];
 
   if (isLoading) {
     return (
-      <div className="summary-card-pro admin-state-card">
+      <div className="admin-dashboard-panel admin-dashboard-state-card">
         <Activity className="stream-icon-glow" style={{ marginBottom: "20px" }} />
         <p>Loading live administrative data...</p>
       </div>
@@ -143,86 +235,111 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="admin-pro-stack admin-page-stack">
-      <div className="live-status-badge">Live administrative overview</div>
-
-      <div className="command-center-header admin-page-heading">
-        <div>
+    <div className="admin-dashboard-v2 admin-pro-stack admin-page-stack">
+      <section className="admin-dashboard-masthead">
+        <div className="admin-dashboard-masthead__copy">
+          <span className="admin-dashboard-kicker">Compact command center</span>
           <h1>Operational snapshot</h1>
-          <p className="admin-page-description">
-            Monitor users, published content, moderation load, and exports from a clean real-time dashboard.
+          <p className="admin-page-description admin-dashboard-description">
+            A smaller, cleaner admin dashboard for publishing, moderation, and platform control.
           </p>
         </div>
-        <div className="header-btn-group">
-          <Link to={routes.adminExports} className="btn-glass">
-            <FileDown size={16} />
-            Export Center
-          </Link>
-          <Link to={routes.adminUsers} className="btn-glow-danger admin-primary-link">
-            <CirclePlus size={16} />
-            Manage Users
-          </Link>
-        </div>
-      </div>
 
-      <div className="admin-card-grid-pro admin-summary-grid-pro">
+        <div className="admin-dashboard-masthead__signals">
+          <span className="admin-dashboard-signal-pill">
+            <Activity size={14} />
+            Auto refresh every 15s
+          </span>
+          <span className="admin-dashboard-signal-pill">
+            <ShieldAlert size={14} />
+            Moderation queues in view
+          </span>
+        </div>
+      </section>
+
+      <section className="admin-dashboard-stat-grid">
         {summaryCards.map((card) => {
           const Icon = card.icon;
+
           return (
-            <article key={card.key} className={`summary-card-pro summary-card-pro--${card.tone}`}>
-              <div className="card-value-row">
-                <div>
-                  <span className="card-label-pro">{card.label}</span>
-                  <strong className="card-value-pro">{card.value}</strong>
-                </div>
-                <div className={`card-icon-box ${card.tone}`}>
-                  <Icon size={24} />
-                </div>
+            <article key={card.key} className={`admin-dashboard-stat-card admin-dashboard-stat-card--${card.tone}`}>
+              <div className="admin-dashboard-stat-card__top">
+                <span className="admin-dashboard-stat-card__label">{card.label}</span>
+                <Link
+                  to={card.to}
+                  className="admin-dashboard-icon-button admin-dashboard-icon-button--ghost"
+                  title={`Open ${card.label}`}
+                  aria-label={`Open ${card.label}`}
+                >
+                  <ArrowUpRight size={16} />
+                </Link>
               </div>
-              <div className="card-trend-pro">
-                <span className="trend-percent trend-percent--neutral">Updated automatically</span>
-                <span className="trend-meta">{card.helper}</span>
+
+              <div className="admin-dashboard-stat-card__value-row">
+                <strong className="admin-dashboard-stat-card__value">{formatCount(card.value)}</strong>
+                <span className={`admin-dashboard-stat-card__icon admin-dashboard-stat-card__icon--${card.tone}`}>
+                  <Icon size={18} />
+                </span>
               </div>
+
+              <p className="admin-dashboard-stat-card__helper">{card.helper}</p>
             </article>
           );
         })}
-      </div>
+      </section>
 
-      <div className="stream-section-pro admin-dashboard-grid">
-        <section className="stream-card-pro">
-          <div className="stream-header-pro">
-            <div className="stream-title-box">
-              <Activity className="stream-icon-glow" size={24} />
+      <div className="admin-dashboard-layout">
+        <section className="admin-dashboard-panel admin-dashboard-panel--activity">
+          <div className="admin-dashboard-panel__header">
+            <div className="admin-dashboard-panel__title-block">
+              <span className="admin-dashboard-panel__eyebrow">Recent signals</span>
               <div>
-                <h3>Recent administrative activity</h3>
-                <span className="stream-meta-label">Reports and warnings sorted by latest action</span>
+                <h3>Administrative activity</h3>
+                <p>Latest reports and warnings in a tighter review list.</p>
               </div>
             </div>
-            <Link to={routes.adminAuditLogs} className="btn-glass admin-inline-link">
-              View audit logs
+
+            <Link
+              to={routes.adminAuditLogs}
+              className="admin-dashboard-icon-button admin-dashboard-icon-button--ghost"
+              title="View audit logs"
+              aria-label="View audit logs"
+            >
+              <History size={18} />
             </Link>
           </div>
 
-          <div className="stream-list-pro">
+          <div className="admin-dashboard-activity-list">
             {activityItems.length > 0 ? (
               activityItems.map((item) => (
-                <Link key={item.id} to={item.link} className="stream-item-pro admin-activity-link">
-                  <div className="stream-item-info">
-                    <span className="stream-item-title">{item.title}</span>
-                    <span className="stream-item-sub">
-                      {item.type} · {item.description}
+                <Link key={item.id} to={item.link} className="admin-dashboard-activity-item">
+                  <div className="admin-dashboard-activity-item__lead">
+                    <span
+                      className={`admin-dashboard-activity-item__icon admin-dashboard-activity-item__icon--${item.type.toLowerCase()}`}
+                    >
+                      {item.type === "Warning" ? <TriangleAlert size={16} /> : <ShieldAlert size={16} />}
                     </span>
+
+                    <div className="admin-dashboard-activity-item__copy">
+                      <span className="admin-dashboard-activity-item__title">{item.title}</span>
+                      <span className="admin-dashboard-activity-item__sub">{item.type}</span>
+                      <span className="admin-dashboard-activity-item__description">{item.description}</span>
+                    </div>
                   </div>
-                  <div className="admin-activity-meta">
-                    <span className={`status-pill ${item.type === "Warning" ? "status-inactive" : "status-active"}`}>
+
+                  <div className="admin-dashboard-activity-item__meta">
+                    <span className={`admin-dashboard-status-chip ${item.type === "Warning" ? "warning" : "report"}`}>
                       {item.status}
                     </span>
-                    <span className="stream-meta-label">{formatDate(item.createdAt)}</span>
+                    <span className="admin-dashboard-activity-item__date">{formatDate(item.createdAt)}</span>
+                    <span className="admin-dashboard-activity-item__jump">
+                      <ArrowUpRight size={16} />
+                    </span>
                   </div>
                 </Link>
               ))
             ) : (
-              <div className="admin-empty-state">
+              <div className="admin-dashboard-empty-state">
                 <TriangleAlert size={20} />
                 <span>No reports or warnings need attention right now.</span>
               </div>
@@ -230,35 +347,128 @@ export default function AdminDashboardPage() {
           </div>
         </section>
 
-        <section className="stream-card-pro admin-dashboard-side-panel">
-          <div className="stream-header-pro">
-            <div className="stream-title-box">
-              <ShieldAlert className="stream-icon-glow" size={24} />
-              <div>
-                <h3>Quick actions</h3>
-                <span className="stream-meta-label">Create, review, and export from one place</span>
+        <div className="admin-dashboard-side-stack">
+          <section className="admin-dashboard-panel admin-dashboard-panel--actions">
+            <div className="admin-dashboard-panel__header">
+              <div className="admin-dashboard-panel__title-block">
+                <span className="admin-dashboard-panel__eyebrow">Quick actions</span>
+                <div>
+                  <h3>Icon-first controls</h3>
+                  <p>Compact shortcuts for content, audits, and exports.</p>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="admin-quick-action-grid">
-            {QUICK_ACTIONS.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link key={item.to} to={item.to} className="admin-quick-action-card">
-                  <div className="card-icon-box secondary">
-                    <Icon size={20} />
-                  </div>
-                  <div>
-                    <strong>{item.title}</strong>
-                    <p>{item.description}</p>
-                  </div>
-                  <ArrowUpRight size={18} />
-                </Link>
-              );
-            })}
-          </div>
-        </section>
+            <div className="admin-dashboard-action-row">
+              <div
+                ref={quickCreateRef}
+                className={`admin-dashboard-create-dock ${quickCreateOpen ? "is-open" : ""}`}
+                onMouseEnter={() => setQuickCreateOpen(true)}
+                onMouseLeave={() => setQuickCreateOpen(false)}
+                onFocus={() => setQuickCreateOpen(true)}
+                onBlur={(event) => {
+                  if (!event.currentTarget.contains(event.relatedTarget)) {
+                    setQuickCreateOpen(false);
+                  }
+                }}
+              >
+                <button
+                  type="button"
+                  className="admin-dashboard-icon-button admin-dashboard-icon-button--primary"
+                  aria-haspopup="menu"
+                  aria-expanded={quickCreateOpen}
+                  aria-label="Open create content options"
+                  title="Create content"
+                  onClick={() => setQuickCreateOpen((previous) => !previous)}
+                >
+                  <CirclePlus size={18} />
+                  <span className="admin-dashboard-sr-only">Create content</span>
+                </button>
+
+                <div className="admin-dashboard-create-menu" role="menu" aria-label="Create content options">
+                  {QUICK_CREATE_ACTIONS.map((item) => {
+                    const Icon = item.icon;
+
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        className="admin-dashboard-create-option"
+                        role="menuitem"
+                        onClick={() => setQuickCreateOpen(false)}
+                      >
+                        <span className="admin-dashboard-create-option__icon">
+                          <Icon size={16} />
+                        </span>
+                        <span className="admin-dashboard-create-option__copy">
+                          <strong>{item.title}</strong>
+                          <small>{item.description}</small>
+                        </span>
+                        <ArrowUpRight size={15} />
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {DASHBOARD_ACTIONS.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className="admin-dashboard-utility-link"
+                    title={item.title}
+                    aria-label={item.title}
+                  >
+                    <span className="admin-dashboard-icon-button admin-dashboard-icon-button--ghost">
+                      <Icon size={18} />
+                    </span>
+                    <span>{item.title}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            <p className="admin-dashboard-helper-copy">
+              Hover or click the plus button to reveal create options to the right.
+            </p>
+          </section>
+
+          <section className="admin-dashboard-panel">
+            <div className="admin-dashboard-panel__header">
+              <div className="admin-dashboard-panel__title-block">
+                <span className="admin-dashboard-panel__eyebrow">Priority counters</span>
+                <div>
+                  <h3>Moderation radar</h3>
+                  <p>Small status tiles for the queues that matter most.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="admin-dashboard-focus-grid">
+              {focusCards.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <Link
+                    key={item.key}
+                    to={item.to}
+                    className={`admin-dashboard-focus-card admin-dashboard-focus-card--${item.tone}`}
+                  >
+                    <span className={`admin-dashboard-focus-card__icon admin-dashboard-focus-card__icon--${item.tone}`}>
+                      <Icon size={16} />
+                    </span>
+                    <strong>{formatCount(item.value)}</strong>
+                    <span>{item.label}</span>
+                    <small>{item.helper}</small>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,389 @@
+.stellar-seamless-wrapper {
+  background: whitesmoke;
+  background-image:
+    radial-gradient(at 0% 0%, rgba(0, 0, 0, 0.02) 0%, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(0, 0, 0, 0.01) 0%, transparent 50%);
+  min-height: 100vh;
+  padding: 40px 20px;
+  color: #1e293b;
+}
+
+.stellar-content-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Header */
+.stellar-hero-head {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stellar-mini-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.stellar-sep {
+  opacity: 0.4;
+}
+
+.stellar-main-title {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.stellar-meta-pill-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.stellar-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #475569;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Gallery */
+.stellar-gallery-hero {
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
+  border: 10px solid white;
+}
+
+.stellar-gallery-hero .media-gallery__viewport--detail {
+  aspect-ratio: 16 / 8;
+  max-height: 520px;
+  border-radius: 0;
+}
+
+/* Layout */
+.stellar-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 50px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .stellar-layout-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+.stellar-primary-col {
+  display: grid;
+  gap: 28px;
+}
+
+/* Seamless Author Section */
+.stellar-author-card-minimal {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.stellar-author-avatar {
+  position: relative;
+  width: 52px;
+  height: 52px;
+}
+
+.stellar-author-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.stellar-author-avatar .avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.stellar-author-ring {
+  position: absolute;
+  inset: -4px;
+  border: 2px solid rgba(59, 130, 246, 0.15);
+  border-radius: 50%;
+}
+
+.stellar-author-naming {
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stellar-author-naming h4 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.stellar-author-naming p {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+  font-weight: 600;
+}
+
+.stellar-header-stats {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  background: white;
+  padding: 8px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}
+
+.stellar-h-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.stellar-h-stat span {
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+/* Seamless Sections */
+.stellar-section-flat {
+  display: grid;
+  gap: 8px;
+}
+
+.stellar-section-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.stellar-section-content {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #475569;
+}
+
+.stellar-tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.stellar-tag-v2 {
+  color: #2563eb;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-right: 12px;
+  display: inline-block;
+  opacity: 0.9;
+}
+
+/* Sidebar Engagement */
+.stellar-engagement-sidebar {
+  display: grid;
+  gap: 20px;
+  position: sticky;
+  top: 100px;
+}
+
+.stellar-stat-tile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+}
+
+.stellar-stat-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border-radius: 12px;
+  color: #64748b;
+}
+
+.stellar-stat-data strong {
+  display: block;
+  font-size: 1.1rem;
+  color: #0f172a;
+}
+
+.stellar-stat-data span {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+.stellar-tag-sidebar-box {
+  padding: 24px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 24px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+}
+
+.stellar-sidebar-title {
+  margin: 0 0 16px;
+  font-size: 0.85rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.stellar-sidebar-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stellar-sidebar-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+/* Footer Zone */
+.stellar-global-actions {
+  padding-top: 40px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.stellar-comment-zone {
+  background: white;
+  padding: 40px;
+  border-radius: 32px;
+  margin-top: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.stellar-resource-icon-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  min-width: 80px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  position: relative;
+  overflow: visible;
+}
+
+.stellar-resource-icon-btn::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: #334155;
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+}
+
+.stellar-resource-icon-btn::before {
+  content: "";
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent #334155 transparent;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 101;
+}
+
+.stellar-resource-icon-btn:hover::after,
+.stellar-resource-icon-btn:hover::before {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.stellar-resource-icon-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border-color: rgba(37, 99, 235, 0.2);
+  background: #f8fafc;
+}
+
+.stellar-resource-icon-btn span {
+  font-weight: 700;
+  color: #64748b;
+  font-size: 0.75rem;
+  margin-top: 8px;
+  text-transform: capitalize;
+}

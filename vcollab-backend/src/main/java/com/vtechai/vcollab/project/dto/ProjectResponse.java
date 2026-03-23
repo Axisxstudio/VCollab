@@ -23,6 +23,12 @@ public class ProjectResponse {
     private TargetType targetType;
     private boolean hasGithubUrl;
     private boolean hasDemoUrl;
+    private String youtubeUrl;
+    private String pdfUrl;
+    private String courseUrl;
+    private boolean hasYoutubeUrl;
+    private boolean hasPdfUrl;
+    private boolean hasCourseUrl;
     private Visibility visibility;
     private boolean active;
     private int likeCount;

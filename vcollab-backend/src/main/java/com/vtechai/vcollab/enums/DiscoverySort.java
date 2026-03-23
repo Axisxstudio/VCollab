@@ -6,7 +6,8 @@ public enum DiscoverySort {
     NEWEST,
     OLDEST,
     MOST_LIKED,
-    MOST_COMMENTED;
+    MOST_COMMENTED,
+    RECENTLY_UPDATED;
 
     public Sort toSort() {
         if (this == OLDEST) {
@@ -18,6 +19,10 @@ public enum DiscoverySort {
         }
         if (this == MOST_COMMENTED) {
             return Sort.by(Sort.Direction.DESC, "commentCount")
+                .and(Sort.by(Sort.Direction.DESC, "createdAt"));
+        }
+        if (this == RECENTLY_UPDATED) {
+            return Sort.by(Sort.Direction.DESC, "updatedAt")
                 .and(Sort.by(Sort.Direction.DESC, "createdAt"));
         }
         return Sort.by(Sort.Direction.DESC, "createdAt");

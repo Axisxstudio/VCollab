@@ -10,6 +10,7 @@ import com.vtechai.vcollab.enums.NotificationType;
 import com.vtechai.vcollab.exception.ForbiddenException;
 import com.vtechai.vcollab.exception.ResourceNotFoundException;
 import com.vtechai.vcollab.interaction.ContentCounterService;
+import com.vtechai.vcollab.notification.MentionService;
 import com.vtechai.vcollab.notification.NotificationService;
 import com.vtechai.vcollab.notification.dto.NotificationCreateRequest;
 import com.vtechai.vcollab.realtime.FeedEvent;
@@ -34,8 +35,10 @@ public class CommentServiceImpl implements CommentService {
     private final ContentCounterService contentCounterService;
     private final FeedPublisher feedPublisher;
     private final NotificationService notificationService;
+    private final MentionService mentionService;
 
     @Override
+    @Transactional(readOnly = true)
     public List<CommentResponse> listByContent(ContentType contentType, Long contentId) {
         List<Comment> comments = commentRepository
             .findByContentTypeAndContentIdAndDeletedAtIsNullOrderByCreatedAtAsc(contentType, contentId);
@@ -66,6 +69,10 @@ public class CommentServiceImpl implements CommentService {
         contentCounterService.assertContentExists(request.getContentType(), request.getContentId());
         User author = userRepository.findById(principal.getId())
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        String normalizedContent = normalizeContent(request.getContent());
+        String normalizedImageUrl = normalizeImageUrl(request.getImageUrl());
+
+        validateCommentPayload(normalizedContent, normalizedImageUrl);
 
         Comment parent = null;
         if (request.getParentId() != null) {
@@ -82,7 +89,8 @@ public class CommentServiceImpl implements CommentService {
             .contentType(request.getContentType())
             .contentId(request.getContentId())
             .parent(parent)
-            .content(request.getContent())
+            .content(normalizedContent)
+            .imageUrl(normalizedImageUrl)
             .active(true)
             .build();
 
@@ -99,15 +107,21 @@ public class CommentServiceImpl implements CommentService {
             .build());
 
         User owner = contentCounterService.getContentOwner(request.getContentType(), request.getContentId());
-        String label = request.getContentType().name().toLowerCase();
-        notificationService.send(NotificationCreateRequest.builder()
-            .recipientId(owner.getId())
-            .actorId(principal.getId())
-            .type(NotificationType.COMMENT)
-            .contentType(request.getContentType())
-            .contentId(request.getContentId())
-            .message(author.getUsername() + " commented on your " + label + ".")
-            .build());
+        if (owner != null) {
+            String label = request.getContentType().name().toLowerCase();
+            notificationService.send(NotificationCreateRequest.builder()
+                .recipientId(owner.getId())
+                .actorId(principal.getId())
+                .type(NotificationType.COMMENT)
+                .contentType(request.getContentType())
+                .contentId(request.getContentId())
+                .message("commented on your " + label + ".")
+                .metadata(normalizedContent)
+                .build());
+        }
+
+        // Process mentions in comment
+        mentionService.processMentions(saved.getContent(), principal.getId(), ContentType.COMMENT, saved.getId());
 
         return toResponse(saved);
     }
@@ -120,8 +134,15 @@ public class CommentServiceImpl implements CommentService {
         if (!comment.getAuthor().getId().equals(principal.getId())) {
             throw new ForbiddenException("Not allowed to update this comment");
         }
-        comment.setContent(request.getContent());
+        String normalizedContent = normalizeContent(request.getContent());
+        validateCommentPayload(normalizedContent, normalizeImageUrl(comment.getImageUrl()));
+        comment.setContent(normalizedContent);
+        comment.setEditedAt(Instant.now());
         Comment saved = commentRepository.save(comment);
+
+        // Process mentions on update
+        mentionService.processMentions(saved.getContent(), principal.getId(), ContentType.COMMENT, saved.getId());
+
         return toResponse(saved);
     }
 
@@ -160,10 +181,32 @@ public class CommentServiceImpl implements CommentService {
         return CommentResponse.builder()
             .id(comment.getId())
             .content(comment.getContent())
+            .imageUrl(comment.getImageUrl())
             .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
             .author(author)
             .createdAt(comment.getCreatedAt())
             .updatedAt(comment.getUpdatedAt())
+            .editedAt(comment.getEditedAt())
+            .likeCount(comment.getLikeCount())
+            .mentionTargets(comment.getMentionTargets())
             .build();
+    }
+
+    private void validateCommentPayload(String content, String imageUrl) {
+        if (content.isBlank() && imageUrl == null) {
+            throw new IllegalArgumentException("Comment text or image is required");
+        }
+    }
+
+    private String normalizeContent(String content) {
+        return content == null ? "" : content.trim();
+    }
+
+    private String normalizeImageUrl(String imageUrl) {
+        if (imageUrl == null) {
+            return null;
+        }
+        String trimmed = imageUrl.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

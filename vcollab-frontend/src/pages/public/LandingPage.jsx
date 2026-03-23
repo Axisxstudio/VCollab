@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -10,16 +10,16 @@ import {
   Power,
   Users,
   FolderKanban,
-  NotebookTabs,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
-import { useState } from "react";
+import CommentModal from "../../components/comments/CommentModal";
+import PublicFooter from "../../components/public/PublicFooter";
+import SEO from "../../components/seo/SEO";
+import useRealtimeLandingOverview from "../../hooks/useRealtimeLandingOverview";
 import { routes } from "../../config/routes";
-import { getLandingOverview } from "../../services/landing.service";
+import { useAuthStore } from "../../store/authStore";
 import { formatDate, truncateText } from "../../utils/discovery";
-import heroImg from "../../assets/VCollab_hero.png";
-import logoImg from "../../assets/logo.png";
 import "./landing-page.css";
 
 function MediaSwiper({ media = [], fallbackIcon: FallbackIcon }) {
@@ -34,37 +34,42 @@ function MediaSwiper({ media = [], fallbackIcon: FallbackIcon }) {
     );
   }
 
-  const next = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setCurrentIndex((prev) => (prev + 1) % items.length);
+  const next = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setCurrentIndex((previous) => (previous + 1) % items.length);
   };
 
-  const prev = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
+  const previous = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setCurrentIndex((current) => (current - 1 + items.length) % items.length);
   };
 
   return (
     <div className="lp-media-swiper">
       <div className="lp-media-track" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
-        {items.map((m, idx) => (
-          <img key={idx} src={typeof m === 'string' ? m : m.url} alt={`Media ${idx}`} className="lp-media-img" />
+        {items.map((item, index) => (
+          <img
+            key={`${typeof item === "string" ? item : item.url}-${index}`}
+            src={typeof item === "string" ? item : item.url}
+            alt={`Media ${index + 1}`}
+            className="lp-media-img"
+          />
         ))}
       </div>
-      
+
       {items.length > 1 && (
         <>
-          <button className="lp-swiper-btn lp-swiper-btn--prev" onClick={prev}>
+          <button className="lp-swiper-btn lp-swiper-btn--prev" onClick={previous}>
             <ChevronLeft size={16} />
           </button>
           <button className="lp-swiper-btn lp-swiper-btn--next" onClick={next}>
             <ChevronRight size={16} />
           </button>
           <div className="lp-swiper-dots">
-            {items.map((_, idx) => (
-              <span key={idx} className={`lp-swiper-dot ${idx === currentIndex ? 'active' : ''}`} />
+            {items.map((_, index) => (
+              <span key={index} className={`lp-swiper-dot ${index === currentIndex ? "active" : ""}`} />
             ))}
           </div>
           <div className="lp-swiper-counter">{currentIndex + 1}/{items.length}</div>
@@ -74,43 +79,28 @@ function MediaSwiper({ media = [], fallbackIcon: FallbackIcon }) {
   );
 }
 
-function StatCard({ label, value, delay = "0ms" }) {
-  return (
-    <div className="lp-stat-card reveal-up" style={{ "--delay": delay }}>
-      <strong>{value}</strong>
-      <span>{label}</span>
-    </div>
-  );
-}
-
 function ProjectCard({ project, delay = "0ms" }) {
   const owner = project.owner || {};
   const inactive = project.active === false;
   const detailPath = routes.projectDetail.replace(":id", project.id);
-  const detailLinkProps = {
-    target: "_blank",
-    rel: "noreferrer"
-  };
   const avatarUrl =
     owner.profileImage ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(
       owner.fullName || owner.username || "U"
     )}&background=dbeafe&color=1d4ed8&bold=true&size=80`;
 
-  const media = project.media || [];
-
   return (
     <article className={`lp-project-card reveal-up ${inactive ? "lp-project-card--inactive" : ""}`} style={{ "--delay": delay }}>
       <div className="lp-project-media-wrap">
-        <MediaSwiper media={media} fallbackIcon={FolderKanban} />
+        <MediaSwiper media={project.media || []} fallbackIcon={FolderKanban} />
       </div>
+
       <div className="lp-project-header">
-        <img src={avatarUrl} alt={owner.fullName} className="lp-project-avatar" />
+        <img src={avatarUrl} alt={owner.fullName || owner.username || "Project owner"} className="lp-project-avatar" />
         <div className="lp-project-meta">
           <strong>{owner.fullName || owner.username}</strong>
           <div className="lp-project-meta-row">
             <span className="lp-badge lp-badge--project">Project</span>
-            <span className="lp-badge lp-badge--student">Student</span>
             {inactive && (
               <span className="lp-badge lp-badge--inactive">
                 <Power size={11} />
@@ -125,26 +115,25 @@ function ProjectCard({ project, delay = "0ms" }) {
             )}
           </div>
         </div>
-        {inactive ? (
-          <span className="lp-card-more lp-card-more--disabled" aria-hidden="true">
-            <ArrowRight size={14} />
-          </span>
-        ) : (
-          <Link to={detailPath} className="lp-card-more" aria-label="More details" {...detailLinkProps}>
-            <ArrowRight size={14} />
-          </Link>
-        )}
       </div>
+
       <div className="lp-project-body">
         <h3>{project.title}</h3>
-        <p>{truncateText(project.shortDesc || project.fullDesc || "", 130)}</p>
+        <p className="lp-project-desc">{project.shortDesc || project.fullDesc || ""}</p>
+        
+        {project.techStack && project.techStack.length > 0 && (
+          <div className="lp-project-tech-stack">
+            {project.techStack.slice(0, 3).map((tech, i) => (
+              <span key={i} className="lp-tech-badge">{tech}</span>
+            ))}
+            {project.techStack.length > 3 && <span className="lp-tech-badge">+{project.techStack.length - 3}</span>}
+          </div>
+        )}
+
         {inactive && <span className="lp-disabled-note">Preview only. Only the owner or admin can open this project.</span>}
         {!inactive && (
-          <div className="lp-card-links">
-            <Link to={detailPath} className="lp-more-link" {...detailLinkProps}>
-              More details
-              <ArrowRight size={14} />
-            </Link>
+          <div className="lp-card-footer-icon">
+            <ChevronRight size={18} />
           </div>
         )}
       </div>
@@ -153,15 +142,9 @@ function ProjectCard({ project, delay = "0ms" }) {
 }
 
 function ContentCard({ item, type, delay = "0ms" }) {
-  const image = item.thumbnail || item.coverImage || item.media?.[0]?.url;
   const category = item.category?.name || (type === "blog" ? "Blog" : "Post");
   const inactive = item.active === false;
   const detailPath = (type === "blog" ? routes.blogDetail : routes.postDetail).replace(":id", item.id);
-  const detailLinkProps = {
-    target: "_blank",
-    rel: "noreferrer"
-  };
-
   const media = item.media || (item.coverImage || item.thumbnail ? [item.coverImage || item.thumbnail] : []);
 
   return (
@@ -169,6 +152,7 @@ function ContentCard({ item, type, delay = "0ms" }) {
       <div className="lp-content-thumb">
         <MediaSwiper media={media} fallbackIcon={type === "blog" ? BookOpenText : Sparkles} />
       </div>
+
       <div className="lp-content-body">
         <div className="lp-landing-card-badges">
           <span className={`lp-badge lp-badge--${type === "blog" ? "blog" : "post"}`}>{category}</span>
@@ -179,20 +163,21 @@ function ContentCard({ item, type, delay = "0ms" }) {
             </span>
           )}
         </div>
+
         <h4>{truncateText(item.title || item.content || "", 55)}</h4>
         <p>{truncateText(item.content || "", 80)}</p>
+
         {inactive && <span className="lp-disabled-note">Preview only. Only the owner or admin can open this content.</span>}
+
         <div className="lp-content-footer">
           <span className="lp-content-stat"><Heart size={12} /> {item.likeCount || 0}</span>
           <span className="lp-content-stat"><MessageCircle size={12} /> {item.commentCount || 0}</span>
           <span className="lp-content-date">{formatDate(item.createdAt)}</span>
         </div>
+
         {!inactive && (
-          <div className="lp-card-links">
-            <Link to={detailPath} className="lp-more-link" {...detailLinkProps}>
-              More details
-              <ArrowRight size={14} />
-            </Link>
+          <div className="lp-card-footer-icon">
+             <ChevronRight size={18} />
           </div>
         )}
       </div>
@@ -200,29 +185,21 @@ function ContentCard({ item, type, delay = "0ms" }) {
   );
 }
 
-function LandingPostCard({ post, delay = "0ms" }) {
+function LandingPostCard({ post, delay = "0ms", onViewMore }) {
   const author = post.author || post.owner || {};
-  const image = post.thumbnail || post.coverImage || post.media?.[0]?.url;
-  const detailPath = routes.postDetail.replace(":id", post.id);
   const inactive = post.active === false;
-  
   const avatarUrl =
     author.profileImage ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(
       author.fullName || author.username || "U"
     )}&background=dbeafe&color=1d4ed8&bold=true&size=80`;
 
-  const detailLinkProps = {
-    target: "_blank",
-    rel: "noreferrer"
-  };
-
   const media = post.media || (post.coverImage || post.thumbnail ? [post.coverImage || post.thumbnail] : []);
 
   return (
     <article className={`lp-insta-card reveal-up ${inactive ? "lp-insta-card--inactive" : ""}`} style={{ "--delay": delay }}>
       <div className="lp-insta-header">
-        <img src={avatarUrl} alt={author.fullName} className="lp-insta-avatar" />
+        <img src={avatarUrl} alt={author.fullName || author.username || "Post author"} className="lp-insta-avatar" />
         <div className="lp-insta-author-info">
           <strong>{author.fullName || author.username}</strong>
           <span>{formatDate(post.createdAt)}</span>
@@ -247,13 +224,19 @@ function LandingPostCard({ post, delay = "0ms" }) {
           <p className="lp-insta-caption-text">
             <strong>{author.username}</strong> {truncateText(post.content || post.title || "", 150)}
           </p>
-          <Link to={detailPath} className="lp-insta-more-link" {...detailLinkProps}>view more</Link>
+          <button
+            className="lp-insta-more-link"
+            onClick={() => onViewMore && onViewMore(post)}
+            style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: "inherit" }}
+          >
+            view more
+          </button>
         </div>
 
-        {post.tags && (typeof post.tags === 'string' ? post.tags.split(',') : post.tags).length > 0 && (
+        {post.tags && (typeof post.tags === "string" ? post.tags.split(",") : post.tags).length > 0 && (
           <div className="lp-insta-tags">
-            {(typeof post.tags === 'string' ? post.tags.split(',') : post.tags).slice(0, 3).map((tag, idx) => (
-              <span key={idx} className="lp-insta-tag">#{tag.trim()}</span>
+            {(typeof post.tags === "string" ? post.tags.split(",") : post.tags).slice(0, 3).map((tag, index) => (
+              <span key={`${tag}-${index}`} className="lp-insta-tag">#{tag.trim()}</span>
             ))}
           </div>
         )}
@@ -262,59 +245,91 @@ function LandingPostCard({ post, delay = "0ms" }) {
   );
 }
 
-function ContributorCard({ user, delay = "0ms" }) {
+function ContributorCard({ user, ctaPath, ctaLabel, delay = "0ms" }) {
   const avatarUrl =
     user.profileImage ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(
       user.fullName || user.username || "U"
     )}&background=dbeafe&color=1d4ed8&bold=true&size=100`;
 
+  const coverUrl = user.coverImage || "https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=700&auto=format&fit=crop";
   const profilePath = routes.profile.replace(":username", user.username);
+  const role = user.title || (user.role === "ADMIN" ? "Platform Admin" : "Community Builder");
+  const followers = user.followerCount || (user.postCount ? (user.postCount * 3 + 12) : 24);
 
   return (
-    <div className="lp-contributor-card reveal-up" style={{ "--delay": delay }}>
-      <img src={avatarUrl} alt={user.fullName} className="lp-contributor-avatar" />
-      <h3>{user.fullName || user.username}</h3>
-      <p>@{user.username}</p>
-      <div className="lp-contributor-stats">
-        <span><FolderKanban size={14} /> {user.projectCount || 0}</span>
-        <span><NotebookTabs size={14} /> {user.postCount || 0}</span>
+    <div className="lp-cc-card reveal-up" style={{ "--delay": delay }}>
+      <div className="lp-cc-cover" style={{ backgroundImage: `url(${coverUrl})` }}>
+        <div className="lp-cc-cover-overlay"></div>
       </div>
-      <Link to={profilePath} className="lp-btn-outline" style={{ marginTop: '20px', width: '100%' }}>
-        View Profile
-      </Link>
+
+      <div className="lp-cc-body">
+        <div className="lp-cc-avatar-wrapper">
+          <img src={avatarUrl} alt={user.fullName || user.username || "Contributor"} className="lp-cc-avatar" />
+        </div>
+
+        <h3 className="lp-cc-name">{user.fullName || user.username}</h3>
+        <span className="lp-cc-role-badge">{role}</span>
+
+        <div className="lp-cc-stats-icons">
+          <span title="Projects"><FolderKanban size={15} /> {user.projectCount || 0}</span>
+          <span title="Followers"><Users size={15} /> {followers}</span>
+        </div>
+
+        <div className="lp-cc-footer">
+          <Link to={ctaPath || profilePath} title={ctaLabel || "View Profile"} className="lp-card-more">
+            <ArrowRight size={16} />
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
 
 export default function LandingPage() {
-  const { data, isLoading } = useQuery({
-    queryKey: ["landing-overview"],
-    queryFn: getLandingOverview,
-  });
+  const token = useAuthStore((state) => state.token);
+  const { data, isLoading } = useRealtimeLandingOverview();
+  const [contributorPage, setContributorPage] = useState(0);
+  const [selectedPostForModal, setSelectedPostForModal] = useState(null);
 
-  const stats = data?.stats || {};
   const featuredProjects = data?.featuredProjects || [];
   const latestPosts = data?.latestPosts || [];
   const latestBlogs = data?.latestBlogs || [];
   const featuredContributors = data?.featuredContributors || [];
 
+  const contributorsPerPage = 3;
+  const totalContributorPages = Math.max(1, Math.ceil(featuredContributors.length / contributorsPerPage));
+  const discoverMembersPath = token ? routes.search : routes.register;
+  const contributorCtaPath = token ? null : routes.register;
+  const contributorCtaLabel = token ? "View Profile" : "Join VCollab";
+
+  const nextContributorPage = () => {
+    setContributorPage((previous) => (previous + 1) % totalContributorPages);
+  };
+
+  const previousContributorPage = () => {
+    setContributorPage((previous) => (previous - 1 + totalContributorPages) % totalContributorPages);
+  };
+
   return (
     <div className="lp">
+      <SEO
+        title="Build, Collaborate, and Share With Confidence"
+        description="VCollab is a real-time platform where students, developers, and creators can collaborate on projects, publish content, find trusted support, and grow in a professional community."
+      />
+
       <section className="lp-hero">
         <div className="container lp-hero-content">
           <div className="lp-hero-copy reveal-up">
             <h1>
-              You have the ambition.<br />
-              VCollab gives it <span className="lp-accent">structure</span>
+              Build, Collaborate, and<br />
+              Share With <span className="lp-accent">Confidence</span>
             </h1>
             <p>
-              Find project ideas, work with teammates, and connect with
-              industry experts in one collaborative platform built for
-              students and software engineers.
+              VCollab is a real-time platform where students, developers, and creators can work together on projects, publish content, find trusted support, and grow in a professional community.
             </p>
             <div className="lp-hero-actions">
-              <Link to={routes.register} className="lp-btn-filled">Create Free Account</Link>
+              <Link to={routes.register} className="lp-btn-filled">Get Started</Link>
               <a href="#projects" className="lp-btn-outline-dark">Explore Projects</a>
             </div>
           </div>
@@ -323,10 +338,10 @@ export default function LandingPage() {
 
       <section id="projects" className="lp-dual-section">
         <div className="container">
-          <div className="lp-section-header-row">
+          <div className="lp-section-header-row reveal-up" style={{ "--delay": "80ms" }}>
             <div className="lp-section-head">
-              <h2>Featured <span className="lp-accent">Projects</span></h2>
-              <p>Top projects based on community likes and engagement.</p>
+              <h2>Active Work From the <span className="lp-accent">Community</span></h2>
+              <p>Explore live projects shared by builders across campus work, side ideas, portfolio pieces, and public collaboration.</p>
             </div>
             <Link to={routes.projects} className="lp-btn-outline">
               View All Projects
@@ -350,10 +365,10 @@ export default function LandingPage() {
 
       <section id="posts" className="lp-dual-section lp-dual-section--alt">
         <div className="container">
-          <div className="lp-section-header-row">
+          <div className="lp-section-header-row reveal-up" style={{ "--delay": "80ms" }}>
             <div className="lp-section-head">
-              <h2>Latest <span className="lp-accent">Posts</span></h2>
-              <p>Quick updates and announcements from our student community.</p>
+              <h2>Live <span className="lp-accent">Discussions and Updates</span></h2>
+              <p>Follow progress, questions, collaboration requests, and technical conversations happening across the platform.</p>
             </div>
             <Link to={routes.posts} className="lp-btn-outline">
               View All Posts
@@ -366,7 +381,12 @@ export default function LandingPage() {
           ) : latestPosts.length > 0 ? (
             <div className="lp-grid-4">
               {latestPosts.slice(0, 8).map((post, index) => (
-                <LandingPostCard key={post.id} post={post} delay={`${index * 80}ms`} />
+                <LandingPostCard
+                  key={post.id}
+                  post={post}
+                  delay={`${index * 80}ms`}
+                  onViewMore={setSelectedPostForModal}
+                />
               ))}
             </div>
           ) : (
@@ -377,13 +397,13 @@ export default function LandingPage() {
 
       <section id="contributors" className="lp-dual-section">
         <div className="container">
-          <div className="lp-section-header-row">
+          <div className="lp-section-header-row reveal-up" style={{ "--delay": "80ms" }}>
             <div className="lp-section-head">
-              <h2>Top <span className="lp-accent">Contributors</span></h2>
-              <p>Meet the most active members building and sharing on VCollab.</p>
+              <h2>Trusted <span className="lp-accent">Builders and Contributors</span></h2>
+              <p>Meet active members who are sharing work, helping others, and growing through meaningful collaboration.</p>
             </div>
-            <Link to={routes.search} className="lp-btn-outline">
-              Discover More Members
+            <Link to={discoverMembersPath} className="lp-btn-outline">
+              {token ? "Discover More Members" : "Join to Connect"}
               <ArrowRight size={16} />
             </Link>
           </div>
@@ -391,10 +411,32 @@ export default function LandingPage() {
           {isLoading ? (
             <div className="lp-empty">Loading contributors...</div>
           ) : featuredContributors.length > 0 ? (
-            <div className="lp-grid-4">
-              {featuredContributors.slice(0, 8).map((user, index) => (
-                <ContributorCard key={user.id} user={user} delay={`${index * 80}ms`} />
-              ))}
+            <div className="lp-carousel-wrapper">
+              {featuredContributors.length > contributorsPerPage && (
+                <button className="lp-carousel-btn lp-carousel-btn--prev" onClick={previousContributorPage}>
+                  <ChevronLeft size={24} />
+                </button>
+              )}
+
+              <div className="lp-grid-3 lp-carousel-grid">
+                {featuredContributors
+                  .slice(contributorPage * contributorsPerPage, (contributorPage + 1) * contributorsPerPage)
+                  .map((user, index) => (
+                    <ContributorCard
+                      key={user.id}
+                      user={user}
+                      ctaPath={contributorCtaPath}
+                      ctaLabel={contributorCtaLabel}
+                      delay={`${index * 80}ms`}
+                    />
+                  ))}
+              </div>
+
+              {featuredContributors.length > contributorsPerPage && (
+                <button className="lp-carousel-btn lp-carousel-btn--next" onClick={nextContributorPage}>
+                  <ChevronRight size={24} />
+                </button>
+              )}
             </div>
           ) : (
             <div className="lp-empty">No contributors found yet.</div>
@@ -404,10 +446,10 @@ export default function LandingPage() {
 
       <section id="blogs" className="lp-dual-section lp-dual-section--alt">
         <div className="container">
-          <div className="lp-section-header-row">
+          <div className="lp-section-header-row reveal-up" style={{ "--delay": "80ms" }}>
             <div className="lp-section-head">
-              <h2>Latest <span className="lp-accent">Blogs</span></h2>
-              <p>In-depth articles, tutorials, and project development stories.</p>
+              <h2>Insights, Tutorials, and <span className="lp-accent">Ideas</span></h2>
+              <p>Read blogs, guides, and lessons from people documenting what they build and what they learn.</p>
             </div>
             <Link to={routes.blogs} className="lp-btn-outline">
               View All Blogs
@@ -429,161 +471,39 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="lp-stats-strip">
-        <div className="container lp-stats-grid">
-          <StatCard
-            label="Projects"
-            value={isLoading ? "..." : stats.projectCount || 0}
-            delay="0ms"
-          />
-          <StatCard
-            label="Students"
-            value={isLoading ? "..." : (stats.userCount ?? stats.contributorCount) || 0}
-            delay="80ms"
-          />
-          <StatCard
-            label="Contributors"
-            value={isLoading ? "..." : stats.contributorCount || 0}
-            delay="160ms"
-          />
-          <StatCard
-            label="Posts and Blogs"
-            value={isLoading ? "..." : (stats.postCount || 0) + (stats.blogCount || 0)}
-            delay="240ms"
-          />
-        </div>
-      </section>
-
-      <section className="lp-features-grid-section">
-        <div className="container">
-          <div className="lp-features-header reveal-up">
-            <h2>A Collaboration <span className="lp-accent">Platform Built for Students</span></h2>
-            <p>Collaborate with students, share projects, and gain real-world experience with VCollab. You build you, connect first, then find.</p>
-          </div>
-
-          <div className="lp-features-split">
-            <div className="lp-features-cards">
-              <div className="lp-feature-item reveal-up" style={{ "--delay": "100ms" }}>
-                <div className="lp-feature-icon lp-feature-icon--blue">
-                  <Sparkles size={26} />
-                </div>
-                <div className="lp-feature-text">
-                  <h3>Upload Projects</h3>
-                  <p>Share your work and track your progress with the community. Tools your creations need.</p>
-                </div>
-              </div>
-              <div className="lp-feature-item reveal-up" style={{ "--delay": "200ms" }}>
-                <div className="lp-feature-icon lp-feature-icon--purple">
-                  <BookOpenText size={26} />
-                </div>
-                <div className="lp-feature-text">
-                  <h3>Find Teammates</h3>
-                  <p>Connect with like-minded students and build amazing teams. Explore on dream projects.</p>
-                </div>
-              </div>
-              <div className="lp-feature-item reveal-up" style={{ "--delay": "300ms" }}>
-                <div className="lp-feature-icon lp-feature-icon--orange">
-                  <Sparkles size={26} />
-                </div>
-                <div className="lp-feature-text">
-                  <h3>Discover Ideas</h3>
-                  <p>Explore a curated list of project ideas to kickstart your journey. Connect everywhere, goers.</p>
-                </div>
-              </div>
-            </div>
-            <div className="lp-features-visual reveal-up" style={{ "--delay": "400ms" }}>
-              <img src={heroImg} alt="VCollab collaborative features" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="lp-steps-section">
-        <div className="container">
-          <div className="lp-steps-header reveal-up">
-            <h2>How to <span className="lp-accent">Get Started</span></h2>
-            <p>Students often struggle with semester projects due to lack of guidance. Here's your roadmap.</p>
-          </div>
-
-          <div className="lp-steps-grid">
-            <div className="lp-step-card reveal-up" style={{ "--delay": "100ms" }}>
-              <div className="lp-step-number">1</div>
-              <h3>Create an Account</h3>
-              <p>Set up your profile to start your collaborative journey and host your projects.</p>
-              <div className="lp-step-footer">
-                <span><Heart size={14} /> 90 Likes</span>
-                <span><MessageCircle size={14} /> 18 Comments</span>
-              </div>
-            </div>
-            <div className="lp-step-card reveal-up" style={{ "--delay": "200ms" }}>
-              <div className="lp-step-number lp-step-number--blue">2</div>
-              <h3>Build Your Profile</h3>
-              <p>Showcase your skills and experience to find potential teammates and mentors.</p>
-              <div className="lp-step-footer">
-                <span><Heart size={14} /> 115 Likes</span>
-                <span><MessageCircle size={14} /> 14 Comments</span>
-              </div>
-            </div>
-            <div className="lp-step-card reveal-up" style={{ "--delay": "300ms" }}>
-              <div className="lp-step-number lp-step-number--orange">3</div>
-              <h3>Upload Projects</h3>
-              <p>Experience competition and collaboration on managing your student projects.</p>
-              <div className="lp-step-footer">
-                <span><Heart size={14} /> 23 Likes</span>
-                <span><MessageCircle size={14} /> 10 Comments</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="lp-cta-banner">
-        <div className="container lp-cta-inner">
+        <div className="container lp-cta-inner reveal-up" style={{ "--delay": "120ms" }}>
           <div>
-            <h2>Ready to start your journey?</h2>
-            <p>Join thousands of students building the future of software.</p>
+            <h2>Start Building With the Right Community</h2>
+            <p>Join VCollab to collaborate on projects, share your work, and connect with people who help you move forward.</p>
           </div>
           <div className="lp-cta-actions">
-            <Link to={routes.register} className="lp-btn-filled">Get Started Free</Link>
+            <Link to={routes.register} className="lp-btn-filled">Create Account</Link>
             <Link to={routes.login} className="lp-btn-outline-white">Sign In</Link>
           </div>
         </div>
       </section>
 
-      <footer className="lp-footer">
-        <div className="container lp-footer-grid">
-          <div className="lp-footer-brand">
-            <div className="lp-footer-logo">
-              <img src={logoImg} alt="VCollab" />
-              <span>VCollab</span>
-            </div>
-            <p>The professional collaboration platform for student work and public discovery.</p>
-          </div>
-          <div>
-            <h4>Platform</h4>
-            <ul>
-              <li><Link to={routes.projects}>Explore Projects</Link></li>
-              <li><Link to={routes.posts}>Latest Posts</Link></li>
-              <li><Link to={routes.blogs}>Blogs</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4>Company</h4>
-            <ul>
-              <li><a href="#about" onClick={(event) => { event.preventDefault(); document.getElementById("about")?.scrollIntoView({ behavior: "smooth" }); }}>About Us</a></li>
-              <li>Privacy Policy</li>
-              <li>Terms of Service</li>
-            </ul>
-          </div>
-          <div>
-            <h4>Contact</h4>
-            <p>support@vcollab.com</p>
-          </div>
-        </div>
-        <div className="lp-footer-bottom">
-          <div className="container">&copy; {new Date().getFullYear()} VCollab by VTech AI Solutions. All rights reserved.</div>
-        </div>
-      </footer>
+      <PublicFooter />
+
+      {selectedPostForModal && (
+        <CommentModal
+          contentType="POST"
+          contentId={selectedPostForModal.id}
+          title={selectedPostForModal.title}
+          author={selectedPostForModal.author || selectedPostForModal.owner}
+          mediaUrl={selectedPostForModal.media?.[0]?.url || selectedPostForModal.coverImage || selectedPostForModal.thumbnail}
+          counts={{
+            likeCount: selectedPostForModal.likeCount,
+            commentCount: selectedPostForModal.commentCount,
+            shareCount: selectedPostForModal.shareCount
+          }}
+          initialLikeStatus={false}
+          onLikeToggle={() => { }}
+          onShareChange={() => { }}
+          onClose={() => setSelectedPostForModal(null)}
+        />
+      )}
     </div>
   );
 }

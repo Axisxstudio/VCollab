@@ -12,11 +12,17 @@ import {
   Heart,
   LayoutDashboard,
   LockKeyhole,
+  Mail,
   MessageCircle,
   Power,
   Share2,
-  UserRound
+  User,
+  UserRound,
+  Youtube,
+  BookOpen,
+  FileText
 } from "lucide-react";
+import ContactOwnerModal from "../../components/messaging/ContactOwnerModal";
 import MediaGallery from "../../components/media/MediaGallery";
 import { getProject, deleteProject } from "../../services/project.service";
 import { createProjectRequest } from "../../services/projectrequest.service";
@@ -30,6 +36,8 @@ import { buildProjectGalleryItems, getContentDetailPath } from "../../utils/cont
 import { buildShareUrl } from "../../utils/discovery";
 import { formatTimeAgo } from "../../utils/date";
 import useFeedUpdates from "../../websocket/useFeedUpdates";
+import ShareModal from "../../components/interactions/ShareModal"; // Assuming ShareModal is also needed based on the state variable
+import SEO from "../../components/seo/SEO";
 
 const getAvatarContent = (author) => {
   if (author?.profileImage) {
@@ -51,7 +59,8 @@ export default function ProjectDetailPage() {
     queryFn: () => getProject(id)
   });
   const [requestMessage, setRequestMessage] = useState("");
-  const [requesting, setRequesting] = useState(false);
+  const [isContactOpen, setIsContactOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
   const [requestNote, setRequestNote] = useState("");
 
   useFeedUpdates({
@@ -111,6 +120,17 @@ export default function ProjectDetailPage() {
     ? "Sign in to like, save, share, report, and comment on this project."
     : "This project is inactive right now.";
   const hasProtectedResources = Boolean(data.githubUrl || data.demoUrl || data.hasGithubUrl || data.hasDemoUrl);
+
+  const getYoutubeId = (url) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const youtubeId = getYoutubeId(data.youtubeUrl);
+  const contactContext = `Project: ${data.title}`;
+
   const authorLabel = (
     <>
       {getAvatarContent(data.owner)}
@@ -119,188 +139,250 @@ export default function ProjectDetailPage() {
   );
 
   return (
-    <div className="section detail-page-shell">
-      <div className="card detail-page-card">
-        <div className="detail-page-header">
-          <div className="detail-page-header-top">
-            <div className="feed-badges">
-              <span className="feed-badge feed-badge--primary">Project</span>
-              {data.category?.name && (
-                <span className="feed-badge feed-badge--success">
-                  <Folder size={12} />
-                  {data.category.name}
-                </span>
-              )}
-            </div>
-            
-            <div className="detail-page-actions">
-              {isOwner && (
-                <OwnerContentControls
-                  editPath={routes.projectEdit.replace(":id", data.id)}
-                  onDelete={handleDelete}
-                  deleteLabel="Delete project"
-                />
-              )}
-              {isAuthenticated ? (
-                <Link to={routes.projects} className="btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ArrowLeft size={16} /> Back
-                </Link>
-              ) : (
-                <a href={landingProjectsHref} className="btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <ArrowLeft size={16} /> Back
-                </a>
-              )}
-            </div>
+    <div className="stellar-seamless-wrapper">
+      <SEO 
+        title={data.title} 
+        description={data.shortDesc || `Check out ${data.title} on VCollab.`} 
+        keywords={data.tags?.join(", ")}
+        image={galleryItems[0]?.url || "/VCollab_hero.png"}
+      />
+      <div className="stellar-content-shell">
+        {/* Breadcrumbs & Header */}
+        <div className="stellar-hero-head">
+          <div className="stellar-mini-breadcrumbs">
+             <span>PROJECT</span>
+             <span className="stellar-sep">•</span>
+             <span>{data.category?.name?.toUpperCase() || "GENERAL"}</span>
           </div>
-
-          <div className="detail-page-header-main">
-            <h1 className="detail-page-title">{data.title}</h1>
-            <div className="detail-page-meta">
-              {isAuthenticated ? (
-                <Link to={profilePath} className="detail-page-author">
-                  {authorLabel}
-                </Link>
-              ) : (
-                <span className="detail-page-author detail-page-author--static">{authorLabel}</span>
-              )}
-              <span className="detail-page-date"><CalendarDays size={14} /> {formatTimeAgo(data.createdAt)}</span>
-              <span><Globe size={14} /> {data.visibility}</span>
-              <span><Power size={14} /> {data.active ? "Active" : "Inactive"}</span>
-            </div>
+          <h1 className="stellar-main-title">{data.title}</h1>
+          <div className="stellar-meta-pill-box">
+             <span className="stellar-meta-pill"><Globe size={12} /> {data.visibility}</span>
+             <span className="stellar-meta-pill"><Power size={12} /> {data.active ? "Active" : "Inactive"}</span>
+             <span className="stellar-meta-pill"><CalendarDays size={12} /> {formatTimeAgo(data.createdAt)}</span>
           </div>
         </div>
 
-        <MediaGallery items={galleryItems} title={`${data.title} gallery`} />
-
-        <div className="detail-page-facts">
-          <div className="detail-fact-card">
-            <span className="detail-fact-card__label"><Folder size={14} /> Category</span>
-            <strong>{data.category?.name || "Uncategorized"}</strong>
-          </div>
-          <div className="detail-fact-card">
-            <span className="detail-fact-card__label"><CalendarDays size={14} /> Updated</span>
-            <strong>{formatTimeAgo(data.updatedAt || data.createdAt)}</strong>
-          </div>
-          <div className="detail-fact-card">
-            <span className="detail-fact-card__label"><Heart size={14} /> Likes</span>
-            <strong>{data.likeCount || 0}</strong>
-          </div>
-          <div className="detail-fact-card">
-            <span className="detail-fact-card__label"><MessageCircle size={14} /> Comments</span>
-            <strong>{data.commentCount || 0}</strong>
-          </div>
-          <div className="detail-fact-card">
-            <span className="detail-fact-card__label"><Bookmark size={14} /> Saves</span>
-            <strong>{data.saveCount || 0}</strong>
-          </div>
-          <div className="detail-fact-card">
-            <span className="detail-fact-card__label"><Share2 size={14} /> Shares</span>
-            <strong>{data.shareCount || 0}</strong>
-          </div>
+        {/* Hero Gallery - No container, just rounded corners */}
+        <div className="stellar-gallery-hero">
+           <MediaGallery items={galleryItems} title={data.title} variant="detail" />
         </div>
 
-        <div className="detail-page-sections">
-          <section className="detail-copy-card">
-            <div className="detail-copy-card__label">
-              <LayoutDashboard size={15} />
-              Overview
-            </div>
-            <RichTextContent value={data.shortDesc} fallback="No short overview has been added for this project yet." />
-          </section>
-
-          <section className="detail-copy-card">
-            <div className="detail-copy-card__label">
-              <FileCode2 size={15} />
-              Full details
-            </div>
-            <RichTextContent value={data.fullDesc} fallback="No full technical description has been added for this project yet." />
-          </section>
-
-          <section className="detail-copy-card">
-            <div className="detail-copy-card__label">
-              <FileCode2 size={15} />
-              Tech stack
-            </div>
-            {data.techStack?.length > 0 ? (
-              <div className="tag-list">
-                {data.techStack.map((item) => (
-                  <span key={item} className="tag-chip">{item}</span>
-                ))}
+        {/* Two Column Layout - Transparent feel */}
+        <div className="stellar-layout-grid">
+          <div className="stellar-primary-col">
+            <div className="stellar-author-card-minimal">
+              <div className="stellar-author-avatar">
+                {data.owner?.profileImage ? (
+                  <img src={data.owner.profileImage} alt="Owner" />
+                ) : (
+                  <div className="avatar-placeholder">{(data.owner?.username || "A").charAt(0)}</div>
+                )}
+                <div className="stellar-author-ring"></div>
               </div>
-            ) : (
-              <p>No tech stack details have been added yet.</p>
-            )}
-          </section>
-
-          <section className="detail-copy-card">
-            <div className="detail-copy-card__label">
-              <Folder size={15} />
-              Tags
-            </div>
-            {data.tags?.length > 0 ? (
-              <div className="tag-list">
-                {data.tags.map((tag) => (
-                  <span key={tag} className="tag-chip">{tag}</span>
-                ))}
+              <div className="stellar-author-naming">
+                <h4>{data.owner?.fullName || data.owner?.username}</h4>
+                <p>{data.owner?.username}</p>
               </div>
-            ) : (
-              <p>No tags have been added yet.</p>
+              
+              <div className="stellar-header-stats">
+                 <div className="stellar-h-stat">
+                    <Heart size={14} />
+                    <span>{data.likeCount || 0}</span>
+                 </div>
+                 <div className="stellar-h-stat">
+                    <MessageCircle size={14} />
+                    <span>{data.commentCount || 0}</span>
+                 </div>
+                 <div className="stellar-h-stat">
+                    <Bookmark size={14} />
+                    <span>{data.saveCount || 0}</span>
+                 </div>
+                 <div className="stellar-h-stat">
+                    <Share2 size={14} />
+                    <span>{data.shareCount || 0}</span>
+                 </div>
+              </div>
+            </div>
+
+            <div className="stellar-section-flat">
+               <h3 className="stellar-section-label"><LayoutDashboard size={16} /> Overview</h3>
+               <div className="stellar-section-content">
+                  <RichTextContent value={data.shortDesc} fallback="Project overview is currently unavailable." />
+               </div>
+            </div>
+
+            <div className="stellar-section-flat">
+               <h3 className="stellar-section-label"><FileCode2 size={16} /> Technical Details</h3>
+               <div className="stellar-section-content">
+                  <RichTextContent value={data.fullDesc} fallback="No detailed technical information has been provided." />
+               </div>
+            </div>
+
+            <div className="stellar-section-flat">
+               <h3 className="stellar-section-label"><Heart size={16} /> Tech Stack</h3>
+               <div className="stellar-section-content">
+                  {data.techStack?.length > 0 ? (
+                    <div className="stellar-tag-group">
+                      {data.techStack.map(tech => <span key={tech} className="stellar-tag-v2">{tech}</span>)}
+                    </div>
+                  ) : (
+                    <p className="stellar-muted-text">None specified.</p>
+                  )}
+               </div>
+            </div>
+
+            {data.tags?.length > 0 && (
+              <div className="stellar-section-flat">
+                 <h3 className="stellar-section-label"><Folder size={16} /> Tags</h3>
+                 <div className="stellar-section-content">
+                    <div className="stellar-tag-group">
+                       {data.tags.map(tag => <span key={tag} className="stellar-tag-v2">#{tag}</span>)}
+                    </div>
+                 </div>
+              </div>
             )}
-          </section>
+
+            {/* Contact Owner Section */}
+            <div className="contact-owner-card">
+              <div className="contact-owner-info">
+                {data.owner?.profileImage ? (
+                  <img src={data.owner.profileImage} alt="Owner" className="contact-owner-avatar" />
+                ) : (
+                  <div className="contact-owner-avatar" style={{ background: 'var(--color-primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <User size={24} />
+                  </div>
+                )}
+                <div className="contact-owner-details">
+                  <h4>{data.owner?.fullName || data.owner?.username}</h4>
+                  <p>Talk to owner about project or price request</p>
+                </div>
+              </div>
+              <button 
+                 className="btn-contact-owner"
+                 onClick={() => {
+                    if (!isAuthenticated) {
+                      const params = new URLSearchParams({
+                        userId: String(data.owner?.id || ""),
+                        context: contactContext
+                      });
+                      navigate(routes.login, {
+                        state: {
+                          from: {
+                            pathname: routes.messages,
+                            search: `?${params.toString()}`
+                          }
+                        }
+                      });
+                      return;
+                    }
+                    setIsContactOpen(true);
+                  }}
+               >
+                <Mail size={18} /> Contact Owner
+              </button>
+            </div>
+
+            {(data.youtubeUrl || data.pdfUrl || data.courseUrl) && (
+              <div className="stellar-section-flat">
+                <h3 className="stellar-section-label"><BookOpen size={16} /> Study Materials & Resources</h3>
+                <div className="stellar-section-content">
+                  {youtubeId && (
+                    <div style={{ marginBottom: "20px", borderRadius: "16px", overflow: "hidden", background: "#000", aspectRatio: "16/9", maxWidth: "480px" }}>
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        src={`https://www.youtube.com/embed/${youtubeId}`}
+                        title="YouTube video player"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  )}
+                  <div style={{ display: "flex", gap: "20px", marginTop: "10px", alignItems: "center" }}>
+                    {data.youtubeUrl && (
+                      <a 
+                        href={data.youtubeUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="stellar-resource-icon-btn" 
+                        data-label="Learning Resource on YouTube"
+                      >
+                        <Youtube size={32} color="#FF0000" />
+                        <span>Video</span>
+                      </a>
+                    )}
+                    {data.pdfUrl && (
+                      <a 
+                        href={data.pdfUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="stellar-resource-icon-btn" 
+                        data-label="PDF Learning Resource"
+                      >
+                        <FileText size={32} color="#EF4444" />
+                        <span>PDF</span>
+                      </a>
+                    )}
+                    {data.courseUrl && (
+                      <a 
+                        href={data.courseUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="stellar-resource-icon-btn" 
+                        data-label="Learning Course Material"
+                      >
+                        <BookOpen size={32} color="#8B5CF6" />
+                        <span>Course</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <aside className="stellar-secondary-col">
+            <div className="stellar-engagement-sidebar">
+               {/* Redundant category removed as it is in the header breadcrumbs */}
+            </div>
+          </aside>
         </div>
 
-        <ContentActions
-          contentType="PROJECT"
-          contentId={id}
-          counts={{
-            likeCount: data.likeCount,
-            commentCount: data.commentCount,
-            saveCount: data.saveCount,
-            shareCount: data.shareCount
-          }}
-          queryKeys={[["project", id], ["projects"]]}
-          shareUrl={buildShareUrl(detailPath)}
-          disabled={interactionsDisabled}
-          disabledReason={interactionDisabledReason}
-        />
+        {/* Global Footer Actions */}
+        <div className="stellar-global-actions">
+           <ContentActions
+              contentType="PROJECT"
+              contentId={id}
+              counts={{
+                likeCount: data.likeCount,
+                commentCount: data.commentCount,
+                saveCount: data.saveCount,
+                shareCount: data.shareCount
+              }}
+              queryKeys={[["project", id], ["projects"]]}
+              shareUrl={buildShareUrl(detailPath)}
+              disabled={interactionsDisabled}
+              disabledReason={interactionDisabledReason}
+            />
+        </div>
+
+        <div className="stellar-comment-zone">
+           <CommentThread
+              contentType="PROJECT"
+              contentId={id}
+              readOnly={!isAuthenticated}
+              loginPath={routes.login}
+              lockedMessage="Sign in to join the conversation."
+            />
+        </div>
       </div>
 
-      {!isOwner && isAuthenticated && (
-        <div className="request-card">
-          <h3>Request this project</h3>
-          <p className="profile-meta">Send a note to the owner if you want access or collaboration details.</p>
-          <textarea
-            rows="3"
-            value={requestMessage}
-            placeholder="Add a short message (optional)"
-            onChange={(event) => setRequestMessage(event.target.value)}
-          />
-          <button className="btn-primary" type="button" onClick={handleRequest} disabled={requesting}>
-            {requesting ? "Sending..." : "Send Request"}
-          </button>
-          {requestNote && <div className="comment-muted">{requestNote}</div>}
-        </div>
-      )}
-
-      {!isOwner && !isAuthenticated && (
-        <div className="request-card request-card--locked">
-          <h3>Want the project links or collaboration access?</h3>
-          <p className="profile-meta">
-            You can read the full project publicly, but requests, GitHub access, demo links, saves, likes, and comments require a VCollab account.
-          </p>
-          <div className="detail-login-lock__actions">
-            <Link to={routes.login} className="btn-primary">Sign In</Link>
-            <Link to={routes.register} className="btn-outline">Create account</Link>
-          </div>
-        </div>
-      )}
-
-      <CommentThread
-        contentType="PROJECT"
-        contentId={id}
-        readOnly={!isAuthenticated}
-        loginPath={routes.login}
-        lockedMessage="Sign in to comment or reply on this project."
+      <ContactOwnerModal 
+        isOpen={isContactOpen} 
+        onClose={() => setIsContactOpen(false)}
+        owner={data.owner}
+        context={contactContext}
       />
     </div>
   );

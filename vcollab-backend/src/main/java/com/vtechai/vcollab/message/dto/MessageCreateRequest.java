@@ -1,6 +1,5 @@
 package com.vtechai.vcollab.message.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -9,6 +8,7 @@ public class MessageCreateRequest {
     @NotNull
     private Long conversationId;
 
-    @NotBlank
     private String content;
+
+    private String attachmentUrl;
 }

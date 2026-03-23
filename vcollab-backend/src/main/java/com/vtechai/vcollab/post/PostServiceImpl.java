@@ -1,5 +1,6 @@
 package com.vtechai.vcollab.post;
 
+import com.vtechai.vcollab.notification.MentionService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +46,7 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     private final ContentTargetingRepository contentTargetingRepository;
     private final ObjectMapper objectMapper;
+    private final MentionService mentionService;
 
     @Override
     public Page<PostResponse> listPublic(Pageable pageable) {
@@ -131,6 +133,9 @@ public class PostServiceImpl implements PostService {
             postMediaRepository.saveAll(media);
         }
 
+        // Process mentions in post content
+        mentionService.processMentions(saved.getContent(), principal.getId(), ContentType.POST, saved.getId());
+
         return toResponse(saved);
     }
 
@@ -163,6 +168,9 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
             postMediaRepository.saveAll(media);
         }
+
+        // Process mentions on update
+        mentionService.processMentions(saved.getContent(), principal.getId(), ContentType.POST, saved.getId());
 
         return toResponse(saved);
     }

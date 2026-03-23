@@ -1,5 +1,6 @@
 package com.vtechai.vcollab.conversation.dto;
 
+import com.vtechai.vcollab.enums.MessageType;
 import java.time.Instant;
 import java.util.List;
 import lombok.Builder;
@@ -20,6 +21,8 @@ public class ConversationResponse {
         private String username;
         private String fullName;
         private String profileImage;
+        private boolean online;
+        private Instant lastSeenAt;
     }
 
     @Data
@@ -27,6 +30,8 @@ public class ConversationResponse {
     public static class MessagePreview {
         private Long id;
         private String content;
+        private MessageType messageType;
+        private String attachmentUrl;
         private Instant createdAt;
         private Long senderId;
     }

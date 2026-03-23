@@ -69,18 +69,23 @@ public class UserProfile extends BaseEntity {
     @Column(name = "website_url")
     private String websiteUrl;
 
+    @Builder.Default
     @Column(name = "follower_count", nullable = false)
     private int followerCount = 0;
 
+    @Builder.Default
     @Column(name = "following_count", nullable = false)
     private int followingCount = 0;
 
+    @Builder.Default
     @Column(name = "project_count", nullable = false)
     private int projectCount = 0;
 
+    @Builder.Default
     @Column(name = "post_count", nullable = false)
     private int postCount = 0;
 
+    @Builder.Default
     @Column(name = "blog_count", nullable = false)
     private int blogCount = 0;
 
@@ -111,4 +116,12 @@ public class UserProfile extends BaseEntity {
     /** University: Faculty / Department */
     @Column(name = "faculty")
     private String faculty;
+
+    @Builder.Default
+    @Column(name = "is_private", nullable = false)
+    private boolean isPrivate = false;
+
+    @Builder.Default
+    @Column(name = "open_messaging", nullable = false)
+    private boolean openMessaging = false;
 }

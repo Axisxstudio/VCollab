@@ -14,6 +14,7 @@ public class NotificationResponse {
     private ContentType contentType;
     private Long contentId;
     private String message;
+    private String metadata;
     private boolean read;
     private Instant createdAt;
     private ActorSummary actor;

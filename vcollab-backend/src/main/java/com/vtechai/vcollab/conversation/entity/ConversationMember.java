@@ -44,4 +44,7 @@ public class ConversationMember extends BaseEntity {
 
     @Column(name = "last_read_at")
     private Instant lastReadAt;
+
+    @Column(name = "last_delivered_at")
+    private Instant lastDeliveredAt;
 }

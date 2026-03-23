@@ -1,8 +1,7 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Trash2, User } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Bell, Inbox, MessageSquare, Trash2 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { routes } from "../../config/routes";
 import {
   clearAllNotifications,
   deleteNotification,
@@ -10,8 +9,24 @@ import {
   markAllNotificationsRead,
   markNotificationRead
 } from "../../services/notification.service";
-import useNotificationUpdates from "../../websocket/useNotificationUpdates";
 import { formatTimeAgo } from "../../utils/date";
+import {
+  getNotificationActionLabel,
+  getNotificationActorInitials,
+  getNotificationPath,
+  getNotificationTypeLabel
+} from "../../utils/notifications";
+import useNotificationUpdates from "../../websocket/useNotificationUpdates";
+
+const buildSections = (notifications) => {
+  const unread = notifications.filter((item) => !item.read);
+  const read = notifications.filter((item) => item.read);
+
+  return [
+    { title: "Unread", items: unread, empty: "New activity will appear here first." },
+    { title: "Earlier", items: read, empty: "Read notifications will move here." }
+  ].filter((section) => section.items.length > 0 || section.title === "Unread");
+};
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
@@ -26,127 +41,174 @@ export default function NotificationsPage() {
   useNotificationUpdates();
 
   const notifications = data?.content || [];
+  const unreadCount = notifications.filter((item) => !item.read).length;
+  const messageCount = notifications.filter((item) => item.type === "MESSAGE").length;
+  const sections = useMemo(() => buildSections(notifications), [notifications]);
 
-  const getNotificationPath = (item) => {
-    if (!item.contentId) return null;
-    if (item.contentType === "PROJECT") return routes.projectDetail.replace(":id", item.contentId);
-    if (item.contentType === "BLOG") return routes.blogDetail.replace(":id", item.contentId);
-    if (item.contentType === "POST") return routes.postDetail.replace(":id", item.contentId);
-    return null;
-  };
+  const invalidateNotificationQueries = () => Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+    queryClient.invalidateQueries({ queryKey: ["notification-unread-count"] }),
+    queryClient.invalidateQueries({ queryKey: ["notification-preview"] })
+  ]);
 
   const handleMarkAll = async () => {
     await markAllNotificationsRead();
-    await queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    await queryClient.invalidateQueries({ queryKey: ["notification-unread-count"] });
+    await invalidateNotificationQueries();
   };
 
   const handleClearAll = async () => {
     await clearAllNotifications();
-    await queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    await queryClient.invalidateQueries({ queryKey: ["notification-unread-count"] });
+    await invalidateNotificationQueries();
     await queryClient.invalidateQueries({ queryKey: ["admin", "recycle-records"] });
-  };
-
-  const handleMarkRead = async (id) => {
-    await markNotificationRead(id);
-    await queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    await queryClient.invalidateQueries({ queryKey: ["notification-unread-count"] });
   };
 
   const handleDelete = async (id) => {
     await deleteNotification(id);
-    await queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    await queryClient.invalidateQueries({ queryKey: ["notification-unread-count"] });
+    await invalidateNotificationQueries();
     await queryClient.invalidateQueries({ queryKey: ["admin", "recycle-records"] });
   };
 
+  const openNotification = async (item) => {
+    if (!item.read) {
+      await markNotificationRead(item.id);
+    }
+    await invalidateNotificationQueries();
+    navigate(getNotificationPath(item));
+  };
+
   return (
-    <div className="section">
-      <div className="project-actions">
+    <div className="collab-page">
+      <section className="collab-page__hero">
         <div>
-          <h2>Notifications</h2>
-          <p className="profile-meta">Stay up to date with activity on your work.</p>
+          <span className="collab-page__eyebrow">Realtime inbox</span>
+          <h2 className="collab-page__title">Notifications</h2>
+          <p className="collab-page__subtitle">
+            Comments, reactions, messages, requests, and moderation updates stay synced here in real time.
+          </p>
         </div>
-        <button className="btn-outline" type="button" onClick={handleMarkAll}>
-          Mark all read
-        </button>
-        <button className="btn-glass" type="button" onClick={handleClearAll}>
-          Clear all
-        </button>
-      </div>
+        <div className="collab-page__actions">
+          <button className="btn-outline" type="button" onClick={handleMarkAll} disabled={notifications.length === 0}>
+            Mark all read
+          </button>
+          <button className="btn-glass" type="button" onClick={handleClearAll} disabled={notifications.length === 0}>
+            Clear all
+          </button>
+        </div>
+      </section>
 
-      {isLoading && <div className="card">Loading notifications...</div>}
+      <section className="collab-stat-grid">
+        <article className="collab-stat-card">
+          <span className="collab-stat-card__icon"><Bell size={18} /></span>
+          <div>
+            <strong>{notifications.length}</strong>
+            <span>Total updates</span>
+          </div>
+        </article>
+        <article className="collab-stat-card">
+          <span className="collab-stat-card__icon"><Inbox size={18} /></span>
+          <div>
+            <strong>{unreadCount}</strong>
+            <span>Unread items</span>
+          </div>
+        </article>
+        <article className="collab-stat-card">
+          <span className="collab-stat-card__icon"><MessageSquare size={18} /></span>
+          <div>
+            <strong>{messageCount}</strong>
+            <span>Message alerts</span>
+          </div>
+        </article>
+      </section>
+
+      {isLoading && <div className="collab-empty-panel">Loading notifications...</div>}
+
       {!isLoading && notifications.length === 0 && (
-        <div className="card">No notifications yet.</div>
+        <div className="collab-empty-panel">
+          <h3>Your inbox is clear</h3>
+          <p>Realtime activity will land here as soon as people interact with your content or conversations.</p>
+        </div>
       )}
+
       {!isLoading && notifications.length > 0 && (
-        <div className="notification-list-pro">
-          {notifications.map((item) => {
-            const profilePath = item.actor ? routes.profile.replace(":username", item.actor.username) : null;
-            const contentPath = getNotificationPath(item);
-            const initials = item.actor?.fullName ? item.actor.fullName.charAt(0).toUpperCase() : (item.actor?.username?.charAt(0).toUpperCase() || "V");
-
-            const handleRowClick = async () => {
-              if (!item.read) {
-                await markNotificationRead(item.id);
-                queryClient.invalidateQueries({ queryKey: ["notification-unread-count"] });
-                queryClient.invalidateQueries({ queryKey: ["notifications"] });
-              }
-              if (contentPath) {
-                navigate(contentPath);
-              }
-            };
-
-            return (
-              <div 
-                key={item.id} 
-                className={`notification-pro-row ${item.read ? "" : "unread"}`}
-                onClick={handleRowClick}
-              >
-                <Link 
-                  to={profilePath || "#"} 
-                  className="notification-pro-avatar" 
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {item.actor?.profileImage ? (
-                    <img src={item.actor.profileImage} alt={item.actor.username} />
-                  ) : (
-                    <span>{initials}</span>
-                  )}
-                </Link>
-
-                <div className="notification-pro-body">
-                  <div className="notification-pro-text">
-                    <Link 
-                      to={profilePath || "#"} 
-                      className="notification-pro-actor"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {item.actor?.fullName || item.actor?.username || "VCollab Member"}
-                    </Link>
-                    {" "}
-                    <span className="notification-pro-message">{item.message}</span>
-                  </div>
-                  <span className="notification-pro-time">
-                    {formatTimeAgo(item.createdAt)}
-                  </span>
+        <div className="collab-section-stack">
+          {sections.map((section) => (
+            <section key={section.title} className="collab-surface">
+              <div className="collab-surface__header">
+                <div>
+                  <h3>{section.title}</h3>
+                  <p>{section.empty}</p>
                 </div>
-
-                <div className="notification-pro-actions" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    className="btn-glass-sm"
-                    type="button"
-                    onClick={() => handleDelete(item.id)}
-                    title="Delete notification"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-                {!item.read && <div className="unread-dot-pro-large" />}
+                <span className="collab-pill">{section.items.length}</span>
               </div>
-            );
-          })}
+
+              <div className="notification-section-list">
+                {section.items.map((item) => {
+                  const truncate = (text, length = 100) => {
+                    if (!text) return "";
+                    return text.length > length ? text.substring(0, length) + "..." : text;
+                  };
+                  const actorInitial = getNotificationActorInitials(item.actor);
+                  const actorName = item.actor?.fullName || item.actor?.username || "VCollab member";
+                  
+                  // Clean up message if it starts with the actor's name (for backward compatibility)
+                  let displayMessage = item.message;
+                  if (displayMessage && (displayMessage.startsWith(actorName) || (item.actor?.username && displayMessage.startsWith(item.actor.username)))) {
+                    displayMessage = displayMessage.replace(actorName, "").replace(item.actor?.username || "", "").trim();
+                  }
+
+                  return (
+                    <article
+                      key={item.id}
+                      className={`notification-upgrade-row ${item.read ? "" : "is-unread"}`}
+                    >
+                      <button
+                        type="button"
+                        className="notification-upgrade-row__main"
+                        onClick={() => openNotification(item)}
+                      >
+                        <div className="notification-upgrade-row__avatar">
+                          {item.actor?.profileImage ? (
+                            <img src={item.actor.profileImage} alt={item.actor.fullName || item.actor.username} />
+                          ) : (
+                            <span>{actorInitial}</span>
+                          )}
+                        </div>
+                        <div className="notification-upgrade-row__content">
+                          <div className="notification-upgrade-row__topline">
+                            <span className="notification-type-chip">
+                              {getNotificationTypeLabel(item.type)}
+                            </span>
+                            <span className="comment-muted">{formatTimeAgo(item.createdAt)}</span>
+                          </div>
+                          <p className="notification-upgrade-row__message">
+                            <strong>{actorName}</strong>{" "}
+                            <span>{displayMessage}</span>
+                          </p>
+                          {(item.type === 'COMMENT' || item.type === 'COMMENT_REPLY' || item.type === 'MENTION') && item.metadata && (
+                            <div className="notification-comment-preview" style={{ maxWidth: '600px' }}>
+                              "{truncate(item.metadata)}"
+                            </div>
+                          )}
+                          <span className="notification-upgrade-row__action">
+                            {getNotificationActionLabel(item)}
+                          </span>
+                        </div>
+                      </button>
+
+                      <button
+                        className="notification-upgrade-row__delete"
+                        type="button"
+                        onClick={() => handleDelete(item.id)}
+                        aria-label="Delete notification"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
         </div>
       )}
     </div>

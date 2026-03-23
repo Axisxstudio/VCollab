@@ -1,5 +1,6 @@
 package com.vtechai.vcollab.notification;
 
+import com.vtechai.vcollab.enums.Role;
 import com.vtechai.vcollab.exception.ResourceNotFoundException;
 import com.vtechai.vcollab.notification.dto.NotificationCreateRequest;
 import com.vtechai.vcollab.notification.dto.NotificationResponse;
@@ -24,6 +25,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
+    @SuppressWarnings("unchecked")
     public void send(NotificationCreateRequest request) {
         if (request == null || request.getRecipientId() == null || request.getType() == null) {
             return;
@@ -35,11 +37,9 @@ public class NotificationServiceImpl implements NotificationService {
             throw new ResourceNotFoundException("Recipient not found");
         }
 
-        User actor = null;
-        if (request.getActorId() != null) {
-            actor = userRepository.findById(request.getActorId())
+        final User actor = request.getActorId() == null ? null : 
+            userRepository.findById(request.getActorId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        }
 
         if (actor != null && recipient.getId().equals(actor.getId())) {
             return;
@@ -52,12 +52,39 @@ public class NotificationServiceImpl implements NotificationService {
             .contentType(request.getContentType())
             .contentId(request.getContentId())
             .message(request.getMessage())
+            .metadata(request.getMetadata())
             .read(false)
             .build();
 
         Notification saved = notificationRepository.save(notification);
-        NotificationResponse response = toResponse(saved);
-        notificationPublisher.publishToUser(recipient.getUsername(), response);
+        if (saved != null) {
+            notificationPublisher.publishToUser(recipient.getUsername(), toResponse(saved));
+            sendCopyToAdmins(request, recipient, actor);
+        }
+    }
+
+    private void sendCopyToAdmins(NotificationCreateRequest request, User originalRecipient, User actor) {
+        List<User> admins = userRepository.findAllByRoleAndDeletedAtIsNull(Role.SUPER_ADMIN);
+        for (User admin : admins) {
+            // Already sent if the recipient was the admin
+            if (admin.getId().equals(originalRecipient.getId())) continue;
+            // Actor shouldn't get their own notification
+            if (actor != null && admin.getId().equals(actor.getId())) continue;
+
+            Notification adminCopy = Notification.builder()
+                .recipient(admin)
+                .actor(actor)
+                .type(request.getType())
+                .contentType(request.getContentType())
+                .contentId(request.getContentId())
+                .message("(Copy for Admin) " + request.getMessage())
+                .metadata(request.getMetadata())
+                .read(false)
+                .build();
+            
+            Notification savedCopy = notificationRepository.save(adminCopy);
+            notificationPublisher.publishToUser(admin.getUsername(), toResponse(savedCopy));
+        }
     }
 
     @Override
@@ -140,6 +167,7 @@ public class NotificationServiceImpl implements NotificationService {
             .contentType(notification.getContentType())
             .contentId(notification.getContentId())
             .message(notification.getMessage())
+            .metadata(notification.getMetadata())
             .read(notification.isRead())
             .createdAt(notification.getCreatedAt())
             .actor(mapActor(notification.getActor()))

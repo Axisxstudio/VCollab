@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Bookmark,
@@ -18,6 +18,9 @@ import { getSaveStatus, saveContent, unsaveContent } from "../../services/save.s
 import { shareContent } from "../../services/share.service";
 import { createReport } from "../../services/report.service";
 import { routes } from "../../config/routes";
+import { useAuthStore } from "../../store/authStore";
+import CommentThread from "../comments/CommentThread";
+import CommentModal from "../comments/CommentModal";
 
 const REPORT_REASONS = [
   { value: "SPAM", label: "Spam" },
@@ -37,12 +40,19 @@ export default function ContentActions({
   layout = "default",
   disabled = false,
   disabledReason = "This content is inactive right now.",
-  authorUsername // New prop
+  authorUsername, // New prop
+  title,
+  author,
+  mediaUrl
 }) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const isAuthenticated = useAuthStore((state) => !!state.token);
   const reportRef = useRef(null);
   const successRef = useRef(null);
   const moreMenuRef = useRef(null);
+  const [showInlineComments, setShowInlineComments] = useState(false);
+  const [showCommentModal, setShowCommentModal] = useState(false);
   const [busyStates, setBusyStates] = useState({
     like: false,
     save: false,
@@ -138,6 +148,18 @@ export default function ContentActions({
     } finally {
       setBusyStates(prev => ({ ...prev, save: false }));
       setMoreMenuOpen(false);
+    }
+  };
+    
+  const handleCommentClick = () => {
+    if (disabled) return;
+    const detailUrl = routes[`${contentType.toLowerCase()}Detail`]?.replace(":id", contentId);
+    if (!detailUrl) return;
+
+    if (window.location.pathname === detailUrl) {
+      document.getElementById("comments")?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      setShowCommentModal(true);
     }
   };
 
@@ -280,7 +302,8 @@ export default function ContentActions({
             </button>
             <button
               className="feed-action-btn-pro"
-              disabled={true}
+              onClick={handleCommentClick}
+              disabled={disabled}
               title={disabled ? disabledReason : "Open comments on the detail page"}
             >
               <MessageCircle size={20} />
@@ -328,7 +351,8 @@ export default function ContentActions({
           <button
             className="action-btn-pro"
             type="button"
-            disabled={true}
+            onClick={handleCommentClick}
+            disabled={disabled}
             title={disabled ? disabledReason : "Open comments on the detail page"}
           >
             <MessageCircle size={18} />
@@ -407,10 +431,10 @@ export default function ContentActions({
                   onChange={(event) => setReportNote(event.target.value)}
                 />
               </div>
-              <button className="btn-glow-danger" type="button" onClick={handleReport} disabled={busyStates.report}>
+              <button className="btn-primary" type="button" style={{ background: "#ef4444", borderColor: "#ef4444", width: "100%", justifyContent: "center" }} onClick={handleReport} disabled={busyStates.report}>
                 {busyStates.report ? "Submitting..." : "Submit Report"}
               </button>
-              <button className="btn-glass" type="button" style={{ marginTop: '8px' }} onClick={() => setReportOpen(false)}>
+              <button className="btn-outline" type="button" style={{ marginTop: '8px', width: "100%", justifyContent: "center" }} onClick={() => setReportOpen(false)}>
                 Cancel
               </button>
             </div>
@@ -419,6 +443,33 @@ export default function ContentActions({
       )}
 
       {reportFeedback && <div className="comment-feedback-toast">{reportFeedback}</div>}
+
+      {showInlineComments && (
+        <div className="inline-comments-section">
+          <CommentThread
+            contentType={contentType}
+            contentId={contentId}
+            readOnly={!isAuthenticated}
+            variant="inline"
+            loginPath={routes.login}
+          />
+        </div>
+      )}
+
+      {showCommentModal && (
+        <CommentModal
+          contentType={contentType}
+          contentId={contentId}
+          title={title}
+          author={author}
+          mediaUrl={mediaUrl}
+          counts={counts}
+          initialLikeStatus={likeStatus?.liked}
+          onLikeToggle={handleLike}
+          onShareChange={handleShare}
+          onClose={() => setShowCommentModal(false)}
+        />
+      )}
     </div>
   );
 }

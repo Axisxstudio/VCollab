@@ -14,3 +14,8 @@ export async function deleteMessage(id) {
   const response = await api.delete(`/messages/${id}`);
   return response.data.data;
 }
+
+export async function updateMessage(id, payload) {
+  const response = await api.put(`/messages/${id}`, payload);
+  return response.data.data;
+}

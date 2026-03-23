@@ -2,6 +2,7 @@ package com.vtechai.vcollab.share.entity;
 
 import com.vtechai.vcollab.common.BaseEntity;
 import com.vtechai.vcollab.enums.ContentType;
+import com.vtechai.vcollab.enums.ShareType;
 import com.vtechai.vcollab.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,7 +30,7 @@ import lombok.Setter;
 @Entity
 @Table(
     name = "shares",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "content_type", "content_id"})
+    uniqueConstraints = @UniqueConstraint(columnNames = {"shareable_token"})
 )
 public class Share extends BaseEntity {
     @Id
@@ -46,4 +47,12 @@ public class Share extends BaseEntity {
 
     @Column(name = "content_id", nullable = false)
     private Long contentId;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "share_type", nullable = false)
+    private ShareType shareType = ShareType.INTERNAL;
+
+    @Column(name = "shareable_token", length = 64)
+    private String shareableToken;
 }

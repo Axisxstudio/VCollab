@@ -69,28 +69,7 @@ export default function MediaGallery({
         )}
       </div>
 
-      {galleryItems.length > 1 && variant === "detail" && (
-        <div className="media-gallery__thumbs">
-          {galleryItems.map((item, index) => (
-            <button
-              key={`${item.url}-${index}`}
-              type="button"
-              className={`media-gallery__thumb ${index === boundedIndex ? "active" : ""}`}
-              onClick={() => setActiveIndex(index)}
-              aria-label={`Open media ${index + 1}`}
-            >
-              {item.mediaType === "VIDEO" ? (
-                <video src={item.url} preload="metadata" muted />
-              ) : (
-                <img src={item.url} alt={item.label || `Thumbnail ${index + 1}`} />
-              )}
-              <span className="media-gallery__thumb-badge">
-                {item.mediaType === "VIDEO" ? <PlayCircle size={12} /> : <ImageIcon size={12} />}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
+      {/* Gallery thumbs removed as per request - only main image with arrows allowed */}
 
       {galleryItems.length > 1 && variant === "card" && (
         <div className="media-gallery__dots" aria-label={`${title} navigation`}>

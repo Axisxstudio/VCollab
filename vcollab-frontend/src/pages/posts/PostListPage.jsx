@@ -81,13 +81,7 @@ export default function PostListPage() {
     setViewMode("All");
   };
 
-  if (isLoading) {
-    return <div className="card">Loading posts...</div>;
-  }
 
-  if (isError) {
-    return <div className="card">We could not load posts right now.</div>;
-  }
 
   const posts = data?.content || [];
   const prioritizedPosts = sortContentForViewerPriority(
@@ -165,10 +159,14 @@ export default function PostListPage() {
 
       <div className="discovery-results-header">
         <h3>{viewMode === "Mine" ? "My Post Results" : "Global Post Results"}</h3>
-        <span className="discovery-results-meta">{resultsMeta}</span>
+        <span className="discovery-results-meta">{isLoading ? "Loading..." : resultsMeta}</span>
       </div>
 
-      {visiblePosts.length === 0 ? (
+      {isLoading ? (
+        <div className="card">Loading posts...</div>
+      ) : isError ? (
+        <div className="card discovery-empty">We could not load posts right now.</div>
+      ) : visiblePosts.length === 0 ? (
         <div className="card discovery-empty">
           <h3>No posts match these filters right now</h3>
           <p>

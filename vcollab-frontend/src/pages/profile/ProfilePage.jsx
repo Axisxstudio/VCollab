@@ -238,7 +238,7 @@ export default function ProfilePage() {
   };
 
   const handleMessage = async () => {
-    if (!data?.id || messageBusy) return;
+    if (!data?.id || messageBusy || !followStatus?.following) return;
     setMessageBusy(true);
     try {
       const conversation = await createConversation(data.id);
@@ -486,9 +486,19 @@ export default function ProfilePage() {
                   <button className="btn-primary" type="button" onClick={handleFollow} disabled={followBusy}>
                     {followStatus?.following ? "Following" : "Follow"}
                   </button>
-                  <button className="btn-outline" type="button" onClick={handleMessage} disabled={messageBusy}>
-                    Message
-                  </button>
+                  <div className="profile-actions-stack">
+                    <button
+                      className="btn-outline"
+                      type="button"
+                      onClick={handleMessage}
+                      disabled={messageBusy || !followStatus?.following}
+                    >
+                      {followStatus?.following ? "Message" : "Follow to message"}
+                    </button>
+                    {!followStatus?.following && (
+                      <span className="profile-actions-hint">Messaging unlocks once you follow this collaborator.</span>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

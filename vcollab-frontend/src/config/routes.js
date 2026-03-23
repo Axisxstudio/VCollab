@@ -1,5 +1,8 @@
 export const routes = {
   landing: "/",
+  about: "/about",
+  privacy: "/privacy-policy",
+  terms: "/terms-of-service",
   login: "/login",
   register: "/register",
   forgotPassword: "/forgot-password",

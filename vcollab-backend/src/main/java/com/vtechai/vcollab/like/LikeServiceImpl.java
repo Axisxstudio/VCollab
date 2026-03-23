@@ -68,7 +68,7 @@ public class LikeServiceImpl implements LikeService {
             .type(NotificationType.LIKE)
             .contentType(request.getContentType())
             .contentId(request.getContentId())
-            .message(user.getUsername() + " liked your " + label + ".")
+            .message("liked your " + label + ".")
             .build());
     }
 

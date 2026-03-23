@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import {
+  ArrowLeft,
+  ArrowRight,
   Bookmark,
   CirclePlus,
   Eye,
@@ -9,9 +11,7 @@ import {
   Folder,
   Globe,
   Heart,
-  LayoutGrid,
   Layers,
-  List,
   Lock,
   MessageCircle,
   Pencil,
@@ -26,13 +26,11 @@ import {
 } from "lucide-react";
 import AdminContentDetailModal from "./AdminContentDetailModal";
 import { listCategories } from "../../services/category.service";
-import {
-  createAdminWarning,
-  downloadAdminPdfExport
-} from "../../services/admin.service";
+import { createAdminWarning, downloadAdminPdfExport } from "../../services/admin.service";
 import { routes } from "../../config/routes";
 import { formatDate } from "../../utils/discovery";
 import useFeedUpdates from "../../websocket/useFeedUpdates";
+import "../../styles/admin-table.css";
 
 const VISIBILITY_OPTIONS = [
   { value: "", label: "All visibility" },
@@ -82,7 +80,7 @@ const DETAIL_QUERY_KEYS = {
   BLOG: "blog"
 };
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 15;
 
 function getInitials(name) {
   return (name || "V").trim().slice(0, 2).toUpperCase();
@@ -113,45 +111,20 @@ export default function AdminContentManager({
   });
   const [page, setPage] = useState(0);
   const [busyKey, setBusyKey] = useState("");
-  const [viewMode, setViewMode] = useState(() => {
-    if (typeof window === "undefined") {
-      return "grid";
-    }
-    return window.localStorage.getItem(`admin-content-view:${contentType}`) || "grid";
-  });
   const [detailTarget, setDetailTarget] = useState(null);
   const [warningTarget, setWarningTarget] = useState(null);
-  const [warningForm, setWarningForm] = useState({
-    title: "",
-    message: "",
-    reason: ""
-  });
+  const [warningForm, setWarningForm] = useState({ title: "", message: "", reason: "" });
   const [warningFeedback, setWarningFeedback] = useState("");
 
-  useFeedUpdates({
-    queryKeys: [queryKeyPrefix, ["admin", "summary"]]
-  });
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(`admin-content-view:${contentType}`, viewMode);
-    }
-  }, [contentType, viewMode]);
+  useFeedUpdates({ queryKeys: [queryKeyPrefix, ["admin", "summary"]] });
 
   const params = useMemo(() => {
-    const next = {
-      page,
-      size: PAGE_SIZE,
-      sort: "createdAt,desc",
-      deleted: deletedMode
-    };
-
+    const next = { page, size: PAGE_SIZE, sort: "createdAt,desc", deleted: deletedMode };
     if (filters.search.trim()) next.search = filters.search.trim();
     if (filters.owner.trim()) next.owner = filters.owner.trim();
     if (filters.categoryId) next.categoryId = filters.categoryId;
     if (filters.visibility) next.visibility = filters.visibility;
     if (filters.active) next.active = filters.active;
-
     return next;
   }, [deletedMode, filters, page]);
 
@@ -184,10 +157,7 @@ export default function AdminContentManager({
 
   const handleFilterChange = (field, value) => {
     setPage(0);
-    setFilters((previous) => ({
-      ...previous,
-      [field]: value
-    }));
+    setFilters((previous) => ({ ...previous, [field]: value }));
   };
 
   const invalidateAfterChange = async () => {
@@ -242,10 +212,10 @@ export default function AdminContentManager({
   const handleExportItem = async (item) => {
     setBusyKey(`export-${item.id}`);
     try {
-      await downloadAdminPdfExport(deletedMode ? "recycle-bin" : EXPORT_MODULES[item.contentType], {
-        id: item.id,
-        contentType: deletedMode ? item.contentType : undefined
-      });
+      await downloadAdminPdfExport(
+        deletedMode ? "recycle-bin" : EXPORT_MODULES[item.contentType],
+        { id: item.id, contentType: deletedMode ? item.contentType : undefined }
+      );
     } finally {
       setBusyKey("");
     }
@@ -254,10 +224,10 @@ export default function AdminContentManager({
   const handleExportFiltered = async () => {
     setBusyKey("export-filtered");
     try {
-      await downloadAdminPdfExport(deletedMode ? "recycle-bin" : EXPORT_MODULES[contentType], {
-        ...params,
-        contentType: deletedMode ? contentType : undefined
-      });
+      await downloadAdminPdfExport(
+        deletedMode ? "recycle-bin" : EXPORT_MODULES[contentType],
+        { ...params, contentType: deletedMode ? contentType : undefined }
+      );
     } finally {
       setBusyKey("");
     }
@@ -267,7 +237,6 @@ export default function AdminContentManager({
     if (!warningTarget) return;
     setBusyKey(`warning-${warningTarget.id}`);
     setWarningFeedback("");
-
     try {
       await createAdminWarning({
         targetUserId: warningTarget.ownerId,
@@ -303,29 +272,9 @@ export default function AdminContentManager({
           <p className="admin-page-description">{description}</p>
         </div>
         <div className="header-btn-group">
-          <div className="admin-view-toggle" aria-label="Choose view mode">
-            <button
-              type="button"
-              className={`admin-view-toggle__button ${viewMode === "grid" ? "active" : ""}`}
-              onClick={() => setViewMode("grid")}
-              aria-label="Grid view"
-              title="Grid view"
-            >
-              <LayoutGrid size={16} />
-            </button>
-            <button
-              type="button"
-              className={`admin-view-toggle__button ${viewMode === "list" ? "active" : ""}`}
-              onClick={() => setViewMode("list")}
-              aria-label="List view"
-              title="List view"
-            >
-              <List size={16} />
-            </button>
-          </div>
           <button type="button" className="btn-glass" onClick={handleExportFiltered} disabled={busyKey === "export-filtered"}>
             <FileDown size={16} />
-            {busyKey === "export-filtered" ? "Preparing PDF..." : "Export Filtered PDF"}
+            {busyKey === "export-filtered" ? "Preparing PDF..." : "Export PDF"}
           </button>
           {!deletedMode && (
             <Link to={createRoute} className="btn-glow-danger admin-primary-link">
@@ -336,6 +285,7 @@ export default function AdminContentManager({
         </div>
       </div>
 
+      {/* Filters */}
       <section className="card admin-filter-panel">
         <div className="admin-filter-grid">
           <div style={{ position: "relative", gridColumn: "span 2" }}>
@@ -363,73 +313,41 @@ export default function AdminContentManager({
           <select value={filters.categoryId} onChange={(event) => handleFilterChange("categoryId", event.target.value)}>
             <option value="">All categories</option>
             {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
+              <option key={category.id} value={category.id}>{category.name}</option>
             ))}
           </select>
           <select value={filters.visibility} onChange={(event) => handleFilterChange("visibility", event.target.value)}>
             {VISIBILITY_OPTIONS.map((option) => (
-              <option key={option.label} value={option.value}>
-                {option.label}
-              </option>
+              <option key={option.label} value={option.value}>{option.label}</option>
             ))}
           </select>
           <select value={filters.active} onChange={(event) => handleFilterChange("active", event.target.value)}>
             {ACTIVE_OPTIONS.map((option) => (
-              <option key={option.label} value={option.value}>
-                {option.label}
-              </option>
+              <option key={option.label} value={option.value}>{option.label}</option>
             ))}
           </select>
         </div>
       </section>
 
+      {/* Warning panel */}
       {warningTarget && (
         <section className="card admin-warning-panel">
           <div className="project-actions admin-warning-panel__header">
             <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-              <div className="card-icon-box warning">
-                <TriangleAlert size={22} />
-              </div>
+              <div className="card-icon-box warning"><TriangleAlert size={22} /></div>
               <div>
                 <h3>Send warning to @{warningTarget.ownerUsername}</h3>
-                <p className="profile-meta">
-                  This warning will reference {warningTarget.contentType.toLowerCase()} #{warningTarget.id}.
-                </p>
+                <p className="profile-meta">This warning will reference {warningTarget.contentType.toLowerCase()} #{warningTarget.id}.</p>
               </div>
             </div>
-            <button type="button" className="btn-glass" onClick={() => setWarningTarget(null)}>
-              Close
-            </button>
+            <button type="button" className="btn-glass" onClick={() => setWarningTarget(null)}>Close</button>
           </div>
-
           <div className="admin-warning-form" style={{ marginTop: "24px" }}>
-            <input
-              type="text"
-              value={warningForm.title}
-              placeholder="Warning title"
-              onChange={(event) => setWarningForm((previous) => ({ ...previous, title: event.target.value }))}
-            />
-            <textarea
-              rows="4"
-              value={warningForm.message}
-              placeholder="Describe the issue clearly for the creator"
-              onChange={(event) => setWarningForm((previous) => ({ ...previous, message: event.target.value }))}
-            />
-            <input
-              type="text"
-              value={warningForm.reason}
-              placeholder="Reason or policy reference"
-              onChange={(event) => setWarningForm((previous) => ({ ...previous, reason: event.target.value }))}
-            />
+            <input type="text" value={warningForm.title} placeholder="Warning title" onChange={(event) => setWarningForm((previous) => ({ ...previous, title: event.target.value }))} />
+            <textarea rows="4" value={warningForm.message} placeholder="Describe the issue clearly for the creator" onChange={(event) => setWarningForm((previous) => ({ ...previous, message: event.target.value }))} />
+            <input type="text" value={warningForm.reason} placeholder="Reason or policy reference" onChange={(event) => setWarningForm((previous) => ({ ...previous, reason: event.target.value }))} />
             <div className="admin-warning-panel__actions">
-              <button
-                type="button"
-                className="btn-glow-danger"
-                onClick={handleWarningSubmit}
-                disabled={busyKey === `warning-${warningTarget.id}`}
-              >
+              <button type="button" className="btn-glow-danger" onClick={handleWarningSubmit} disabled={busyKey === `warning-${warningTarget.id}`}>
                 {busyKey === `warning-${warningTarget.id}` ? "Sending warning..." : "Send Warning"}
               </button>
               {warningFeedback && <span className="trend-meta admin-feedback-text">{warningFeedback}</span>}
@@ -438,6 +356,7 @@ export default function AdminContentManager({
         </section>
       )}
 
+      {/* Table */}
       {isLoading ? (
         <div className="summary-card-pro admin-state-card">
           <Layers className="stream-icon-glow" style={{ marginBottom: "20px" }} />
@@ -448,237 +367,155 @@ export default function AdminContentManager({
           <TriangleAlert className="stream-icon-glow" style={{ marginBottom: "20px" }} />
           <p>We could not load this content set right now.</p>
         </div>
-      ) : items.length === 0 ? (
-        <div className="summary-card-pro admin-state-card">
-          <Folder className="stream-icon-glow" style={{ marginBottom: "20px" }} />
-          <p>No records match the selected filters.</p>
-        </div>
       ) : (
-        <section className={`admin-entity-grid admin-content-grid-pro admin-content-grid-pro--${viewMode}`}>
-          {items.map((item) => (
-            <article
-              key={`${item.contentType}-${item.id}`}
-              className={`card admin-content-record-card admin-content-record-card--${viewMode}`}
-            >
-              {item.thumbnailUrl ? (
-                <div className="admin-content-record-card__media">
-                  <img src={item.thumbnailUrl} alt={item.title} />
-                </div>
-              ) : (
-                <div className="admin-content-record-card__placeholder">
-                  <Folder size={28} />
-                  <span>{item.contentType}</span>
-                </div>
-              )}
-
-              <div className="admin-content-record-card__body">
-                <div className="admin-content-record-card__header">
-                  <div>
-                    <div className="admin-content-record-card__title-row">
-                      <h4>{item.title}</h4>
-                      <span className="feed-badge">{item.contentType}</span>
+        <div className="admin-table-wrapper">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Owner</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Visibility</th>
+                <th>Status</th>
+                <th>Engagement</th>
+                <th>Created</th>
+                <th>Updated</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.length === 0 ? (
+                <tr>
+                  <td colSpan={9}>
+                    <div className="admin-table-empty">
+                      <Folder size={36} />
+                      No records match the selected filters.
                     </div>
-                    <Link to={getProfilePath(item.ownerUsername)} className="admin-owner-link">
-                      <div className="admin-owner-link__avatar">
-                        {item.ownerProfileImage ? (
-                          <img src={item.ownerProfileImage} alt={item.ownerFullName || item.ownerUsername} />
-                        ) : (
-                          getInitials(item.ownerFullName || item.ownerUsername)
-                        )}
-                      </div>
-                      <div>
-                        <strong>{item.ownerFullName || item.ownerUsername || "Unknown user"}</strong>
-                        <span>@{item.ownerUsername || "unknown"}</span>
-                      </div>
-                    </Link>
-                  </div>
-                </div>
-
-                <p className="admin-content-record-card__excerpt">
-                  {item.excerpt || "No content preview available for this record."}
-                </p>
-
-                <div className="admin-content-record-card__meta">
-                  <span className="status-pill">Created {formatDate(item.createdAt)}</span>
-                  <span className="status-pill">Updated {formatDate(item.updatedAt || item.createdAt)}</span>
-                  {item.subtype && <span className="status-pill">{item.subtype}</span>}
-                  {item.categoryName && <span className="status-pill">{item.categoryName}</span>}
-                </div>
-
-                <div className="admin-content-record-card__tags">
-                  {item.categoryName && (
-                    <span className="status-pill admin-tag-pill">
-                      <Folder size={12} />
-                      {item.categoryName}
-                    </span>
-                  )}
-                  {item.tags?.slice(0, 3).map((tag) => (
-                    <span key={tag} className="status-pill admin-tag-pill">
-                      <Tag size={12} />
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="admin-content-record-card__stats">
-                  <div>
-                    <Heart size={14} />
-                    <span>{item.likeCount || 0}</span>
-                  </div>
-                  <div>
-                    <MessageCircle size={14} />
-                    <span>{item.commentCount || 0}</span>
-                  </div>
-                  <div>
-                    <Bookmark size={14} />
-                    <span>{item.saveCount || 0}</span>
-                  </div>
-                  <div>
-                    <Share2 size={14} />
-                    <span>{item.shareCount || 0}</span>
-                  </div>
-                </div>
-
-                <div className="admin-content-record-card__status-row">
-                  <span className={`status-pill ${item.active ? "status-active" : "status-inactive"}`}>
-                    <Power size={12} />
-                    {item.active ? "Active" : "Inactive"}
-                  </span>
-                  <span className="status-pill">
-                    {item.visibility === "PUBLIC" ? <Globe size={12} /> : <Lock size={12} />}
-                    {item.visibility}
-                  </span>
-                </div>
-
-                <div className="admin-card-toolbar">
-                  {!deletedMode && (
-                    <>
-                      <button
-                        type="button"
-                        className="btn-glass admin-action-button admin-action-button--view"
-                        onClick={() => setDetailTarget(item)}
-                      >
-                        <Eye size={16} />
-                        View details
-                      </button>
-                      <Link
-                        to={getEditPath(item)}
-                        className="admin-icon-btn"
-                        title="Edit content"
-                        aria-label="Edit content"
-                      >
-                        <Pencil size={16} />
+                  </td>
+                </tr>
+              ) : (
+                items.map((item) => (
+                  <tr key={`${item.contentType}-${item.id}`}>
+                    {/* Owner */}
+                    <td>
+                      <Link to={getProfilePath(item.ownerUsername)} className="admin-table-avatar" style={{ textDecoration: "none" }}>
+                        <div className="admin-table-avatar__img">
+                          {item.ownerProfileImage
+                            ? <img src={item.ownerProfileImage} alt={item.ownerFullName || item.ownerUsername} />
+                            : getInitials(item.ownerFullName || item.ownerUsername)}
+                        </div>
+                        <div className="admin-table-avatar__copy">
+                          <strong>{item.ownerFullName || item.ownerUsername || "Unknown"}</strong>
+                          <span>@{item.ownerUsername || "unknown"}</span>
+                        </div>
                       </Link>
-                      <button
-                        type="button"
-                        className="admin-icon-btn"
-                        onClick={() => setWarningTarget(item)}
-                        title="Send warning"
-                        aria-label="Send warning"
-                      >
-                        <TriangleAlert size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        className="admin-icon-btn"
-                        onClick={() => handleExportItem(item)}
-                        disabled={busyKey === `export-${item.id}`}
-                        title="Export PDF"
-                        aria-label="Export PDF"
-                      >
-                        {busyKey === `export-${item.id}` ? <RotateCcw size={16} className="spin" /> : <FileDown size={16} />}
-                      </button>
-                      <button
-                        type="button"
-                        className="admin-icon-btn"
-                        onClick={() => handleToggleVisibility(item)}
-                        disabled={busyKey === `visibility-${item.id}`}
-                        title={item.visibility === "PUBLIC" ? "Make private" : "Publish publicly"}
-                        aria-label={item.visibility === "PUBLIC" ? "Make private" : "Publish publicly"}
-                      >
-                        {busyKey === `visibility-${item.id}` ? (
-                          <RotateCcw size={16} className="spin" />
-                        ) : item.visibility === "PUBLIC" ? (
-                          <Lock size={16} />
-                        ) : (
-                          <Globe size={16} />
+                    </td>
+
+                    {/* Title */}
+                    <td style={{ minWidth: 200 }}>
+                      <div className="admin-table-title">{item.title}</div>
+                    </td>
+
+                    {/* Type */}
+                    <td><span className="admin-table-badge">{item.contentType}</span></td>
+
+                    {/* Visibility */}
+                    <td>
+                      <span className={`status-pill ${item.visibility === "PUBLIC" ? "status-active" : ""}`}>
+                        {item.visibility === "PUBLIC" ? <Globe size={11} /> : <Lock size={11} />}
+                        {item.visibility}
+                      </span>
+                    </td>
+
+                    {/* Active status */}
+                    <td>
+                      <span className={`status-pill ${item.active ? "status-active" : "status-inactive"}`}>
+                        <Power size={11} />
+                        {item.active ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+
+                    {/* Engagement */}
+                    <td>
+                      <div style={{ display: "flex", gap: "10px", fontSize: "0.78rem", color: "#6b7f95" }}>
+                        <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><Heart size={12} />{item.likeCount || 0}</span>
+                        <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><MessageCircle size={12} />{item.commentCount || 0}</span>
+                        <span style={{ display: "flex", alignItems: "center", gap: "4px" }}><Bookmark size={12} />{item.saveCount || 0}</span>
+                      </div>
+                    </td>
+
+                    {/* Created */}
+                    <td style={{ whiteSpace: "nowrap", color: "#788fa5", fontSize: "0.78rem" }}>
+                      {formatDate(item.createdAt)}
+                    </td>
+
+                    {/* Updated */}
+                    <td style={{ whiteSpace: "nowrap", color: "#788fa5", fontSize: "0.78rem" }}>
+                      {formatDate(item.updatedAt || item.createdAt)}
+                    </td>
+
+                    {/* Actions */}
+                    <td>
+                      <div className="admin-table-actions">
+                        {!deletedMode && (
+                          <>
+                            <button type="button" className="admin-icon-btn" onClick={() => setDetailTarget(item)} title="View details" aria-label="View details">
+                              <Eye size={15} />
+                            </button>
+                            <Link to={getEditPath(item)} className="admin-icon-btn" title="Edit" aria-label="Edit">
+                              <Pencil size={15} />
+                            </Link>
+                            <button type="button" className="admin-icon-btn" onClick={() => setWarningTarget(item)} title="Send warning" aria-label="Send warning">
+                              <TriangleAlert size={15} />
+                            </button>
+                            <button type="button" className="admin-icon-btn" onClick={() => handleExportItem(item)} disabled={busyKey === `export-${item.id}`} title="Export PDF" aria-label="Export PDF">
+                              {busyKey === `export-${item.id}` ? <RotateCcw size={15} className="spin" /> : <FileDown size={15} />}
+                            </button>
+                            <button type="button" className="admin-icon-btn" onClick={() => handleToggleVisibility(item)} disabled={busyKey === `visibility-${item.id}`} title={item.visibility === "PUBLIC" ? "Make private" : "Publish"} aria-label="Toggle visibility">
+                              {busyKey === `visibility-${item.id}` ? <RotateCcw size={15} className="spin" /> : item.visibility === "PUBLIC" ? <Lock size={15} /> : <Globe size={15} />}
+                            </button>
+                            <button type="button" className="admin-icon-btn" onClick={() => handleToggleActive(item)} disabled={busyKey === `active-${item.id}`} title={item.active ? "Disable" : "Enable"} aria-label="Toggle active">
+                              {busyKey === `active-${item.id}` ? <RotateCcw size={15} className="spin" /> : <Power size={15} />}
+                            </button>
+                            <button type="button" className="admin-icon-btn admin-icon-btn--danger" onClick={() => handleDelete(item)} disabled={busyKey === `delete-${item.id}`} title="Move to recycle bin" aria-label="Delete">
+                              {busyKey === `delete-${item.id}` ? <RotateCcw size={15} className="spin" /> : <Trash2 size={15} />}
+                            </button>
+                          </>
                         )}
-                      </button>
-                      <button
-                        type="button"
-                        className="admin-icon-btn"
-                        onClick={() => handleToggleActive(item)}
-                        disabled={busyKey === `active-${item.id}`}
-                        title={item.active ? "Disable content" : "Enable content"}
-                        aria-label={item.active ? "Disable content" : "Enable content"}
-                      >
-                        {busyKey === `active-${item.id}` ? <RotateCcw size={16} className="spin" /> : <Power size={16} />}
-                      </button>
-                      <button
-                        type="button"
-                        className="admin-icon-btn admin-icon-btn--danger"
-                        onClick={() => handleDelete(item)}
-                        disabled={busyKey === `delete-${item.id}`}
-                        title="Move to recycle bin"
-                        aria-label="Move to recycle bin"
-                      >
-                        {busyKey === `delete-${item.id}` ? <RotateCcw size={16} className="spin" /> : <Trash2 size={16} />}
-                      </button>
-                    </>
-                  )}
+                        {deletedMode && (
+                          <>
+                            <button type="button" className="admin-icon-btn admin-icon-btn--primary" onClick={() => handleRestore(item)} disabled={busyKey === `restore-${item.id}`} title="Restore" aria-label="Restore">
+                              {busyKey === `restore-${item.id}` ? <RotateCcw size={15} className="spin" /> : <RotateCcw size={15} />}
+                            </button>
+                            <button type="button" className="admin-icon-btn" onClick={() => handleExportItem(item)} disabled={busyKey === `export-${item.id}`} title="Export PDF" aria-label="Export PDF">
+                              {busyKey === `export-${item.id}` ? <RotateCcw size={15} className="spin" /> : <FileDown size={15} />}
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
 
-                  {deletedMode && (
-                    <>
-                      <button
-                        type="button"
-                        className="admin-icon-btn admin-icon-btn--primary"
-                        onClick={() => handleRestore(item)}
-                        disabled={busyKey === `restore-${item.id}`}
-                        title="Restore content"
-                        aria-label="Restore content"
-                      >
-                        {busyKey === `restore-${item.id}` ? <RotateCcw size={16} className="spin" /> : <RotateCcw size={16} />}
-                      </button>
-                      <button
-                        type="button"
-                        className="admin-icon-btn"
-                        onClick={() => handleExportItem(item)}
-                        disabled={busyKey === `export-${item.id}`}
-                        title="Export PDF"
-                        aria-label="Export PDF"
-                      >
-                        {busyKey === `export-${item.id}` ? <RotateCcw size={16} className="spin" /> : <FileDown size={16} />}
-                      </button>
-                    </>
-                  )}
-                </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="admin-table-pagination">
+              <span className="admin-table-pagination__meta">
+                Page {page + 1} of {totalPages} · {totalElements} records
+              </span>
+              <div className="admin-table-pagination__btns">
+                <button type="button" className="admin-table-pagination__btn" onClick={() => setPage((c) => Math.max(c - 1, 0))} disabled={page === 0}>
+                  <ArrowLeft size={14} /> Previous
+                </button>
+                <button type="button" className="admin-table-pagination__btn" onClick={() => setPage((c) => c + 1)} disabled={page + 1 >= totalPages}>
+                  Next <ArrowRight size={14} />
+                </button>
               </div>
-            </article>
-          ))}
-        </section>
-      )}
-
-      {totalPages > 1 && (
-        <div className="discovery-pagination">
-          <button
-            type="button"
-            className="btn-glass"
-            onClick={() => setPage((current) => Math.max(current - 1, 0))}
-            disabled={page === 0}
-          >
-            Previous
-          </button>
-          <span className="stream-meta-label">
-            Page {page + 1} of {totalPages} · {totalElements} records
-          </span>
-          <button
-            type="button"
-            className="btn-glass"
-            onClick={() => setPage((current) => current + 1)}
-            disabled={page + 1 >= totalPages}
-          >
-            Next
-          </button>
+            </div>
+          )}
         </div>
       )}
 

@@ -35,5 +35,11 @@ public class ProjectRequestDto {
     @NotNull
     private Visibility visibility;
 
+    private String youtubeUrl;
+
+    private String pdfUrl;
+
+    private String courseUrl;
+
     private boolean active = true;
 }

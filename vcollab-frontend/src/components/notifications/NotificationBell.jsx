@@ -12,6 +12,12 @@ import useNotificationUpdates from "../../websocket/useNotificationUpdates";
 
 import { Bell } from "lucide-react";
 import { formatTimeAgo } from "../../utils/date";
+import {
+  getNotificationActionLabel,
+  getNotificationActorInitials,
+  getNotificationPath,
+  getNotificationTypeLabel
+} from "../../utils/notifications";
 
 export default function NotificationBell({ icon: Icon = Bell, size = 18 }) {
   const navigate = useNavigate();
@@ -84,14 +90,6 @@ export default function NotificationBell({ icon: Icon = Bell, size = 18 }) {
     }
   };
 
-  const getNotificationPath = (item) => {
-    if (!item.contentId) return null;
-    if (item.contentType === "PROJECT") return routes.projectDetail.replace(":id", item.contentId);
-    if (item.contentType === "BLOG") return routes.blogDetail.replace(":id", item.contentId);
-    if (item.contentType === "POST") return routes.postDetail.replace(":id", item.contentId);
-    return null;
-  };
-
   return (
     <div 
       className="notification-bell" 
@@ -123,9 +121,20 @@ export default function NotificationBell({ icon: Icon = Bell, size = 18 }) {
               <div className="comment-muted" style={{ padding: '30px', textAlign: 'center' }}>No notifications yet.</div>
             )}
             {notifications.map((item) => {
+              const truncate = (text, length = 60) => {
+                if (!text) return "";
+                return text.length > length ? text.substring(0, length) + "..." : text;
+              };
               const profilePath = item.actor ? routes.profile.replace(":username", item.actor.username) : null;
               const contentPath = getNotificationPath(item);
-              const initials = item.actor?.fullName ? item.actor.fullName.charAt(0).toUpperCase() : (item.actor?.username?.charAt(0).toUpperCase() || "V");
+              const initials = getNotificationActorInitials(item.actor);
+              const actorName = item.actor?.fullName || item.actor?.username || "VCollab Member";
+              
+              // Clean up message if it starts with the actor's name (for backward compatibility)
+              let displayMessage = item.message;
+              if (displayMessage && (displayMessage.startsWith(actorName) || (item.actor?.username && displayMessage.startsWith(item.actor.username)))) {
+                displayMessage = displayMessage.replace(actorName, "").replace(item.actor?.username || "", "").trim();
+              }
 
               const handleRowClick = () => {
                 if (contentPath) {
@@ -141,7 +150,7 @@ export default function NotificationBell({ icon: Icon = Bell, size = 18 }) {
                   key={item.id} 
                   className={`notification-item-pro ${item.read ? "" : "unread"}`}
                   onClick={handleRowClick}
-                  style={{ cursor: contentPath ? 'pointer' : 'default' }}
+                  style={{ cursor: "pointer" }}
                 >
                   <Link 
                     to={profilePath || "#"} 
@@ -160,28 +169,27 @@ export default function NotificationBell({ icon: Icon = Bell, size = 18 }) {
                   </Link>
                   <div className="notification-body">
                     <div className="notification-text">
-                      <Link 
-                        to={profilePath || "#"} 
-                        className="notification-actor-name" 
-                        onClick={(e) => { 
-                          e.stopPropagation();
-                          setIsOpen(false); 
-                          setIsLocked(false); 
-                        }}
-                      >
-                        {item.actor?.fullName || item.actor?.username || "VCollab Member"}
-                      </Link>
-                      {" "}
-                      <span className="notification-msg-text">{item.message}</span>
-                    </div>
-                    <div className="notification-footer">
-                      <span className="notification-time">
-                        {formatTimeAgo(item.createdAt)}
-                      </span>
-                      {contentPath && (
-                        <span className="notification-view-link">
-                          View content
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                        <Link 
+                          to={profilePath || "#"} 
+                          className="notification-actor-name" 
+                          onClick={(e) => { 
+                            e.stopPropagation();
+                            setIsOpen(false); 
+                            setIsLocked(false); 
+                          }}
+                        >
+                          {actorName}
+                        </Link>
+                        <span className="notification-msg-text">{displayMessage}</span>
+                        <span className="notification-time-inline">
+                          {formatTimeAgo(item.createdAt)}
                         </span>
+                      </div>
+                      {(item.type === 'COMMENT' || item.type === 'COMMENT_REPLY' || item.type === 'MENTION') && item.metadata && (
+                        <div className="notification-comment-preview">
+                          "{truncate(item.metadata)}"
+                        </div>
                       )}
                     </div>
                   </div>

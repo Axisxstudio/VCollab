@@ -15,6 +15,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import jakarta.persistence.Column;
 
 @Getter
 @Setter
@@ -31,4 +32,14 @@ public class Conversation extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private User createdBy;
+
+    @Column(name = "last_message_id")
+    private Long lastMessageId;
+
+    @Column(name = "last_message_at")
+    private java.time.Instant lastMessageAt;
+
+    @Builder.Default
+    @Column(name = "is_group", nullable = false)
+    private boolean group = false;
 }

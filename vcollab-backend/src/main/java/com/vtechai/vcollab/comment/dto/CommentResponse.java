@@ -11,10 +11,15 @@ import lombok.Data;
 public class CommentResponse {
     private Long id;
     private String content;
+    private String imageUrl;
     private Long parentId;
     private AuthorSummary author;
     private Instant createdAt;
     private Instant updatedAt;
+    private Instant editedAt;
+    private int likeCount;
+    private String mentionTargets;
+    private boolean likedByCurrentUser;
     @Builder.Default
     private List<CommentResponse> replies = new ArrayList<>();
 

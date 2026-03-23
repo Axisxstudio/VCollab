@@ -1,5 +1,6 @@
 .login-modern-container {
-  height: 100vh;
+  min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   display: flex;
   align-items: center;
@@ -11,7 +12,8 @@
   background-size: cover;
   padding: 20px;
   font-family: 'Inter', sans-serif;
-  overflow: hidden; /* Prevents scrolling */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .login-card-glass {
@@ -31,9 +33,9 @@
     0 30px 40px -10px rgba(0, 0, 0, 0.8),
     inset 0 1px 1px rgba(255, 255, 255, 0.05);
   animation: modalEnter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-  max-height: 95vh; /* Ensure card itself doesn't cause page scroll */
   display: flex;
   flex-direction: column;
+  margin: auto 0;
 }
 
 .register-card-wide {
@@ -102,7 +104,7 @@
   gap: 20px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 760px) {
   .form-row-split {
     grid-template-columns: 1fr;
   }
@@ -157,6 +159,7 @@
 .input-with-icon-ref input,
 .input-with-icon-ref select {
   width: 100%;
+  min-height: 50px;
   padding: 12px 14px;
   background: transparent !important;
   border: none !important;
@@ -258,6 +261,7 @@
   background: linear-gradient(90deg, #3b82f6 0%, #2dd4bf 100%);
   color: #ffffff;
   border: none;
+  min-height: 52px;
   padding: 14px;
   border-radius: 12px;
   font-weight: 700;
@@ -315,6 +319,7 @@
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #ffffff;
+  min-height: 52px;
   padding: 12px;
   border-radius: 12px;
   font-weight: 600;
@@ -330,6 +335,11 @@
 .btn-sso-ref:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-sso-ref span {
+  min-width: 0;
+  text-align: center;
 }
 
 .login-footer-text {
@@ -408,15 +418,113 @@
   box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.5);
 }
 
+@media (max-width: 900px) {
+  .login-modern-container {
+    align-items: safe center;
+    justify-content: center;
+    padding: 24px 18px;
+  }
+
+  .login-card-glass {
+    padding: 36px 30px;
+    border-radius: 28px;
+    margin: 0;
+  }
+
+  .register-card-wide {
+    max-width: 560px;
+  }
+}
+
 @media (max-width: 640px) {
   .login-card-glass {
-    padding: 32px 24px;
-    border-radius: 0;
-    min-height: 100vh;
-    max-height: 100vh;
+    width: 100%;
+    max-width: none;
+    padding: 26px 18px 22px;
+    border-radius: 24px;
+    min-height: auto;
   }
+
   .login-modern-container {
-    padding: 0;
-    overflow: auto; /* Allow scroll only on mobile if content overflows screen */
+    min-height: 100vh;
+    min-height: 100dvh;
+    align-items: safe center;
+    justify-content: center;
+    padding:
+      max(14px, env(safe-area-inset-top))
+      14px
+      max(18px, env(safe-area-inset-bottom));
+  }
+
+  .brand-logo-inline {
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .login-v-logo-ref {
+    width: 34px;
+    height: 34px;
+  }
+
+  .brand-name-text {
+    font-size: 1.55rem;
+  }
+
+  .ref-signin-title {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+
+  .login-subtitle {
+    font-size: 0.92rem;
+  }
+
+  .login-modern-form {
+    gap: 16px;
+  }
+
+  .input-with-icon-ref input,
+  .input-with-icon-ref select {
+    min-height: 52px;
+    font-size: 16px;
+  }
+
+  .login-options-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 0;
+  }
+
+  .btn-google-ref {
+    padding: 14px 12px !important;
+  }
+
+  .login-divider-ref {
+    gap: 12px;
+  }
+
+  .login-footer-text {
+    margin-top: 4px;
+  }
+}
+
+@media (max-width: 380px) {
+  .login-modern-container {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .login-card-glass {
+    padding: 22px 14px 18px;
+    border-radius: 20px;
+  }
+
+  .brand-name-text {
+    font-size: 1.42rem;
+  }
+
+  .ref-signin-title {
+    font-size: 1.36rem;
   }
 }

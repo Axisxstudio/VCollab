@@ -79,20 +79,18 @@ class LandingContentServiceImplTest {
             .title("Build together")
             .build();
 
-        when(projectService.searchPublic(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), eq(DiscoverySort.MOST_LIKED), any(PageRequest.class)))
-            .thenReturn(new PageImpl<>(List.of(featuredProject), PageRequest.of(0, 4), 12));
+        when(projectService.searchPublic(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), eq(DiscoverySort.RECENTLY_UPDATED), any(PageRequest.class)))
+            .thenReturn(new PageImpl<>(List.of(featuredProject), PageRequest.of(0, 8), 12));
         when(projectService.searchPublic(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), eq(DiscoverySort.NEWEST), any(PageRequest.class)))
             .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 1), 12));
+        when(postService.searchPublic(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), eq(DiscoverySort.RECENTLY_UPDATED), any(PageRequest.class)))
+            .thenReturn(new PageImpl<>(List.of(latestPost), PageRequest.of(0, 8), 7));
         when(postService.searchPublic(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), eq(DiscoverySort.NEWEST), any(PageRequest.class)))
-            .thenReturn(
-                new PageImpl<>(List.of(latestPost), PageRequest.of(0, 3), 7),
-                new PageImpl<>(List.of(), PageRequest.of(0, 1), 7)
-            );
+            .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 1), 7));
+        when(blogService.searchPublic(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), eq(DiscoverySort.RECENTLY_UPDATED), any(PageRequest.class)))
+            .thenReturn(new PageImpl<>(List.of(latestBlog), PageRequest.of(0, 8), 5));
         when(blogService.searchPublic(isNull(), isNull(), isNull(), isNull(), isNull(), isNull(), eq(DiscoverySort.NEWEST), any(PageRequest.class)))
-            .thenReturn(
-                new PageImpl<>(List.of(latestBlog), PageRequest.of(0, 3), 5),
-                new PageImpl<>(List.of(), PageRequest.of(0, 1), 5)
-            );
+            .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 1), 5));
         when(userService.searchPublicProfiles(isNull(), isNull(), any(PageRequest.class)))
             .thenReturn(
                 new PageImpl<>(List.of(contributor), PageRequest.of(0, 4), 9),

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, Github, Power, Layers, User, Layout, Plus } from "lucide-react";
+import { ExternalLink, Github, Power, Layers, User, Layout, Plus, Youtube, BookOpen, FileText } from "lucide-react";
 import SchoolContentToggle from "../../components/content/SchoolContentToggle";
 import DiscoveryToolbar from "../../components/discovery/DiscoveryToolbar";
 import HoverActionPill from "../../components/discovery/HoverActionPill";
@@ -83,13 +83,7 @@ export default function ProjectListPage() {
     setViewMode("All");
   };
 
-  if (isLoading) {
-    return <div className="card">Loading projects...</div>;
-  }
 
-  if (isError) {
-    return <div className="card">We could not load projects right now.</div>;
-  }
 
   const projects = data?.content || [];
   const prioritizedProjects = sortContentForViewerPriority(
@@ -167,10 +161,14 @@ export default function ProjectListPage() {
 
       <div className="discovery-results-header">
         <h3>{viewMode === "Mine" ? "My Project Results" : "Global Project Results"}</h3>
-        <span className="discovery-results-meta">{resultsMeta}</span>
+        <span className="discovery-results-meta">{isLoading ? "Loading..." : resultsMeta}</span>
       </div>
 
-      {visibleProjects.length === 0 ? (
+      {isLoading ? (
+        <div className="card">Loading projects...</div>
+      ) : isError ? (
+        <div className="card discovery-empty">We could not load projects right now.</div>
+      ) : visibleProjects.length === 0 ? (
         <div className="card discovery-empty">
           <h3>No projects match these filters right now</h3>
           <p>
@@ -235,9 +233,9 @@ export default function ProjectListPage() {
                 </div>
 
                 {project.tags?.length > 0 && (
-                  <div className="tag-list">
+                  <div className="tag-list" style={{ marginTop: '8px' }}>
                     {project.tags.slice(0, 5).map((tag) => (
-                      <span key={tag} className="tag-chip">{tag}</span>
+                      <span key={tag} className="tag-hash">#{tag}</span>
                     ))}
                   </div>
                 )}
@@ -260,6 +258,21 @@ export default function ProjectListPage() {
                     {canOpen && project.demoUrl && (
                       <a href={project.demoUrl} target="_blank" rel="noreferrer" className="icon-chip-btn" title="Live Demo">
                         <ExternalLink size={16} />
+                      </a>
+                    )}
+                    {canOpen && project.youtubeUrl && (
+                      <a href={project.youtubeUrl} target="_blank" rel="noreferrer" className="icon-chip-btn" title="Watch on YouTube">
+                        <Youtube size={16} style={{ color: "#FF0000" }} />
+                      </a>
+                    )}
+                    {canOpen && project.pdfUrl && (
+                      <a href={project.pdfUrl} target="_blank" rel="noreferrer" className="icon-chip-btn" title="View PDF Document">
+                        <FileText size={16} style={{ color: "#EF4444" }} />
+                      </a>
+                    )}
+                    {canOpen && project.courseUrl && (
+                      <a href={project.courseUrl} target="_blank" rel="noreferrer" className="icon-chip-btn" title="Access Course Material">
+                        <BookOpen size={16} style={{ color: "#8B5CF6" }} />
                       </a>
                     )}
                   </div>

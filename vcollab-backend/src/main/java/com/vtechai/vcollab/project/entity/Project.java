@@ -88,4 +88,13 @@ public class Project extends BaseEntity {
 
     @Column(name = "view_count", nullable = false)
     private int viewCount = 0;
+
+    @Column(name = "youtube_url", length = 1000)
+    private String youtubeUrl;
+
+    @Column(name = "pdf_url", length = 1000)
+    private String pdfUrl;
+
+    @Column(name = "course_url", length = 1000)
+    private String courseUrl;
 }

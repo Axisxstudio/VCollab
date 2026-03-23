@@ -9,6 +9,8 @@ import { antdTheme } from "./styles/antd-theme";
 import "./styles/variables.css";
 import "./styles/global.css";
 import "./styles/content-system.css";
+import "./styles/realtime-upgrade.css";
+import "./styles/detail-modern.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

@@ -32,13 +32,13 @@ public class LandingContentServiceImpl implements LandingContentService {
     @Override
     public LandingOverviewResponse getOverview() {
         Page<ProjectResponse> featuredProjectPage = projectService.searchPublic(
-            null, null, null, null, null, null, DiscoverySort.MOST_LIKED, PageRequest.of(0, 8)
+            null, null, null, null, null, null, DiscoverySort.RECENTLY_UPDATED, PageRequest.of(0, 8)
         );
         Page<PostResponse> latestPostPage = postService.searchPublic(
-            null, null, null, null, null, null, DiscoverySort.NEWEST, PageRequest.of(0, 8)
+            null, null, null, null, null, null, DiscoverySort.RECENTLY_UPDATED, PageRequest.of(0, 8)
         );
         Page<BlogResponse> latestBlogPage = blogService.searchPublic(
-            null, null, null, null, null, null, DiscoverySort.NEWEST, PageRequest.of(0, 8)
+            null, null, null, null, null, null, DiscoverySort.RECENTLY_UPDATED, PageRequest.of(0, 8)
         );
         Page<PublicProfileResponse> contributorPage = userService.searchPublicProfiles(
             null, null, PageRequest.of(0, 8)

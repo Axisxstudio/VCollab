@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import axios from "axios";
 import {
   Bold,
   Code,
@@ -71,7 +72,30 @@ export default function RichTextEditor({
   const [charCount, setCharCount] = useState(0);
   const editorRef = useRef(null);
   const lastValueRef = useRef(value || "");
+  const [mentionState, setMentionState] = useState({ active: false, query: "", index: 0, results: [], anchor: null });
   const sanitizedValue = useMemo(() => sanitizeRichText(value), [value]);
+
+  const searchUsers = useCallback(async (query) => {
+    try {
+      const resp = await axios.get(`/api/v1/users/discover?query=${query}`);
+      const users = resp.data.data.content || [];
+      // Add 'all' option if query is 'all' or empty
+      const results = users.map(u => ({ username: u.username, fullName: u.fullName }));
+      if ("all".startsWith(query.toLowerCase())) {
+        results.unshift({ username: "all", fullName: "Everyone (@all)" });
+      }
+      setMentionState(s => ({ ...s, results: results.slice(0, 8) }));
+    } catch (err) {
+      console.error("Mention search failed", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (mentionState.active && mentionState.query.length >= 0) {
+      const timer = setTimeout(() => searchUsers(mentionState.query), 200);
+      return () => clearTimeout(timer);
+    }
+  }, [mentionState.active, mentionState.query, searchUsers]);
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -117,10 +141,116 @@ export default function RichTextEditor({
     emitChange();
   };
 
+  const insertMention = (username) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    editor.focus();
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+    // Find the @ trigger position in the current text node
+    const textNode = range.startContainer;
+    const offset = range.startOffset;
+    const text = textNode.textContent || "";
+    const mentionStart = text.lastIndexOf("@", offset - 1);
+
+    if (mentionStart !== -1) {
+      range.setStart(textNode, mentionStart);
+      range.setEnd(textNode, offset);
+      range.deleteContents();
+
+      const mentionNode = document.createElement("span");
+      mentionNode.className = "mention";
+      mentionNode.textContent = `@${username}`;
+      // Set as non-editable but keep the outer container editable
+      mentionNode.setAttribute("contenteditable", "false");
+      
+      range.insertNode(mentionNode);
+      
+      // Add a trailing space
+      const spaceNode = document.createTextNode("\u00A0");
+      mentionNode.after(spaceNode);
+      
+      // Move cursor after the space
+      const newRange = document.createRange();
+      newRange.setStartAfter(spaceNode);
+      newRange.setEndAfter(spaceNode);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+      
+      setMentionState({ active: false, query: "", index: 0, results: [], anchor: null });
+      emitChange();
+    }
+  };
+
+  const handleInput = (e) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    const selection = window.getSelection();
+    if (selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const text = range.startContainer.textContent || "";
+      const offset = range.startOffset;
+      const lastAt = text.lastIndexOf("@", offset - 1);
+      
+      // Check if @ is preceded by space or start of line
+      if (lastAt !== -1 && (lastAt === 0 || /\s/.test(text[lastAt - 1]))) {
+        const query = text.substring(lastAt + 1, offset);
+        if (!query.includes(" ")) {
+          // Get position for the dropdown
+          const rect = range.getBoundingClientRect();
+          setMentionState(s => ({ ...s, active: true, query, anchor: { top: rect.bottom + window.scrollY, left: rect.left + window.scrollX } }));
+        } else {
+          setMentionState(s => ({ ...s, active: false }));
+        }
+      } else {
+        setMentionState(s => ({ ...s, active: false }));
+      }
+    }
+    emitChange();
+  };
+
+  const handleKeyDown = (e) => {
+    if (mentionState.active && mentionState.results.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setMentionState(s => ({ ...s, index: (s.index + 1) % s.results.length }));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setMentionState(s => ({ ...s, index: (s.index - 1 + s.results.length) % s.results.length }));
+      } else if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        insertMention(mentionState.results[mentionState.index].username);
+      } else if (e.key === "Escape") {
+        setMentionState(s => ({ ...s, active: false }));
+      }
+    }
+  };
+
   const handlePaste = (event) => {
     event.preventDefault();
-    const text = event.clipboardData?.getData("text/plain") || "";
-    runEditorCommand("insertText", text);
+    const htmlSnippet = event.clipboardData?.getData("text/html");
+    const plainText = event.clipboardData?.getData("text/plain");
+
+    if (htmlSnippet) {
+      const sanitized = sanitizeRichText(htmlSnippet);
+      runEditorCommand("insertHTML", sanitized);
+    } else if (plainText) {
+      // Basic text-to-html conversion for simple lists (dash/bullet)
+      const lines = plainText.split("\n");
+      const hasBulletedLines = lines.some(line => line.trim().startsWith("- ") || line.trim().startsWith("* "));
+      
+      if (hasBulletedLines && lines.length > 2) {
+        // Advanced: convert simple list to HTML if it looks like a list
+        const listHtml = `<ul>${lines.map(line => `<li>${line.replace(/^[-*]\s*/, "")}</li>`).join("")}</ul>`;
+        runEditorCommand("insertHTML", listHtml);
+      } else {
+        runEditorCommand("insertText", plainText);
+      }
+    }
     emitChange();
   };
 
@@ -210,11 +340,52 @@ export default function RichTextEditor({
             role="textbox"
             aria-multiline="true"
             data-placeholder={placeholder}
-            onInput={emitChange}
+            onInput={handleInput}
+            onKeyDown={handleKeyDown}
             onBlur={emitChange}
             onPaste={handlePaste}
             style={{ minHeight }}
           />
+          {mentionState.active && mentionState.results.length > 0 && (
+            <div 
+              className="mention-dropdown" 
+              style={{ 
+                position: "fixed", 
+                top: mentionState.anchor.top, 
+                left: mentionState.anchor.left,
+                background: "#fff",
+                border: "1px solid #e2e8f0",
+                borderRadius: "12px",
+                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+                zIndex: 1000,
+                padding: "8px",
+                minWidth: "180px"
+              }}
+            >
+              {mentionState.results.map((user, idx) => (
+                <div 
+                  key={user.username}
+                  onClick={() => insertMention(user.username)}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    background: idx === mentionState.index ? "#f1f5f9" : "transparent",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "2px"
+                  }}
+                >
+                  <span style={{ fontWeight: 700, fontSize: "0.85rem", color: idx === mentionState.index ? "#22c55e" : "#0f172a" }}>
+                    @{user.username}
+                  </span>
+                  {user.fullName && (
+                    <span style={{ fontSize: "0.75rem", color: "#64748b" }}>{user.fullName}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
           {showPreview && (
             <div className="rich-editor__preview" style={{ minHeight }}>
               <div className="rich-editor__preview-label">Live Preview</div>

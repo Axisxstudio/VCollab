@@ -1,0 +1,286 @@
+/* ═══════════════════════════════════════════════
+   Admin Data Table — shared across all admin pages
+   ═══════════════════════════════════════════════ */
+
+.admin-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(215, 224, 234, 0.72);
+  background: #ffffff;
+  box-shadow: 0 10px 32px rgba(15, 35, 64, 0.07);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+/* ── Header ── */
+.admin-table thead tr {
+  background: #f5f8ff;
+  border-bottom: 1.5px solid rgba(215, 224, 234, 0.9);
+}
+
+.admin-table th {
+  padding: 13px 16px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #5d7490;
+  white-space: nowrap;
+}
+
+.admin-table th:first-child { border-radius: 18px 0 0 0; }
+.admin-table th:last-child  { border-radius: 0 18px 0 0; text-align: right; }
+
+/* ── Body rows ── */
+.admin-table tbody tr {
+  border-bottom: 1px solid rgba(215, 224, 234, 0.55);
+  transition: background 0.14s ease;
+}
+
+.admin-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.admin-table tbody tr:hover {
+  background: #f9fbff;
+}
+
+.admin-table td {
+  padding: 12px 16px;
+  color: #10233d;
+  vertical-align: middle;
+}
+
+.admin-table td:last-child {
+  text-align: right;
+}
+
+/* ── Cell helpers ── */
+.admin-table-avatar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-table-avatar__img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: linear-gradient(135deg, #1d5fa8, #3b82f6);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.admin-table-avatar__img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.admin-table-avatar__copy strong {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #10233d;
+  line-height: 1.2;
+}
+
+.admin-table-avatar__copy span {
+  font-size: 0.75rem;
+  color: #6b7f95;
+}
+
+.admin-table-title {
+  font-weight: 700;
+  color: #10233d;
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.admin-table-sub {
+  font-size: 0.75rem;
+  color: #788fa5;
+  margin-top: 2px;
+}
+
+.admin-table-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+/* Status pills inside table */
+.admin-table .status-pill {
+  font-size: 0.72rem;
+  padding: 4px 10px;
+}
+
+/* ── Empty / loading state ── */
+.admin-table-empty {
+  text-align: center;
+  padding: 60px 24px;
+  color: #788fa5;
+  font-size: 0.9rem;
+}
+
+.admin-table-empty svg {
+  display: block;
+  margin: 0 auto 12px;
+  opacity: 0.35;
+}
+
+/* ── Sortable column header ── */
+.admin-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.admin-table th.sortable:hover {
+  color: #1d5fa8;
+}
+
+/* ── Pagination row ── */
+.admin-table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-top: 1px solid rgba(215, 224, 234, 0.68);
+  background: #f9fbff;
+  border-radius: 0 0 18px 18px;
+}
+
+.admin-table-pagination__meta {
+  font-size: 0.8rem;
+  color: #6b7f95;
+  font-weight: 600;
+}
+
+.admin-table-pagination__btns {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-table-pagination__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(215, 224, 234, 0.9);
+  background: #ffffff;
+  color: #10233d;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.admin-table-pagination__btn:hover:not(:disabled) {
+  background: #eaf1ff;
+  border-color: rgba(29, 95, 168, 0.22);
+}
+
+.admin-table-pagination__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Inline note textarea in table (Reports) ── */
+.admin-table-note-input {
+  width: 100%;
+  min-width: 160px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(215, 224, 234, 0.9);
+  background: #f8fbff;
+  font-size: 0.8rem;
+  color: #10233d;
+  resize: none;
+}
+
+.admin-table-note-input:focus {
+  outline: none;
+  border-color: rgba(29, 95, 168, 0.4);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.admin-table select {
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(215, 224, 234, 0.9);
+  background: #f8fbff;
+  font-size: 0.8rem;
+  color: #10233d;
+  min-width: 130px;
+}
+
+.admin-table select:focus {
+  outline: none;
+  border-color: rgba(29, 95, 168, 0.4);
+}
+
+/* ── Metadata badge ── */
+.admin-table-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(29, 95, 168, 0.08);
+  color: #1d5fa8;
+  white-space: nowrap;
+}
+
+.admin-table-badge--warning {
+  background: rgba(217, 119, 6, 0.1);
+  color: #b45309;
+}
+
+.admin-table-badge--danger {
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+}
+
+.admin-table-badge--success {
+  background: rgba(5, 150, 105, 0.1);
+  color: #059669;
+}
+
+/* ── Monospace metadata cell ── */
+.admin-table-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 0.78rem;
+  color: #4a5568;
+  background: #f1f5f9;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .admin-table th,
+  .admin-table td {
+    padding: 10px 12px;
+  }
+}

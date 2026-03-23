@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import com.vtechai.vcollab.notification.MentionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -49,6 +50,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final UserRepository userRepository;
     private final ContentTargetingRepository contentTargetingRepository;
     private final ObjectMapper objectMapper;
+    private final MentionService mentionService;
 
     @Override
     public Page<ProjectResponse> listPublic(Pageable pageable) {
@@ -128,6 +130,9 @@ public class ProjectServiceImpl implements ProjectService {
             .tags(serializeList(request.getTags()))
             .githubUrl(request.getGithubUrl())
             .demoUrl(request.getDemoUrl())
+            .youtubeUrl(request.getYoutubeUrl())
+            .pdfUrl(request.getPdfUrl())
+            .courseUrl(request.getCourseUrl())
             .thumbnail(request.getThumbnail())
             .visibility(request.getVisibility())
             .active(request.isActive())
@@ -141,6 +146,9 @@ public class ProjectServiceImpl implements ProjectService {
                 .collect(Collectors.toList());
             projectMediaRepository.saveAll(media);
         }
+
+        // Process mentions in description
+        mentionService.processMentions(saved.getFullDesc(), principal.getId(), ContentType.PROJECT, saved.getId());
 
         return toResponse(saved);
     }
@@ -164,6 +172,9 @@ public class ProjectServiceImpl implements ProjectService {
         project.setTags(serializeList(request.getTags()));
         project.setGithubUrl(request.getGithubUrl());
         project.setDemoUrl(request.getDemoUrl());
+        project.setYoutubeUrl(request.getYoutubeUrl());
+        project.setPdfUrl(request.getPdfUrl());
+        project.setCourseUrl(request.getCourseUrl());
         project.setThumbnail(request.getThumbnail());
         project.setVisibility(request.getVisibility());
         project.setActive(request.isActive());
@@ -183,6 +194,9 @@ public class ProjectServiceImpl implements ProjectService {
                 .collect(Collectors.toList());
             projectMediaRepository.saveAll(media);
         }
+
+        // Process mentions in description on update
+        mentionService.processMentions(saved.getFullDesc(), principal.getId(), ContentType.PROJECT, saved.getId());
 
         return toResponse(saved);
     }
@@ -286,9 +300,15 @@ public class ProjectServiceImpl implements ProjectService {
             .techStack(deserializeList(project.getTechStack()))
             .githubUrl(canExposeExternalLinks() ? project.getGithubUrl() : null)
             .demoUrl(canExposeExternalLinks() ? project.getDemoUrl() : null)
+            .youtubeUrl(canExposeExternalLinks() ? project.getYoutubeUrl() : null)
+            .pdfUrl(canExposeExternalLinks() ? project.getPdfUrl() : null)
+            .courseUrl(canExposeExternalLinks() ? project.getCourseUrl() : null)
             .targetType(resolveTargetType(project.getId()))
             .hasGithubUrl(hasText(project.getGithubUrl()))
             .hasDemoUrl(hasText(project.getDemoUrl()))
+            .hasYoutubeUrl(hasText(project.getYoutubeUrl()))
+            .hasPdfUrl(hasText(project.getPdfUrl()))
+            .hasCourseUrl(hasText(project.getCourseUrl()))
             .visibility(project.getVisibility())
             .active(project.isActive())
             .likeCount(project.getLikeCount())

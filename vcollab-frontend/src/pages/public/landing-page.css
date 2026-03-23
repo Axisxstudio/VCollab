@@ -93,6 +93,22 @@ html {
   flex-shrink: 0;
 }
 
+.lp-brand-logo {
+  height: 32px;
+  width: auto;
+  margin-right: 10px;
+}
+
+@media (max-width: 600px) {
+  .lp-brand-logo {
+    height: 24px;
+    margin-right: 6px;
+  }
+  .lp-brand-mark {
+    font-size: 1.1rem !important;
+  }
+}
+
 .lp-brand-mark {
   font-family: 'Sora', 'Outfit', sans-serif;
   font-size: 1.5rem;
@@ -195,52 +211,85 @@ html {
   background: #f1f5f9;
 }
 
-/* Mobile drawer */
+/* Mobile drawer - Full screen right slide */
 .lp-mobile-drawer {
-  display: none;
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  height: 100vh;
+  background: white;
+  z-index: 1000;
+  display: flex;
   flex-direction: column;
-  gap: 2px;
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height 0.35s ease, padding 0.3s ease;
-  padding: 0 20px;
-  border-top: 1px solid var(--lp-border);
-  background: rgba(255, 255, 255, 0.99);
+  transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+  max-height: none;
+  border-top: none;
 }
 
 .lp-mobile-drawer--open {
-  max-height: 440px;
-  padding: 14px 20px;
+  right: 0;
+}
+
+.lp-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--lp-border);
+}
+
+.lp-drawer-close {
+  background: none;
+  border: none;
+  color: var(--lp-text);
+  cursor: pointer;
+  padding: 8px;
+}
+
+.lp-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .lp-mobile-link {
   display: block;
-  padding: 11px 14px;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 500;
+  padding: 16px 20px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
   color: var(--lp-muted);
+  transition: all 0.2s;
 }
 
 .lp-mobile-link:hover,
 .lp-mobile-link--active {
   background: #f1f5f9;
-  color: var(--lp-text);
+  color: var(--lp-blue);
 }
 
 .lp-mobile-cta {
+  padding: 24px 20px 48px;
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
-  padding-top: 10px;
+  flex-direction: column;
+  gap: 12px;
   border-top: 1px solid var(--lp-border);
+  background: white;
 }
 
 .lp-mobile-cta .lp-btn-outline,
 .lp-mobile-cta .lp-btn-filled {
-  flex: 1;
+  width: 100%;
   justify-content: center;
+  padding: 14px;
+  font-size: 1rem;
 }
+
 
 /* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
    1. HERO Ã¢â‚¬â€ illustration as TRUE background
@@ -637,6 +686,12 @@ html {
   gap: 24px;
 }
 
+.lp-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
 /* --- Contributor Card --- */
 .lp-contributor-card {
   background: var(--lp-white);
@@ -805,11 +860,35 @@ html {
   margin-bottom: 5px;
 }
 
-.lp-project-body p {
+.lp-project-desc {
   font-size: 0.85rem;
   color: var(--lp-muted);
-  line-height: 1.6;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 12px;
 }
+
+.lp-project-tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.lp-tech-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  background: #f1f5f9;
+  color: #475569;
+  border-radius: 6px;
+}
+
+
 
 /* Ã¢â€â‚¬Ã¢â€â‚¬ Badges Ã¢â€â‚¬Ã¢â€â‚¬ */
 .lp-badge {
@@ -1213,9 +1292,7 @@ html {
     display: flex;
   }
 
-  .lp-mobile-drawer {
-    display: flex;
-  }
+
 
   .lp-hero {
     padding: 60px 0 70px;
@@ -1276,17 +1353,12 @@ html {
     padding: 0 18px;
   }
 
-  .lp-stats-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
+  .lp-stats-grid,
   .lp-content-grid,
-  .lp-grid-4 {
-    grid-template-columns: 1fr;
-  }
-
+  .lp-grid-4,
   .lp-footer-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 
   .lp-dual-section {
@@ -1322,34 +1394,11 @@ html {
   color: #475569;
 }
 
-.lp-landing-card-badges {
+.lp-project-tech-stack {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-}
-
-.lp-disabled-note {
-  display: inline-flex;
-  width: fit-content;
-  margin-top: 6px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(148, 163, 184, 0.14);
-  color: #475569;
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.lp-card-links {
-  margin-top: 14px;
-}
-
-.lp-more-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--lp-blue);
-  font-weight: 700;
+  gap: 6px;
+  margin-top: 10px;
 }
 
 .lp-card-more {
@@ -1366,6 +1415,23 @@ html {
 .lp-card-more--disabled {
   opacity: 0.4;
 }
+
+.lp-card-footer-icon {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  color: var(--lp-blue);
+  opacity: 0.8;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.lp-project-card:hover .lp-card-footer-icon,
+.lp-content-card:hover .lp-card-footer-icon {
+  transform: translateX(4px);
+  opacity: 1;
+}
+
+
 
 /* ── Public Page Wrapper (Separate Pages) ── */
 .public-page-wrap {
@@ -1434,7 +1500,7 @@ html {
 
 .lp-insta-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
 }
 
 .lp-insta-header {
@@ -1639,8 +1705,13 @@ html {
   background: white;
 }
 
-.lp-swiper-btn--prev { left: 8px; }
-.lp-swiper-btn--next { right: 8px; }
+.lp-swiper-btn--prev {
+  left: 8px;
+}
+
+.lp-swiper-btn--next {
+  right: 8px;
+}
 
 .lp-swiper-dots {
   position: absolute;
@@ -1687,3 +1758,319 @@ html {
   overflow: hidden;
 }
 
+@media (max-width: 768px) {
+
+  /* Landing page grids force 2 columns */
+  .lp-stats-grid,
+  .lp-content-grid,
+  .lp-grid-4,
+  .lp-footer-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+
+  .lp-grid-3,
+  .lp-carousel-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .lp-project-body p,
+  .lp-content-body p {
+    font-size: 0.75rem !important;
+    line-height: 1.3 !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  .lp-card-footer-icon {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+    color: var(--lp-blue);
+    opacity: 1;
+  }
+
+
+  .lp-project-card h3,
+  .lp-insta-author-info strong,
+  .lp-content-card h3 {
+    font-size: 0.9rem !important;
+  }
+
+  .lp-project-header,
+  .lp-insta-header {
+    padding: 8px !important;
+    gap: 8px !important;
+  }
+
+  .lp-project-avatar,
+  .lp-insta-avatar {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .lp-project-body,
+  .lp-insta-body,
+  .lp-content-body {
+    padding: 8px !important;
+    gap: 6px !important;
+  }
+
+  .lp-project-actions,
+  .lp-insta-actions {
+    padding: 8px !important;
+  }
+
+  .lp-cta-banner {
+    padding: 32px 16px !important;
+    width: calc(100% - 32px) !important;
+    margin: 32px auto !important;
+    border-radius: 16px !important;
+  }
+
+  .lp-cta-banner h2 {
+    font-size: 1.35rem !important;
+  }
+
+  /* Force "View All" buttons to be icon-only circles on mobile */
+  .lp-section-header-row .lp-btn-outline {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
+    font-size: 0 !important;
+    /* Hide text */
+    flex-shrink: 0 !important;
+  }
+
+  .lp-section-header-row .lp-btn-outline svg {
+    margin: 0 !important;
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .lp-section-header-row {
+    gap: 12px !important;
+    align-items: center !important;
+  }
+
+  /* contributor card sizing for 3 items on mobile */
+  .lp-cc-avatar {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .lp-cc-avatar-wrapper {
+    margin-top: -22px !important;
+  }
+
+  .lp-cc-name {
+    font-size: 0.75rem !important;
+  }
+
+  .lp-cc-role-badge {
+    font-size: 0.6rem !important;
+    padding: 2px 4px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .lp-cc-stats-icons {
+    gap: 6px !important;
+    font-size: 0.65rem !important;
+    margin-bottom: 8px !important;
+  }
+
+  .lp-cc-body {
+    padding: 0 6px 10px !important;
+  }
+
+  .lp-cc-footer {
+    padding-top: 6px !important;
+  }
+
+  .lp-cc-footer .lp-card-more {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .lp-cc-cover {
+    height: 50px !important;
+  }
+}
+
+@media (max-width: 480px) {
+
+  /* Extreme small phones, if 2 cols is too squeesed, keeping 2 cols but tightening */
+  .lp-stats-grid,
+  .lp-content-grid,
+  .lp-grid-4 {
+    gap: 8px !important;
+  }
+
+  .lp-grid-3 {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  .container {
+    padding: 0 10px;
+  }
+}
+
+/* --- Contributor Cards --- */
+.lp-cc-card {
+  background: white;
+  border: 1px solid var(--lp-border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--lp-motion-base), box-shadow var(--lp-motion-base), border-color var(--lp-motion-fast);
+}
+
+.lp-cc-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 28px -18px rgba(15, 23, 42, 0.22);
+  border-color: rgba(37, 99, 235, 0.15);
+}
+
+.lp-cc-cover {
+  width: 100%;
+  height: 80px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.lp-cc-cover-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.2) 100%);
+}
+
+.lp-cc-body {
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+}
+
+.lp-cc-avatar-wrapper {
+  margin-top: -32px;
+  margin-bottom: 12px;
+  padding: 4px;
+  background: white;
+  border-radius: 50%;
+  position: relative;
+  z-index: 2;
+}
+
+.lp-cc-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: transform var(--lp-motion-base);
+}
+
+.lp-cc-card:hover .lp-cc-avatar {
+  transform: scale(1.05);
+}
+
+.lp-cc-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--lp-text);
+  margin-bottom: 4px;
+}
+
+.lp-cc-role-badge {
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  background: #f1f5f9;
+  color: #64748b;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.lp-cc-stats-icons {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--lp-muted);
+}
+
+.lp-cc-stats-icons span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lp-cc-footer {
+  margin-top: auto;
+  border-top: 1px solid #f1f5f9;
+  width: 100%;
+  padding-top: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Override card more specifically for cc */
+.lp-cc-footer .lp-card-more {
+  width: 32px;
+  height: 32px;
+}
+
+.lp-cc-footer .lp-card-more:hover {
+  background: var(--lp-blue);
+  color: white;
+}
+
+/* CAROUSEL CONTROLS */
+.lp-carousel-wrapper {
+  position: relative;
+}
+
+.lp-carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid var(--lp-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  color: #475569;
+  transition: all 0.2s ease;
+}
+
+.lp-carousel-btn:hover {
+  color: var(--lp-blue);
+  border-color: rgba(37, 99, 235, 0.2);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.1);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.lp-carousel-btn--prev {
+  left: -20px;
+}
+
+.lp-carousel-btn--next {
+  right: -20px;
+}

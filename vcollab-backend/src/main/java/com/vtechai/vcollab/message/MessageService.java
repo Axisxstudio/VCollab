@@ -11,5 +11,6 @@ public interface MessageService {
     Page<MessageResponse> list(Long conversationId, UserPrincipal principal, Pageable pageable);
     MessageResponse send(MessageCreateRequest request, UserPrincipal principal);
     MessageResponse update(Long id, MessageUpdateRequest request, UserPrincipal principal);
+    void markConversationRead(Long conversationId, UserPrincipal principal);
     void delete(Long id, UserPrincipal principal);
 }

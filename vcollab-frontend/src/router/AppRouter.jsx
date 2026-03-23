@@ -7,6 +7,9 @@ import ViewerLayout from "../layouts/ViewerLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
 import LandingPage from "../pages/public/LandingPage";
+import AboutPage from "../pages/public/AboutPage";
+import PrivacyPolicyPage from "../pages/public/PrivacyPolicyPage";
+import TermsOfServicePage from "../pages/public/TermsOfServicePage";
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
@@ -42,13 +45,15 @@ import AdminRecycleBinPage from "../pages/admin/AdminRecycleBinPage";
 import AdminAuditLogsPage from "../pages/admin/AdminAuditLogsPage";
 import AdminExportCenterPage from "../pages/admin/AdminExportCenterPage";
 import { routes } from "../config/routes";
-import { useAuthStore } from "../store/authStore";
 
 export default function AppRouter() {
   return (
     <Routes>
       <Route element={<PublicLayout />}>
         <Route path={routes.landing} element={<LandingPage />} />
+        <Route path={routes.about} element={<AboutPage />} />
+        <Route path={routes.privacy} element={<PrivacyPolicyPage />} />
+        <Route path={routes.terms} element={<TermsOfServicePage />} />
       </Route>
 
       <Route element={<ViewerLayout />}>

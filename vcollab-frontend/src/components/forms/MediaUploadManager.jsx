@@ -7,7 +7,8 @@ import {
   Trash2, 
   Upload, 
   UploadCloud, 
-  Video 
+  Video,
+  FileText 
 } from "lucide-react";
 import { uploadMedia } from "../../services/media.service";
 
@@ -39,7 +40,8 @@ export default function MediaUploadManager({
   accept = "image/*,video/*",
   buttonLabel,
   helperText,
-  emptyLabel = "Drag and drop your files here, or click to browse"
+  emptyLabel = "Drag and drop your files here, or click to browse",
+  compact = false
 }) {
   const inputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
@@ -98,6 +100,42 @@ export default function MediaUploadManager({
 
   const isCoverMode = !multiple && items.length > 0;
 
+  if (compact) {
+    return (
+      <div className={`media-manager-compact ${isDragOver ? "is-dragging" : ""}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          multiple={multiple}
+          onChange={handleFilesSelected}
+          hidden
+        />
+        <div className="media-manager-compact__input-group">
+          <div className="media-manager-compact__display" onClick={() => inputRef.current?.click()}>
+            <FileText size={18} className="media-manager-compact__icon" />
+            <span className="media-manager-compact__filename">
+              {uploading ? "Uploading..." : items.length > 0 ? items[0].fileName : emptyLabel}
+            </span>
+          </div>
+          {items.length > 0 ? (
+            <button type="button" className="media-manager-compact__action-btn delete" onClick={() => handleRemove(0)}>
+              <Trash2 size={16} />
+            </button>
+          ) : (
+            <button type="button" className="media-manager-compact__action-btn upload" onClick={() => inputRef.current?.click()} disabled={uploading}>
+              {uploading ? <Loader2 className="spin" size={16} /> : <Upload size={16} />}
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`media-manager-pro ${isDragOver ? "is-dragging" : ""}`}>
       <div className="media-manager-pro__header">
@@ -139,6 +177,10 @@ export default function MediaUploadManager({
                 <div className="media-manager-pro__preview">
                   {item.mediaType === "VIDEO" ? (
                     <video src={item.url} preload="metadata" />
+                  ) : item.mediaType === "DOCUMENT" ? (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", background: "rgba(239, 68, 68, 0.1)", borderRadius: "12px" }}>
+                      <FileText size={48} color="#EF4444" />
+                    </div>
                   ) : (
                     <img src={item.url} alt="" />
                   )}
@@ -174,6 +216,10 @@ export default function MediaUploadManager({
             <div className="media-manager-pro__cover-preview">
               {items[0].mediaType === "VIDEO" ? (
                 <video src={items[0].url} controls />
+              ) : items[0].mediaType === "DOCUMENT" ? (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", width: "100%", background: "rgba(239, 68, 68, 0.1)", borderRadius: "12px" }}>
+                  <FileText size={64} color="#EF4444" />
+                </div>
               ) : (
                 <img src={items[0].url} alt="Cover" />
               )}

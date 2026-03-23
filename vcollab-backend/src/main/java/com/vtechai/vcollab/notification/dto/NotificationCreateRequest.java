@@ -14,4 +14,5 @@ public class NotificationCreateRequest {
     private ContentType contentType;
     private Long contentId;
     private String message;
+    private String metadata;
 }

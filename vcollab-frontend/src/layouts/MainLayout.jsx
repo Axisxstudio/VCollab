@@ -1,23 +1,26 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Bell,
-  BookOpenText,
-  FolderKanban,
-  House,
+  BookOpen,
+  Folder,
+  Home,
   LayoutDashboard,
   LogOut,
-  MessageSquareMore,
-  NotebookTabs,
+  MessageSquare,
+  FileText,
   Search,
   Settings,
-  TriangleAlert,
-  Users,
-  X
+  AlertTriangle,
+  User,
+  X,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence } from "framer-motion";
 import NotificationBell from "../components/notifications/NotificationBell";
+import RealtimeNotificationToaster from "../components/notifications/RealtimeNotificationToaster";
 import SettingsPopup from "../components/settings/SettingsPopup";
 import { roles } from "../config/constants";
 import { routes } from "../config/routes";
@@ -29,19 +32,19 @@ import { useDebounce } from "../hooks/useDebounce";
 import "../styles/app-shell.css";
 
 const APP_LINKS = [
-  { to: routes.home, label: "Home", icon: House, end: true },
+  { to: routes.home, label: "Home", icon: Home, end: true },
   { to: routes.search, label: "Search", icon: Search },
-  { to: routes.projects, label: "Projects", icon: FolderKanban },
-  { to: routes.posts, label: "Posts", icon: NotebookTabs },
-  { to: routes.blogs, label: "Blogs", icon: BookOpenText },
+  { to: routes.projects, label: "Projects", icon: Folder },
+  { to: routes.posts, label: "Posts", icon: FileText },
+  { to: routes.blogs, label: "Blogs", icon: BookOpen },
   { to: routes.requests, label: "Requests", icon: Bell },
-  { to: routes.messages, label: "Messages", icon: MessageSquareMore },
-  { to: routes.warnings, label: "Warnings", icon: TriangleAlert },
-  { to: routes.settings, label: "Settings", icon: Settings }
+  { to: routes.messages, label: "Messages", icon: MessageSquare },
+  { to: routes.warnings, label: "Warnings", icon: AlertTriangle }
 ];
 
 function getInitials(name) {
-  return (name || "V").trim().charAt(0).toUpperCase();
+  if (!name) return "V";
+  return name.trim().charAt(0).toUpperCase();
 }
 
 export default function MainLayout() {
@@ -55,16 +58,25 @@ export default function MainLayout() {
     : routes.home;
   const isAdmin = user?.role === roles.SUPER_ADMIN;
 
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    return localStorage.getItem("sidebarCollapsed") === "true";
+  });
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [searchExpanded, setSearchExpanded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+  const debouncedSearch = useDebounce(searchQuery, 300);
+
+  const toggleSidebar = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    localStorage.setItem("sidebarCollapsed", newState.toString());
+  };
+
   const handleLogout = () => {
     clearAuth();
     navigate(routes.landing);
   };
-
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [searchExpanded, setSearchExpanded] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const debouncedSearch = useDebounce(searchQuery, 300);
 
   const { data: searchResults, isLoading: isSearching } = useQuery({
     queryKey: ["live-search", debouncedSearch],
@@ -81,10 +93,10 @@ export default function MainLayout() {
   };
 
   const hasResults = searchResults && (
-    searchResults.users?.length > 0 || 
-    searchResults.projects?.length > 0 || 
-    searchResults.blogs?.length > 0 || 
-    searchResults.posts?.length > 0
+    (searchResults.users && searchResults.users.length > 0) || 
+    (searchResults.projects && searchResults.projects.length > 0) || 
+    (searchResults.blogs && searchResults.blogs.length > 0) || 
+    (searchResults.posts && searchResults.posts.length > 0)
   );
 
   useEffect(() => {
@@ -106,71 +118,92 @@ export default function MainLayout() {
   }, [searchQuery]);
 
   return (
-    <div className="workspace-shell">
-      <aside className="workspace-sidebar">
-        <Link to={routes.home} className="workspace-brand">
-          <img src={logoImg} alt="VCollab" className="workspace-brand-logo" />
-          <div className="workspace-brand-col">
-            <strong>VCollab</strong>
-            <span>Workspace</span>
-          </div>
-        </Link>
-
-        <div className="workspace-user-card">
-          <div className="workspace-avatar">
-            {user?.profileImage ? (
-              <img src={user.profileImage} alt={user.fullName || user.username || "User"} />
-            ) : (
-              <span>{getInitials(user?.fullName || user?.username)}</span>
-            )}
-          </div>
-          <div className="workspace-user-meta">
-            <strong>{user?.fullName || user?.username || "VCollab User"}</strong>
-            <span>@{user?.username || "workspace"}</span>
-            <div className="workspace-role-chip">{formatRole(user?.role)}</div>
-          </div>
+    <div className={`workspace-shell ${isCollapsed ? "sidebar-collapsed" : ""}`}>
+      <aside className={`workspace-sidebar ${isCollapsed ? "collapsed" : ""}`}>
+        <div className="workspace-sidebar-header">
+          <Link to={routes.home} className="workspace-brand">
+            <img src={logoImg} alt="VCollab" className="workspace-brand-logo" />
+            {!isCollapsed && <span className="workspace-brand-text">VCollab</span>}
+          </Link>
+          <button 
+            type="button" 
+            className="sidebar-toggle-btn" 
+            onClick={toggleSidebar}
+            title={isCollapsed ? "Expand" : "Collapse"}
+          >
+            {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          </button>
         </div>
 
-        <nav className="workspace-nav" style={{ position: 'relative' }}>
+        <nav className="workspace-nav">
           {APP_LINKS.map((item) => {
             const Icon = item.icon;
-            const isSettingsLink = item.to === routes.settings;
-            
             return (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.end}
                 className={({ isActive }) => `workspace-nav-link ${isActive ? "active" : ""}`}
-                onMouseEnter={isSettingsLink ? () => setIsSettingsOpen(true) : undefined}
-                onMouseLeave={isSettingsLink ? (e) => {
-                  // Small delay to check if they moved into the popup
-                  setTimeout(() => {
-                    // We don't have an easy way to check current mouse position without more state
-                    // but move into the popup will be handled by the popup's own onMouseLeave
-                  }, 100);
-                } : undefined}
-                onClick={isSettingsLink ? (e) => {
-                  e.preventDefault();
-                  setIsSettingsOpen(!isSettingsOpen);
-                } : undefined}
+                title={isCollapsed ? item.label : ""}
               >
-                <Icon size={18} />
-                <span>{item.label}</span>
+                {({ isActive }) => (
+                  <>
+                    <div className="nav-icon-wrapper">
+                      <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+                    </div>
+                    {!isCollapsed && <span className="nav-label">{item.label}</span>}
+                  </>
+                )}
               </NavLink>
             );
           })}
+          
           {isAdmin && (
-            <NavLink to={routes.adminDashboard} className={({ isActive }) => `workspace-nav-link ${isActive ? "active" : ""}`}>
-              <LayoutDashboard size={18} />
-              <span>Admin Console</span>
+            <NavLink 
+              to={routes.adminDashboard} 
+              className={({ isActive }) => `workspace-nav-link ${isActive ? "active" : ""}`}
+              title={isCollapsed ? "Admin Console" : ""}
+            >
+              {({ isActive }) => (
+                <>
+                  <div className="nav-icon-wrapper">
+                    <LayoutDashboard size={24} strokeWidth={isActive ? 2.5 : 2} />
+                  </div>
+                  {!isCollapsed && <span className="nav-label">Admin Console</span>}
+                </>
+              )}
             </NavLink>
           )}
         </nav>
 
         <div className="workspace-sidebar-footer">
-          <Link to={routes.profileEdit} className="btn-outline">Edit Profile</Link>
-          <button type="button" className="btn-outline" onClick={handleLogout}>Log Out</button>
+          <NavLink 
+            to={profilePath} 
+            className={({ isActive }) => `workspace-nav-link profile-link ${isActive ? "active" : ""}`}
+            title={isCollapsed ? "Profile" : ""}
+          >
+            <div className="nav-icon-wrapper profile-avatar-mini">
+              {user?.profileImage ? (
+                <img src={user.profileImage} alt="Profile" />
+              ) : (
+                <div className="avatar-initials">{getInitials(user?.fullName || user?.username)}</div>
+              )}
+            </div>
+            {!isCollapsed && <span className="nav-label">Profile</span>}
+          </NavLink>
+
+          <button 
+            type="button" 
+            className={`workspace-nav-link more-link ${isSettingsOpen ? "active" : ""}`}
+            onMouseEnter={() => setIsSettingsOpen(true)}
+            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+            title={isCollapsed ? "More" : ""}
+          >
+            <div className="nav-icon-wrapper">
+              <Settings size={24} strokeWidth={isSettingsOpen ? 2.5 : 2} />
+            </div>
+            {!isCollapsed && <span className="nav-label">Settings</span>}
+          </button>
         </div>
       </aside>
 
@@ -223,48 +256,37 @@ export default function MainLayout() {
                   {isSearching && <div className="search-live-item disabled">Searching...</div>}
                   
                   {!isSearching && !hasResults && (
-                    <div className="search-live-item disabled">No quick results found.</div>
+                    <div className="search-live-item disabled">No results for "{debouncedSearch}"</div>
                   )}
 
-                  {searchResults?.users?.length > 0 && (
-                    <div className="search-live-section">
+                  {!isSearching && hasResults && searchResults.users?.length > 0 && (
+                    <div className="search-live-group">
                       <div className="search-live-label">Users</div>
                       {searchResults.users.map(u => (
                         <Link key={u.id} to={routes.profile.replace(":username", u.username)} className="search-live-item" onClick={() => { setSearchQuery(""); setSearchExpanded(false); }}>
-                          <Users size={14} /> {u.fullName || u.username}
+                          <User size={14} /> {u.fullName || u.username}
                         </Link>
                       ))}
                     </div>
                   )}
 
-                  {searchResults?.projects?.length > 0 && (
-                    <div className="search-live-section">
+                  {!isSearching && hasResults && searchResults.projects?.length > 0 && (
+                    <div className="search-live-group">
                       <div className="search-live-label">Projects</div>
                       {searchResults.projects.map(p => (
                         <Link key={p.id} to={routes.projectDetail.replace(":id", p.id)} className="search-live-item" onClick={() => { setSearchQuery(""); setSearchExpanded(false); }}>
-                          <FolderKanban size={14} /> {p.title}
+                          <Folder size={14} /> {p.title || "Untitled Project"}
                         </Link>
                       ))}
                     </div>
                   )}
 
-                  {searchResults?.blogs?.length > 0 && (
-                    <div className="search-live-section">
-                      <div className="search-live-label">Blogs</div>
-                      {searchResults.blogs.map(b => (
-                        <Link key={b.id} to={routes.blogDetail.replace(":id", b.id)} className="search-live-item" onClick={() => { setSearchQuery(""); setSearchExpanded(false); }}>
-                          <BookOpenText size={14} /> {b.title}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-
-                  {searchResults?.posts?.length > 0 && (
-                    <div className="search-live-section">
+                  {!isSearching && hasResults && searchResults.posts?.length > 0 && (
+                    <div className="search-live-group">
                       <div className="search-live-label">Posts</div>
                       {searchResults.posts.map(po => (
                         <Link key={po.id} to={routes.postDetail.replace(":id", po.id)} className="search-live-item" onClick={() => { setSearchQuery(""); setSearchExpanded(false); }}>
-                          <NotebookTabs size={14} /> {po.title || "Untitled Post"}
+                          <FileText size={14} /> {po.title || "Untitled Post"}
                         </Link>
                       ))}
                     </div>
@@ -281,6 +303,7 @@ export default function MainLayout() {
                 </div>
               )}
             </div>
+            
             <NotificationBell size={18} />
             
             <div 
@@ -307,7 +330,7 @@ export default function MainLayout() {
                   </div>
                   <div className="dropdown-divider" />
                   <Link to={profilePath} className="dropdown-item">
-                    <Users size={16} />
+                    <User size={16} />
                     <span>My Profile</span>
                   </Link>
                   <Link to={routes.settings} className="dropdown-item">
@@ -331,14 +354,17 @@ export default function MainLayout() {
           </div>
         </main>
       </div>
+
       <AnimatePresence>
         {isSettingsOpen && (
           <SettingsPopup 
-            isOpen={isSettingsOpen} 
+            isCollapsed={isCollapsed} 
             onClose={() => setIsSettingsOpen(false)} 
           />
         )}
       </AnimatePresence>
+
+      <RealtimeNotificationToaster />
     </div>
   );
 }

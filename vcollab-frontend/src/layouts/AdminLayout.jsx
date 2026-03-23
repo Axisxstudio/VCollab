@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Bell,
   BookOpenText,
@@ -18,7 +18,9 @@ import {
   Tags,
   Trash2,
   TriangleAlert,
-  Users
+  Users,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import NotificationBell from "../components/notifications/NotificationBell";
@@ -79,6 +81,17 @@ export default function AdminLayout() {
   const user = useAuthStore((state) => state.user);
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    return localStorage.getItem("sidebar-collapsed-admin") === "true";
+  });
+  const [createOpen, setCreateOpen] = useState(false);
+  const createRef = useRef(null);
+
+  const toggleSidebar = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    localStorage.setItem("sidebar-collapsed-admin", newState);
+  };
 
   const currentNavItem =
     ALL_LINKS.find((item) =>
@@ -100,6 +113,23 @@ export default function AdminLayout() {
     setSearchTerm(params.get("q") || "");
   }, [location.pathname, location.search]);
 
+  useEffect(() => {
+    const handlePointerDown = (event) => {
+      if (createRef.current && !createRef.current.contains(event.target)) {
+        setCreateOpen(false);
+      }
+    };
+    const handleEscape = (event) => {
+      if (event.key === "Escape") setCreateOpen(false);
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
   const handleSearchSubmit = (event) => {
     event.preventDefault();
     const trimmed = searchTerm.trim();
@@ -111,14 +141,27 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="workspace-shell admin-shell">
-      <aside className="admin-sidebar-pro">
+    <div className={`workspace-shell admin-shell ${isCollapsed ? "sidebar-collapsed" : ""}`}>
+      <aside className={`admin-sidebar-pro ${isCollapsed ? "collapsed" : ""}`}>
+        <div className="sidebar-toggle-wrapper" style={{ marginBottom: "20px" }}>
+          <button 
+            type="button" 
+            className="sidebar-toggle-btn admin-toggle-btn" 
+            onClick={toggleSidebar}
+            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            {isCollapsed ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
+          </button>
+        </div>
+
         <Link to={routes.adminDashboard} className="workspace-brand-pro">
           <img src={logoImg} alt="VCollab" className="admin-brand-logo" />
-          <div className="brand-text-pro">
-            <strong>VCollab Admin</strong>
-            <span>Operations Console</span>
-          </div>
+          {!isCollapsed && (
+            <div className="brand-text-pro">
+              <strong>VCollab Admin</strong>
+              <span>Operations Console</span>
+            </div>
+          )}
         </Link>
 
         <Link to={getProfilePath(user?.username)} className="admin-sidebar-profile-card">
@@ -129,18 +172,22 @@ export default function AdminLayout() {
               getInitials(user?.fullName || user?.username)
             )}
           </div>
-          <div className="admin-sidebar-profile-copy">
-            <strong>{user?.fullName || user?.username || "Admin User"}</strong>
-            <span>@{user?.username || "admin"}</span>
-            <small>Super administrator access</small>
-          </div>
-          <ChevronDown size={16} />
+          {!isCollapsed && (
+            <>
+              <div className="admin-sidebar-profile-copy">
+                <strong>{user?.fullName || user?.username || "Admin User"}</strong>
+                <span>@{user?.username || "admin"}</span>
+                <small>Super administrator access</small>
+              </div>
+              <ChevronDown size={16} />
+            </>
+          )}
         </Link>
 
         <nav className="admin-nav-pro">
           {NAV_GROUPS.map((group) => (
             <div key={group.label} className="admin-nav-group">
-              <span className="admin-nav-label">{group.label}</span>
+              {!isCollapsed && <span className="admin-nav-label">{group.label}</span>}
               {group.links.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -149,9 +196,10 @@ export default function AdminLayout() {
                     to={item.to}
                     end={item.end}
                     className={({ isActive }) => `admin-nav-link-pro ${isActive ? "active" : ""}`}
+                    title={isCollapsed ? item.label : ""}
                   >
                     <Icon size={18} />
-                    <span>{item.label}</span>
+                    {!isCollapsed && <span>{item.label}</span>}
                   </NavLink>
                 );
               })}
@@ -160,13 +208,15 @@ export default function AdminLayout() {
         </nav>
 
         <div className="admin-sidebar-footer-pro">
-          <Link to={routes.adminExports} className="admin-sidebar-secondary-link">
-            <Database size={16} />
-            Export records and reports
-          </Link>
-          <button type="button" className="btn-terminate" onClick={handleLogout}>
+          {!isCollapsed && (
+            <Link to={routes.adminExports} className="admin-sidebar-secondary-link">
+              <Database size={16} />
+              Export records and reports
+            </Link>
+          )}
+          <button type="button" className="btn-terminate" onClick={handleLogout} title={isCollapsed ? "Log Out" : ""}>
             <LogOut size={18} />
-            Log Out
+            {!isCollapsed && <span>Log Out</span>}
           </button>
         </div>
       </aside>
@@ -191,13 +241,38 @@ export default function AdminLayout() {
             </form>
 
             <div className="admin-header-actions">
-              <div className="admin-header-shortcuts">
-                {QUICK_CREATE_LINKS.map((item) => (
-                  <Link key={item.to} to={item.to} className="admin-quick-action-link">
-                    <CirclePlus size={16} />
-                    {item.label}
-                  </Link>
-                ))}
+              <div
+                ref={createRef}
+                className={`admin-topbar-create-dock ${createOpen ? "is-open" : ""}`}
+                onMouseEnter={() => setCreateOpen(true)}
+                onMouseLeave={() => setCreateOpen(false)}
+              >
+                <button
+                  type="button"
+                  className="admin-topbar-create-btn"
+                  aria-haspopup="menu"
+                  aria-expanded={createOpen}
+                  aria-label="Create content"
+                  title="Create content"
+                  onClick={() => setCreateOpen((prev) => !prev)}
+                >
+                  <CirclePlus size={20} />
+                </button>
+
+                <div className="admin-topbar-create-menu" role="menu" aria-label="Create options">
+                  {QUICK_CREATE_LINKS.map((item) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className="admin-topbar-create-option"
+                      role="menuitem"
+                      onClick={() => setCreateOpen(false)}
+                    >
+                      <CirclePlus size={14} />
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
 
               <div className="admin-utility-group">

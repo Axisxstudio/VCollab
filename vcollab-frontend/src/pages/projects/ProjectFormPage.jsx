@@ -15,7 +15,9 @@ import {
   PlusCircle, 
   Save, 
   Tag,
-  Target
+  Target,
+  Youtube,
+  BookOpen
 } from "lucide-react";
 import CategorySelect from "../../components/category/CategorySelect";
 import RichTextEditor from "../../components/forms/RichTextEditor";
@@ -31,7 +33,10 @@ const schema = z.object({
   tags: z.string().optional(),
   techStack: z.string().optional(),
   githubUrl: z.string().url().optional().or(z.literal("")),
-  demoUrl: z.string().url().optional().or(z.literal(""))
+  demoUrl: z.string().url().optional().or(z.literal("")),
+  youtubeUrl: z.string().url().optional().or(z.literal("")),
+  pdfUrl: z.string().optional().or(z.literal("")),
+  courseUrl: z.string().url().optional().or(z.literal(""))
 });
 
 export default function ProjectFormPage() {
@@ -41,6 +46,7 @@ export default function ProjectFormPage() {
   const [categoryId, setCategoryId] = useState(null);
   const [mediaItems, setMediaItems] = useState([]);
   const [thumbnailItems, setThumbnailItems] = useState([]);
+  const [pdfItems, setPdfItems] = useState([]);
   const [targeting, setTargeting] = useState({ targetType: "ALL" });
 
   const { data } = useQuery({
@@ -65,7 +71,10 @@ export default function ProjectFormPage() {
       tags: "",
       techStack: "",
       githubUrl: "",
-      demoUrl: ""
+      demoUrl: "",
+      youtubeUrl: "",
+      pdfUrl: "",
+      courseUrl: ""
     }
   });
 
@@ -81,6 +90,11 @@ export default function ProjectFormPage() {
         ? [{ url: data.thumbnail, mediaType: "IMAGE", fileName: "Project cover", sortOrder: 0 }]
         : []
     );
+    setPdfItems(
+      data.pdfUrl
+        ? [{ url: data.pdfUrl, mediaType: "DOCUMENT", fileName: "Project resource", sortOrder: 0 }]
+        : []
+    );
     reset({
       title: data.title || "",
       shortDesc: data.shortDesc || "",
@@ -88,7 +102,10 @@ export default function ProjectFormPage() {
       tags: (data.tags || []).join(", "),
       techStack: (data.techStack || []).join(", "),
       githubUrl: data.githubUrl || "",
-      demoUrl: data.demoUrl || ""
+      demoUrl: data.demoUrl || "",
+      youtubeUrl: data.youtubeUrl || "",
+      pdfUrl: data.pdfUrl || "",
+      courseUrl: data.courseUrl || ""
     });
 
     // Fetch targeting
@@ -108,6 +125,7 @@ export default function ProjectFormPage() {
         tags: values.tags ? values.tags.split(",").map((item) => item.trim()).filter(Boolean) : [],
         techStack: values.techStack ? values.techStack.split(",").map((item) => item.trim()).filter(Boolean) : [],
         thumbnail: thumbnailItems[0]?.url || "",
+        pdfUrl: pdfItems[0]?.url || "",
         media: mediaItems.map(item => ({
           url: item.url,
           mediaType: item.mediaType,
@@ -151,12 +169,26 @@ export default function ProjectFormPage() {
   };
 
   const fullDesc = watch("fullDesc");
+  const youtubeUrl = watch("youtubeUrl");
+
+  const getYoutubeId = (url) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const youtubeId = getYoutubeId(youtubeUrl);
 
   return (
     <div className="card">
-      <div className="workspace-brand" style={{ marginBottom: "24px" }}>
-        <h2 style={{ margin: 0 }}>{isEdit ? "Edit Project" : "Create New Project"}</h2>
-        <p style={{ margin: 0, opacity: 0.7 }}>Define your project goals, technical tools, and showcase media.</p>
+      <div className="workspace-brand" style={{ 
+        marginBottom: "32px", 
+        borderLeft: "4px solid #22c55e",
+        paddingLeft: "20px"
+      }}>
+        <h2 style={{ margin: 0, color: "#166534" }}>{isEdit ? "Refine Project Details" : "Create New Project"}</h2>
+        <p style={{ margin: "4px 0 0", color: "#15803d", opacity: 0.9 }}>Publish your technical innovations and learning materials to the VCollab community.</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit, onFormError)} className="form">
@@ -247,7 +279,7 @@ export default function ProjectFormPage() {
 
         <div className="form-section">
           <div className="form-section-title">
-            <ExternalLink size={18} /> Project Links
+            <ExternalLink size={18} /> Project Links & Resources
           </div>
           
           <div className="form-grid-2">
@@ -264,6 +296,58 @@ export default function ProjectFormPage() {
               <div className="input-icon-group">
                 <ExternalLink size={18} />
                 <input type="url" {...register("demoUrl")} placeholder="https://project-demo.com" />
+              </div>
+            </label>
+          </div>
+
+          <div className="form-grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px", marginTop: "16px" }}>
+            <label>
+              YouTube Video
+              <div className="input-icon-group">
+                <Youtube size={18} />
+                <input type="url" {...register("youtubeUrl")} placeholder="https://youtube.com/watch?v=..." />
+              </div>
+              {youtubeId && (
+                <div className="youtube-preview-box" style={{ 
+                  marginTop: "12px", 
+                  borderRadius: "12px", 
+                  overflow: "hidden", 
+                  background: "#000",
+                  aspectRatio: "16/9",
+                  position: "relative"
+                }}>
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${youtubeId}`}
+                    title="YouTube video player"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              )}
+            </label>
+
+            <label style={{ gridColumn: "span 2" }}>
+              PDF Resource (Upload)
+              <MediaUploadManager
+                context="project"
+                items={pdfItems}
+                onChange={setPdfItems}
+                multiple={false}
+                accept=".pdf,application/pdf"
+                buttonLabel="Upload PDF"
+                compact
+                emptyLabel="No PDF uploaded."
+              />
+            </label>
+
+            <label>
+              Course Material
+              <div className="input-icon-group">
+                <BookOpen size={18} />
+                <input type="url" {...register("courseUrl")} placeholder="Course Link" />
               </div>
             </label>
           </div>

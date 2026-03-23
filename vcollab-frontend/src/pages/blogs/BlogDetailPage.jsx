@@ -13,6 +13,7 @@ import { buildShareUrl } from "../../utils/discovery";
 import { useAuthStore } from "../../store/authStore";
 import useFeedUpdates from "../../websocket/useFeedUpdates";
 import { formatTimeAgo } from "../../utils/date";
+import SEO from "../../components/seo/SEO";
 
 const getAvatarContent = (author) => {
   if (author?.profileImage) {
@@ -76,6 +77,12 @@ export default function BlogDetailPage() {
 
   return (
     <div className="section detail-page-shell">
+      <SEO 
+        title={data.title} 
+        description={data.content?.substring(0, 160) || `Read ${data.title} on VCollab.`} 
+        keywords={data.tags?.join(", ")}
+        image={galleryItems[0]?.url || "/VCollab_hero.png"}
+      />
       <div className="card detail-page-card">
         <div className="detail-page-header">
           <div className="detail-page-header-top">

@@ -1,4 +1,10 @@
 /* Registration Enhancements */
+.password-strength-container {
+  display: grid;
+  gap: 6px;
+  padding: 4px 2px 0;
+}
+
 .input-status {
   display: flex;
   align-items: center;
@@ -73,4 +79,16 @@
 
 @keyframes spin {
   to { transform: translateY(-50%) rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+  .password-strength-container {
+    gap: 8px;
+  }
+
+  .password-strength-text {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
 }

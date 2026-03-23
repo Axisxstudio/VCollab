@@ -56,6 +56,17 @@ public class Notification extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String message;
 
+    @Column(name = "action_url", length = 512)
+    private String actionUrl;
+
+    @Column(columnDefinition = "TEXT")
+    private String metadata;
+
+    @Builder.Default
+    @Column(name = "grouped_count", nullable = false)
+    private int groupedCount = 1;
+
+    @Builder.Default
     @Column(name = "is_read", nullable = false)
     private boolean read = false;
 

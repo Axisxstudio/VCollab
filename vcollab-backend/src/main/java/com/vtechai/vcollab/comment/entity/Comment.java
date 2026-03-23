@@ -50,6 +50,20 @@ public class Comment extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "image_url", length = 1024)
+    private String imageUrl;
+
+    @Builder.Default
+    @Column(name = "like_count", nullable = false)
+    private int likeCount = 0;
+
+    @Column(name = "edited_at")
+    private java.time.Instant editedAt;
+
+    @Column(name = "mention_targets", columnDefinition = "JSON")
+    private String mentionTargets;
+
+    @Builder.Default
     @Column(name = "is_active", nullable = false)
     private boolean active = true;
 }

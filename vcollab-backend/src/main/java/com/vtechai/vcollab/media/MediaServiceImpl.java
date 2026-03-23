@@ -23,8 +23,12 @@ public class MediaServiceImpl implements MediaService {
     private static final Set<String> VIDEO_TYPES = Set.of(
         "video/mp4", "video/webm"
     );
+    private static final Set<String> DOCUMENT_TYPES = Set.of(
+        "application/pdf"
+    );
     private static final long MAX_IMAGE_BYTES = 10 * 1024 * 1024;
     private static final long MAX_VIDEO_BYTES = 200 * 1024 * 1024;
+    private static final long MAX_DOCUMENT_BYTES = 100 * 1024 * 1024;
 
     @Value("${app.media.upload-dir}")
     private String uploadDir;
@@ -52,6 +56,14 @@ public class MediaServiceImpl implements MediaService {
             }
             if (file.getSize() > MAX_VIDEO_BYTES) {
                 throw new IllegalArgumentException("Video too large");
+            }
+        }
+        if (mediaType == MediaType.DOCUMENT) {
+            if (contentType == null || !DOCUMENT_TYPES.contains(contentType)) {
+                throw new IllegalArgumentException("Invalid document type");
+            }
+            if (file.getSize() > MAX_DOCUMENT_BYTES) {
+                throw new IllegalArgumentException("Document too large");
             }
         }
 

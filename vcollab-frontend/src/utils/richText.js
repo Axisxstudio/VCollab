@@ -14,7 +14,13 @@ const ALLOWED_TAGS = new Set([
   "div",
   "a",
   "font",
-  "blockquote"
+  "blockquote",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6"
 ]);
 
 const ALLOWED_STYLE_PROPERTIES = new Set([
@@ -129,6 +135,11 @@ function sanitizeElement(element) {
       } else {
         element.removeAttribute("style");
       }
+      return;
+    }
+
+    if (name === "class") {
+      element.setAttribute("class", value);
       return;
     }
 
