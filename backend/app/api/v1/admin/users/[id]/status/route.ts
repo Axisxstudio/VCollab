@@ -1,0 +1,4 @@
+import { routeJson } from "@/server/http/route";
+import { idFrom, updateAdminUser } from "@/server/social-admin/service";
+type Context = { params: Promise<{ id: string }> };
+export async function PATCH(request: Request, context: Context) { return routeJson(async () => { const { id } = await context.params; return { message: "User updated", data: await updateAdminUser(request, idFrom(id, "user"), await request.json()) }; }); }

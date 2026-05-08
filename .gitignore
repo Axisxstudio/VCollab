@@ -12,6 +12,16 @@ __codex_tmp/
 
 vcollab-frontend/node_modules/
 vcollab-frontend/dist/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+apps/*/node_modules/
+apps/*/.next/
+apps/*/out/
+backend/node_modules/
+backend/.next/
+backend/out/
 
 vcollab-backend/target/
 
