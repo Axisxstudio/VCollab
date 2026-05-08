@@ -1,31 +1,49 @@
-.vscode/
-.edge-headless/
-__codex_tmp/
+# Next.js
+.next/
+out/
 
+# Vite
+dist/
+.vite/
+
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+.env.*.local
+
+# Logs
 *.log
 *.out
 *.err
+next-dev.err.log
+next-dev.out.log
+frontend_run.log
+frontend_install.log
+frontend_launcher.log
+frontend_run_*.log
 
-.env
-.env.local
-.env.*.local
+# Editor/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
 
-vcollab-frontend/node_modules/
-vcollab-frontend/dist/
-frontend/node_modules/
-frontend/dist/
-frontend/.vite/
-
-apps/*/node_modules/
-apps/*/.next/
-apps/*/out/
-backend/node_modules/
-backend/.next/
-backend/out/
-
-vcollab-backend/target/
-
+# Project specific
+vcollab-frontend/
+vcollab-backend/
+__codex_tmp/
+.edge-headless/
 codex-run-frontend.ps1
 codex-run-backend.ps1
 edge-dom.html
 detached-start-test.txt
+
+# Media / Assets (already committed ones should be kept, but avoid new large ones)
+*.png.tmp
+*.jpg.tmp
