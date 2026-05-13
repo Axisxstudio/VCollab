@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "seed:super-admin": "node scripts/ensure-super-admin.mjs"
+    "seed:super-admin": "node scripts/ensure-super-admin.mjs",
+    "vercel-build": "npm run build:frontend && npm run build:backend"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

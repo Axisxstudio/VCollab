@@ -2,20 +2,24 @@
 .next/
 out/
 
-# Vite
-dist/
+# Vite dev cache
 .vite/
+
+# Frontend build artifacts (DO NOT ignore public/ - Vite builds there for Vercel)
+frontend/dist/
 
 # Dependencies
 node_modules/
-package-lock.json
+frontend/node_modules/
 
-# Environment variables
+# Environment variables (keep .env.example committed)
 .env
 .env.local
 .env.production
 .env.development
 .env.*.local
+frontend/.env
+frontend/.env.local
 
 # Logs
 *.log
@@ -23,10 +27,11 @@ package-lock.json
 *.err
 next-dev.err.log
 next-dev.out.log
-frontend_run.log
-frontend_install.log
-frontend_launcher.log
-frontend_run_*.log
+frontend/frontend_run.log
+frontend/frontend_install.log
+frontend/frontend_launcher.log
+frontend/frontend_live.err.log
+frontend/frontend_run_*.log
 
 # Editor/OS
 .vscode/
@@ -44,6 +49,7 @@ codex-run-backend.ps1
 edge-dom.html
 detached-start-test.txt
 
-# Media / Assets (already committed ones should be kept, but avoid new large ones)
+# Large media files (avoid committing new ones)
 *.png.tmp
 *.jpg.tmp
+tsconfig.tsbuildinfo
