@@ -188,7 +188,6 @@ export default function ProjectFormPage() {
         paddingLeft: "20px"
       }}>
         <h2 style={{ margin: 0, color: "#166534" }}>{isEdit ? "Refine Project Details" : "Create New Project"}</h2>
-        <p style={{ margin: "4px 0 0", color: "#15803d", opacity: 0.9 }}>Publish your technical innovations and learning materials to the VCollab community.</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit, onFormError)} className="form">

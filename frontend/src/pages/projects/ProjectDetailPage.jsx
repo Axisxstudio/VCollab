@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -11,13 +11,11 @@ import {
   Globe,
   Heart,
   LayoutDashboard,
-  LockKeyhole,
   Mail,
   MessageCircle,
   Power,
   Share2,
   User,
-  UserRound,
   Youtube,
   BookOpen,
   FileText
@@ -25,7 +23,6 @@ import {
 import ContactOwnerModal from "../../components/messaging/ContactOwnerModal";
 import MediaGallery from "../../components/media/MediaGallery";
 import { getProject, deleteProject } from "../../services/project.service";
-import { createProjectRequest } from "../../services/projectrequest.service";
 import { useAuthStore } from "../../store/authStore";
 import ContentActions from "../../components/interactions/ContentActions";
 import CommentThread from "../../components/comments/CommentThread";
@@ -36,17 +33,7 @@ import { buildProjectGalleryItems, getContentDetailPath } from "../../utils/cont
 import { buildShareUrl } from "../../utils/discovery";
 import { formatTimeAgo } from "../../utils/date";
 import useFeedUpdates from "../../websocket/useFeedUpdates";
-import ShareModal from "../../components/interactions/ShareModal"; // Assuming ShareModal is also needed based on the state variable
 import SEO from "../../components/seo/SEO";
-
-const getAvatarContent = (author) => {
-  if (author?.profileImage) {
-    return <img src={author.profileImage} alt={author.fullName || author.username} className="detail-page-avatar" />;
-  }
-  return <div className="detail-page-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'var(--color-primary)', fontWeight: 'bold' }}>{(author?.fullName || author?.username || "V").charAt(0).toUpperCase()}</div>;
-};
-
-
 
 export default function ProjectDetailPage() {
   const { id } = useParams();
@@ -58,10 +45,7 @@ export default function ProjectDetailPage() {
     queryKey: ["project", id],
     queryFn: () => getProject(id)
   });
-  const [requestMessage, setRequestMessage] = useState("");
   const [isContactOpen, setIsContactOpen] = useState(false);
-  const [isShareOpen, setIsShareOpen] = useState(false);
-  const [requestNote, setRequestNote] = useState("");
 
   useFeedUpdates({
     contentType: "PROJECT",
@@ -72,25 +56,6 @@ export default function ProjectDetailPage() {
       ["comments", "PROJECT", id]
     ]
   });
-
-  const handleRequest = async () => {
-    if (!isAuthenticated || requesting) return;
-    setRequesting(true);
-    setRequestNote("");
-    try {
-      await createProjectRequest({
-        projectId: id,
-        message: requestMessage.trim()
-      });
-      setRequestMessage("");
-      setRequestNote("Request sent to the project owner.");
-    } catch (error) {
-      const message = error?.response?.data?.message || "Unable to send request.";
-      setRequestNote(message);
-    } finally {
-      setRequesting(false);
-    }
-  };
 
   const handleDelete = async () => {
     const confirmed = window.confirm("Delete this project? This action will remove it from the active platform view.");
@@ -113,14 +78,10 @@ export default function ProjectDetailPage() {
   const isOwner = currentUser?.id && data.owner?.id === currentUser.id;
   const galleryItems = buildProjectGalleryItems(data);
   const detailPath = getContentDetailPath("PROJECT", id);
-  const profilePath = data.owner?.username ? routes.profile.replace(":username", data.owner.username) : routes.home;
-  const landingProjectsHref = `${routes.landing}#projects`;
   const interactionsDisabled = !isAuthenticated || data.active === false;
   const interactionDisabledReason = !isAuthenticated
     ? "Sign in to like, save, share, report, and comment on this project."
     : "This project is inactive right now.";
-  const hasProtectedResources = Boolean(data.githubUrl || data.demoUrl || data.hasGithubUrl || data.hasDemoUrl);
-
   const getYoutubeId = (url) => {
     if (!url) return null;
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -130,13 +91,6 @@ export default function ProjectDetailPage() {
 
   const youtubeId = getYoutubeId(data.youtubeUrl);
   const contactContext = `Project: ${data.title}`;
-
-  const authorLabel = (
-    <>
-      {getAvatarContent(data.owner)}
-      <span>{data.owner?.fullName || data.owner?.username || "VCollab member"}</span>
-    </>
-  );
 
   return (
     <div className="stellar-seamless-wrapper">
@@ -149,9 +103,13 @@ export default function ProjectDetailPage() {
       <div className="stellar-content-shell">
         {/* Breadcrumbs & Header */}
         <div className="stellar-hero-head">
+          <button type="button" className="stellar-back-btn" onClick={() => navigate(routes.projects)}>
+            <ArrowLeft size={16} />
+            <span>Projects</span>
+          </button>
           <div className="stellar-mini-breadcrumbs">
              <span>PROJECT</span>
-             <span className="stellar-sep">•</span>
+             <span className="stellar-sep">/</span>
              <span>{data.category?.name?.toUpperCase() || "GENERAL"}</span>
           </div>
           <h1 className="stellar-main-title">{data.title}</h1>
@@ -202,6 +160,14 @@ export default function ProjectDetailPage() {
                     <span>{data.shareCount || 0}</span>
                  </div>
               </div>
+
+              {isOwner && (
+                <OwnerContentControls
+                  editPath={routes.projectEdit.replace(":id", id)}
+                  onDelete={handleDelete}
+                  deleteLabel="Delete project"
+                />
+              )}
             </div>
 
             <div className="stellar-section-flat">
@@ -287,7 +253,7 @@ export default function ProjectDetailPage() {
                 <h3 className="stellar-section-label"><BookOpen size={16} /> Study Materials & Resources</h3>
                 <div className="stellar-section-content">
                   {youtubeId && (
-                    <div style={{ marginBottom: "20px", borderRadius: "16px", overflow: "hidden", background: "#000", aspectRatio: "16/9", maxWidth: "480px" }}>
+                    <div className="stellar-video-embed">
                       <iframe
                         width="100%"
                         height="100%"
@@ -299,7 +265,7 @@ export default function ProjectDetailPage() {
                       />
                     </div>
                   )}
-                  <div style={{ display: "flex", gap: "20px", marginTop: "10px", alignItems: "center" }}>
+                  <div className="stellar-resource-row">
                     {data.youtubeUrl && (
                       <a 
                         href={data.youtubeUrl} 
@@ -387,3 +353,4 @@ export default function ProjectDetailPage() {
     </div>
   );
 }
+

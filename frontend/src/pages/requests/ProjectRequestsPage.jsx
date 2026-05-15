@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Clock3, Inbox, SendHorizontal } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -68,6 +68,7 @@ function RequestCard({ request, direction, onStatus }) {
 
 export default function ProjectRequestsPage() {
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState("received");
 
   const { data: sent = [], isLoading: loadingSent } = useQuery({
     queryKey: ["project-requests", "sent"],
@@ -92,14 +93,11 @@ export default function ProjectRequestsPage() {
   };
 
   return (
-    <div className="collab-page">
+    <div className="collab-page project-requests-page">
       <section className="collab-page__hero">
         <div>
           <span className="collab-page__eyebrow">VCollab Workflow</span>
           <h2 className="collab-page__title">Project Requests</h2>
-          <p className="collab-page__subtitle">
-            Manage your collaborations seamlessly. Approve or reject incoming requests and track your sent invitations.
-          </p>
         </div>
       </section>
 
@@ -122,12 +120,34 @@ export default function ProjectRequestsPage() {
           <span className="collab-stat-card__icon"><Clock3 size={18} /></span>
           <div>
             <strong>{summary.pending}</strong>
-            <span>Pending decisions</span>
+            <span>Pending</span>
           </div>
         </article>
       </section>
 
-      <div className="requests-board">
+      <div className="request-toggle" role="tablist" aria-label="Project request views">
+        <button
+          type="button"
+          className={`request-toggle__button ${activeTab === "received" ? "active" : ""}`}
+          onClick={() => setActiveTab("received")}
+          role="tab"
+          aria-selected={activeTab === "received"}
+        >
+          Received
+        </button>
+        <button
+          type="button"
+          className={`request-toggle__button ${activeTab === "sent" ? "active" : ""}`}
+          onClick={() => setActiveTab("sent")}
+          role="tab"
+          aria-selected={activeTab === "sent"}
+        >
+          Sent
+        </button>
+      </div>
+
+      <div className="requests-board requests-board--toggle">
+        {activeTab === "received" && (
         <section className="collab-surface">
           <div className="collab-surface__header">
             <div>
@@ -159,7 +179,9 @@ export default function ProjectRequestsPage() {
             </div>
           )}
         </section>
+        )}
 
+        {activeTab === "sent" && (
         <section className="collab-surface">
           <div className="collab-surface__header">
             <div>
@@ -186,6 +208,7 @@ export default function ProjectRequestsPage() {
             </div>
           )}
         </section>
+        )}
       </div>
     </div>
   );

@@ -107,18 +107,12 @@ export default function PostListPage() {
     : `${totalElements} post${totalElements === 1 ? "" : "s"} found`;
 
   return (
-    <div className="section">
+    <div className="section post-list-page">
       <div className="project-actions" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px", marginBottom: "24px", flexWrap: "wrap" }}>
         <div>
           <h2 style={{ fontSize: "2rem", fontWeight: "900", marginBottom: "4px" }}>Social Hub</h2>
           <p className="profile-meta">Share quick updates, ideas, and announcements with the community.</p>
         </div>
-        <HoverActionPill
-          icon={Plus}
-          label="Create Post"
-          to={routes.postCreate}
-          variant="primary"
-        />
       </div>
 
       <DiscoveryToolbar
@@ -155,6 +149,14 @@ export default function PostListPage() {
             onToggle={() => { setShowSchool((current) => !current); setPage(0); }}
           />
         </div>
+        <HoverActionPill
+          icon={Plus}
+          label="Create Post"
+          to={routes.postCreate}
+          variant="primary"
+          mobileIconOnly={true}
+          className="content-create-action"
+        />
       </div>
 
       <div className="discovery-results-header">

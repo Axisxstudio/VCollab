@@ -45,5 +45,6 @@ export const routes = {
   adminAuditLogs: "/admin/audit-logs",
   adminExports: "/admin/exports",
   adminVHub: "/admin/v-hub",
-  settings: "/settings"
+  settings: "/settings",
+  settingsPanel: "/settings/:panel"
 };

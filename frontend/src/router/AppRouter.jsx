@@ -102,6 +102,7 @@ export default function AppRouter() {
           <Route path={routes.resourceManage} element={<ResourceManagePage />} />
           <Route path={routes.warnings} element={<WarningsPage />} />
           <Route path={routes.settings} element={<SettingsPage />} />
+          <Route path={routes.settingsPanel} element={<SettingsPage />} />
         </Route>
       </Route>
 

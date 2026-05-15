@@ -109,19 +109,12 @@ export default function ProjectListPage() {
     : `${totalElements} project${totalElements === 1 ? "" : "s"} found`;
 
   return (
-    <div className="section">
+    <div className="section project-list-page">
       <div className="project-actions" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
         <div>
           <h2>Projects Pipeline</h2>
           <p className="profile-meta">Monitor development cycles and explore community contributions.</p>
         </div>
-        <HoverActionPill
-          icon={Plus}
-          label="Create Project"
-          to={routes.projectCreate}
-          variant="primary"
-          mobileIconOnly={true}
-        />
       </div>
 
       <DiscoveryToolbar
@@ -158,6 +151,14 @@ export default function ProjectListPage() {
             onToggle={() => { setShowSchool((current) => !current); setPage(0); }}
           />
         </div>
+        <HoverActionPill
+          icon={Plus}
+          label="Create Project"
+          to={routes.projectCreate}
+          variant="primary"
+          mobileIconOnly={true}
+          className="project-create-action"
+        />
       </div>
 
       <div className="discovery-results-header">

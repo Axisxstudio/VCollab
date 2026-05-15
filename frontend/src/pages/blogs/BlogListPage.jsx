@@ -107,18 +107,12 @@ export default function BlogListPage() {
     : `${totalElements} blog${totalElements === 1 ? "" : "s"} found`;
 
   return (
-    <div className="section">
+    <div className="section blog-list-page">
       <div className="project-actions" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px", marginBottom: "24px", flexWrap: "wrap" }}>
         <div>
           <h2 style={{ fontSize: "2rem", fontWeight: "900", marginBottom: "4px" }}>Insights & Stories</h2>
           <p className="profile-meta">Longer-form insights, tutorials, and academic project stories.</p>
         </div>
-        <HoverActionPill
-          icon={Plus}
-          label="Write Blog"
-          to={routes.blogCreate}
-          variant="primary"
-        />
       </div>
 
       <DiscoveryToolbar
@@ -155,6 +149,14 @@ export default function BlogListPage() {
             onToggle={() => { setShowSchool((current) => !current); setPage(0); }}
           />
         </div>
+        <HoverActionPill
+          icon={Plus}
+          label="Write Blog"
+          to={routes.blogCreate}
+          variant="primary"
+          mobileIconOnly={true}
+          className="content-create-action"
+        />
       </div>
 
       <div className="discovery-results-header">
