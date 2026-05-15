@@ -407,7 +407,11 @@
     align-items: flex-start;
   }
 
-  .profile-summary-grid,
+  .profile-summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  
   .about-grid,
   .connection-grid {
     grid-template-columns: 1fr;
@@ -422,13 +426,15 @@
 
 /* Profile Edit Icon */
 .profile-edit-icon {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
   width: 40px;
   height: 40px;
   background: #f0f2f5;
   border: none;
   color: #050505;
-  margin-top: -10px;
-  /* Aligns with top right text edge depending on height */
+  z-index: 10;
 }
 
 .profile-edit-icon:hover {

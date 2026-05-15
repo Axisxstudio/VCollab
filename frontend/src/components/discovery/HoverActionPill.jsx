@@ -8,13 +8,15 @@ export default function HoverActionPill({
   active = false,
   variant = "neutral",
   title,
-  className = ""
+  className = "",
+  mobileIconOnly = false
 }) {
   const Component = to ? Link : "button";
   const classes = [
     "discovery-hover-action",
     active ? "is-active" : "",
     variant === "primary" ? "is-primary" : "",
+    mobileIconOnly ? "mobile-icon-only" : "",
     className
   ].filter(Boolean).join(" ");
 

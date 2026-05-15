@@ -15,7 +15,8 @@ import {
   User,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Menu
 } from "lucide-react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -65,6 +66,7 @@ export default function MainLayout() {
     return localStorage.getItem("sidebarCollapsed") === "true";
   });
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -122,13 +124,13 @@ export default function MainLayout() {
 
   return (
     <div className={`workspace-shell ${isCollapsed ? "sidebar-collapsed" : ""}`}>
-      <aside className={`workspace-sidebar ${isCollapsed ? "collapsed" : ""}`}>
+      <aside className={`workspace-sidebar ${isCollapsed ? "collapsed" : ""} ${isMobileOpen ? "mobile-open" : ""}`}>
         <div className="workspace-sidebar-header">
           <Link to={routes.home} className="workspace-brand">
             <div className="sidebar-brand-glow">
               <img src={logoImg} alt="VCollab" className="workspace-brand-logo" />
             </div>
-            {!isCollapsed && (
+            {(!isCollapsed || isMobileOpen) && (
               <div className="sidebar-brand-copy">
                 <span className="workspace-brand-text">VCollab</span>
                 <span className="workspace-brand-tagline">Premium Workspace</span>
@@ -137,21 +139,25 @@ export default function MainLayout() {
           </Link>
           <button 
             type="button" 
-            className="sidebar-toggle-btn" 
+            className="sidebar-toggle-btn desktop-toggle-btn" 
             onClick={toggleSidebar}
             title={isCollapsed ? "Expand" : "Collapse"}
           >
             {isCollapsed ? <ChevronRight size={16} strokeWidth={2.5} /> : <ChevronLeft size={16} strokeWidth={2.5} />}
           </button>
+          {isMobileOpen && (
+            <button 
+              type="button" 
+              className="sidebar-toggle-btn mobile-close-btn" 
+              onClick={() => setIsMobileOpen(false)}
+              style={{ display: 'flex', marginLeft: 'auto' }}
+            >
+              <X size={20} strokeWidth={2.5} />
+            </button>
+          )}
         </div>
 
-        {!isCollapsed && (
-          <div className="sidebar-search-trigger" onClick={() => setSearchExpanded(true)}>
-            <Search size={16} />
-            <span>Search workspace...</span>
-            <kbd className="kb-shortcut">⌘K</kbd>
-          </div>
-        )}
+
 
         <nav className="workspace-nav">
           {APP_LINKS.map((item) => {
@@ -163,13 +169,14 @@ export default function MainLayout() {
                 end={item.end}
                 className={({ isActive }) => `workspace-nav-link ${isActive ? "active" : ""}`}
                 title={isCollapsed ? item.label : ""}
+                onClick={() => setIsMobileOpen(false)}
               >
                 {({ isActive }) => (
                   <>
                     <div className="nav-icon-wrapper">
                       <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
                     </div>
-                    {!isCollapsed && <span className="nav-label">{item.label}</span>}
+                    {(!isCollapsed || isMobileOpen) && <span className="nav-label">{item.label}</span>}
                   </>
                 )}
               </NavLink>
@@ -181,13 +188,14 @@ export default function MainLayout() {
               to={routes.adminDashboard} 
               className={({ isActive }) => `workspace-nav-link ${isActive ? "active" : ""}`}
               title={isCollapsed ? "Admin Console" : ""}
+              onClick={() => setIsMobileOpen(false)}
             >
               {({ isActive }) => (
                 <>
                   <div className="nav-icon-wrapper">
                     <LayoutDashboard size={24} strokeWidth={isActive ? 2.5 : 2} />
                   </div>
-                  {!isCollapsed && <span className="nav-label">Admin Console</span>}
+                  {(!isCollapsed || isMobileOpen) && <span className="nav-label">Admin Console</span>}
                 </>
               )}
             </NavLink>
@@ -195,8 +203,8 @@ export default function MainLayout() {
         </nav>
 
         <div className="workspace-sidebar-footer">
-          {!isCollapsed ? (
-            <Link to={profilePath} className="sidebar-user-glass-card">
+          {(!isCollapsed || isMobileOpen) ? (
+            <Link to={profilePath} className="sidebar-user-glass-card" onClick={() => setIsMobileOpen(false)}>
               <div className="user-glass-avatar">
                 {user?.profileImage ? (
                   <img src={user.profileImage} alt="Profile" />
@@ -214,6 +222,7 @@ export default function MainLayout() {
               to={profilePath} 
               className={({ isActive }) => `workspace-nav-link more-link ${isActive ? "active" : ""}`}
               title="Profile"
+              onClick={() => setIsMobileOpen(false)}
             >
               <div className="nav-icon-wrapper profile-avatar-mini">
                 {user?.profileImage ? (
@@ -227,11 +236,22 @@ export default function MainLayout() {
         </div>
       </aside>
 
+      {isMobileOpen && (
+        <div className="mobile-overlay mobile-open" onClick={() => setIsMobileOpen(false)} />
+      )}
+
       <div className="workspace-main">
         <header className="workspace-topbar">
+          <button 
+            className="mobile-menu-btn" 
+            onClick={() => setIsMobileOpen(prev => !prev)}
+            aria-label="Toggle menu"
+          >
+            <Menu size={24} />
+          </button>
           <div className="workspace-topbar-copy">
             <span className="workspace-eyebrow">Signed-in workspace</span>
-            <h2>Welcome back, {user?.fullName || user?.username || "collaborator"}</h2>
+            <h2>Welcome back, <span className="user-name-gradient">{user?.fullName || user?.username || "collaborator"}</span></h2>
             <p>Manage resources, projects, posts, blogs, requests, and conversations from one professional side navigation.</p>
           </div>
           <div className="workspace-top-actions">
@@ -257,6 +277,20 @@ export default function MainLayout() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearchSubmit}
               />
+
+              {searchExpanded && (
+                <button 
+                  type="button"
+                  className="search-close-trigger"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSearchQuery("");
+                    setSearchExpanded(false);
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              )}
 
               {searchQuery && (
                 <button 

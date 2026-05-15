@@ -398,7 +398,6 @@ export default function ResourceManagePage() {
                   <Icon size={18} />
                   <div className="rm2-nav-item__copy">
                     <strong>{item.label}</strong>
-                    <small>{item.description}</small>
                   </div>
                   {isActive && <span className="rm2-nav-item__dot" />}
                 </button>
@@ -441,8 +440,8 @@ export default function ResourceManagePage() {
                   <button type="button" className="rm2-btn rm2-btn--primary" onClick={() => setIsUploadModalOpen(true)}>
                     <Wand2 size={16} /> Start Upload Wizard
                   </button>
-                  <button type="button" className="rm2-btn rm2-btn--ghost" onClick={() => setActiveContainer("libraries")}>
-                    <FolderTree size={16} /> Open My Libraries
+                  <button type="button" className="rm2-btn rm2-btn--ghost rm2-btn--icon-mobile" onClick={() => setActiveContainer("libraries")}>
+                    <FolderTree size={16} /> <span>Open My Libraries</span>
                   </button>
                 </div>
               </div>

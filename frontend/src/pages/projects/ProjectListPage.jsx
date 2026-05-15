@@ -110,9 +110,9 @@ export default function ProjectListPage() {
 
   return (
     <div className="section">
-      <div className="project-actions" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "16px", marginBottom: "24px", flexWrap: "wrap" }}>
+      <div className="project-actions" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
         <div>
-          <h2 style={{ fontSize: "2rem", fontWeight: "900", marginBottom: "4px" }}>Projects Pipeline</h2>
+          <h2>Projects Pipeline</h2>
           <p className="profile-meta">Monitor development cycles and explore community contributions.</p>
         </div>
         <HoverActionPill
@@ -120,6 +120,7 @@ export default function ProjectListPage() {
           label="Create Project"
           to={routes.projectCreate}
           variant="primary"
+          mobileIconOnly={true}
         />
       </div>
 

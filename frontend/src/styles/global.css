@@ -2442,9 +2442,26 @@ input[type="reset"] {
     align-items: stretch;
   }
 
-  .feed-scope-switch,
-  .feed-summary-grid {
+  .feed-scope-switch {
     grid-template-columns: 1fr;
+  }
+
+  .feed-summary-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .feed-stat {
+    padding: 8px 6px;
+    gap: 2px;
+  }
+
+  .feed-stat strong {
+    font-size: 1.1rem;
+  }
+
+  .feed-stat span {
+    font-size: 0.7rem;
   }
 
   .feed-card-header {
@@ -2477,8 +2494,13 @@ input[type="reset"] {
   }
 
   .notification-dropdown {
-    width: min(100vw - 20px, 380px);
-    right: 0;
+    position: fixed !important;
+    left: 16px !important;
+    right: 16px !important;
+    top: 75px !important;
+    width: auto !important;
+    max-width: none !important;
+    transform: none !important;
   }
 
   .cta-actions,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { routes } from "../../config/routes";
 import { useQuery } from "@tanstack/react-query";
@@ -45,6 +45,44 @@ export default function ContributorSearchPanel() {
     });
   };
 
+  const gridRef = useRef(null);
+
+  // Auto-scroll logic for mobile carousel
+  useEffect(() => {
+    if (!gridRef.current || contributors.length <= 1) return;
+
+    let isMobile = window.innerWidth <= 900;
+    const handleResize = () => { isMobile = window.innerWidth <= 900; };
+    window.addEventListener("resize", handleResize);
+
+    const interval = setInterval(() => {
+      if (isMobile && gridRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = gridRef.current;
+        const cardWidth = gridRef.current.children[0]?.offsetWidth || 0;
+        
+        // If we've reached the end, snap back to start
+        if (scrollLeft + clientWidth >= scrollWidth - 10) {
+          gridRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          // Scroll to the next card
+          gridRef.current.scrollBy({ left: cardWidth + 16, behavior: 'smooth' }); // 16 is the gap
+        }
+      }
+    }, 4000); // Swipe every 4 seconds
+
+    // Pause auto-scroll on interaction
+    const handleTouchStart = () => clearInterval(interval);
+    gridRef.current.addEventListener('touchstart', handleTouchStart, { passive: true });
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("resize", handleResize);
+      if (gridRef.current) {
+        gridRef.current.removeEventListener('touchstart', handleTouchStart);
+      }
+    };
+  }, [contributors.length]);
+
   return (
     <section className="card" style={{ padding: '16px', background: 'transparent', border: 'none', boxShadow: 'none' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -63,7 +101,7 @@ export default function ContributorSearchPanel() {
           <p>Try a broader role filter or remove your search terms.</p>
         </div>
       ) : (
-        <div className="contributor-grid">
+        <div className="contributor-grid" ref={gridRef}>
           {contributors.map((contributor) => {
             const profilePath = getProfilePath(contributor.username);
             const avatarLabel = (contributor.fullName || contributor.username || "V")

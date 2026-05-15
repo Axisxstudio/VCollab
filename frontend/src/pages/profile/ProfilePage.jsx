@@ -154,9 +154,6 @@ export default function ProfilePage() {
   const tabs = [
     { key: "activity", label: "Discovery" },
     { key: "about", label: "About" },
-    { key: "projects", label: "Projects" },
-    { key: "posts", label: "Posts" },
-    { key: "blogs", label: "Blogs" },
     ...(isMe ? [{ key: "saved", label: "Saved" }] : []),
     { key: "connections", label: "Connections" }
   ];
@@ -437,6 +434,11 @@ export default function ProfilePage() {
           {data.coverImage && <img src={data.coverImage} alt={`${getDisplayName(data)} cover`} />}
           {!data.coverImage && <div className="profile-cover-placeholder" />}
           <div className="profile-role-badge">{formatRole(data.role)}</div>
+          {isMe && (
+            <Link to={routes.profileEdit} className="admin-icon-btn profile-edit-icon" title="Edit Profile">
+              <Pencil size={18} />
+            </Link>
+          )}
         </div>
 
         <div className="profile-hero-body">
@@ -477,11 +479,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="profile-top-actions">
-              {isMe ? (
-                <Link to={routes.profileEdit} className="admin-icon-btn profile-edit-icon" title="Edit Profile">
-                  <Pencil size={18} />
-                </Link>
-              ) : (
+              {!isMe && (
                 <div className="profile-actions">
                   <button className="btn-primary" type="button" onClick={handleFollow} disabled={followBusy}>
                     {followStatus?.following ? "Following" : "Follow"}
@@ -534,7 +532,10 @@ export default function ProfilePage() {
             background: "#f1f5f9",
             padding: "4px",
             borderRadius: "12px",
-            border: "1px solid #e2e8f0"
+            border: "1px solid #e2e8f0",
+            maxWidth: "100%",
+            overflowX: "auto",
+            WebkitOverflowScrolling: "touch"
           }}>
             {filterToggles.map((f) => (
               <button
@@ -550,6 +551,8 @@ export default function ProfilePage() {
                   fontSize: "0.85rem",
                   fontWeight: "600",
                   cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
                   background: contentFilter === f.id ? "#fff" : "transparent",
                   color: contentFilter === f.id ? "var(--color-primary)" : "#64748b",
                   boxShadow: contentFilter === f.id ? "0 4px 6px -1px rgba(0,0,0,0.1)" : "none",

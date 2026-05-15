@@ -22,7 +22,8 @@ import {
   TriangleAlert,
   Users,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Menu
 } from "lucide-react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import NotificationBell from "../components/notifications/NotificationBell";
@@ -88,6 +89,7 @@ export default function AdminLayout() {
   const [isCollapsed, setIsCollapsed] = useState(() => {
     return localStorage.getItem("sidebar-collapsed-admin") === "true";
   });
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const createRef = useRef(null);
 
@@ -146,8 +148,8 @@ export default function AdminLayout() {
 
   return (
     <div className={`workspace-shell admin-shell ${isCollapsed ? "sidebar-collapsed" : ""}`}>
-      <aside className={`admin-sidebar-pro ${isCollapsed ? "collapsed" : ""}`}>
-        <div className="sidebar-toggle-wrapper" style={{ marginBottom: "20px" }}>
+      <aside className={`admin-sidebar-pro ${isCollapsed ? "collapsed" : ""} ${isMobileOpen ? "mobile-open" : ""}`}>
+        <div className="sidebar-toggle-wrapper desktop-toggle-btn" style={{ marginBottom: "20px" }}>
           <button
             type="button"
             className="sidebar-toggle-btn admin-toggle-btn"
@@ -158,15 +160,27 @@ export default function AdminLayout() {
           </button>
         </div>
 
-        <Link to={routes.adminDashboard} className="workspace-brand-pro">
-          <img src={logoImg} alt="VCollab" className="admin-brand-logo" />
-          {!isCollapsed && (
-            <div className="brand-text-pro">
-              <strong>VCollab Admin</strong>
-              <span>Operations Console</span>
-            </div>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
+          <Link to={routes.adminDashboard} className="workspace-brand-pro" style={{ marginBottom: 0 }}>
+            <img src={logoImg} alt="VCollab" className="admin-brand-logo" />
+            {(!isCollapsed || isMobileOpen) && (
+              <div className="brand-text-pro">
+                <strong>VCollab Admin</strong>
+                <span>Operations Console</span>
+              </div>
+            )}
+          </Link>
+
+          {isMobileOpen && (
+            <button
+              type="button"
+              className="sidebar-toggle-btn admin-toggle-btn mobile-close-btn"
+              onClick={() => setIsMobileOpen(false)}
+            >
+              <X size={24} />
+            </button>
           )}
-        </Link>
+        </div>
 
         <Link to={getProfilePath(user?.username)} className="admin-sidebar-profile-card">
           <div className="admin-user-nav-avatar admin-user-nav-avatar--large">
@@ -176,7 +190,7 @@ export default function AdminLayout() {
               getInitials(user?.fullName || user?.username)
             )}
           </div>
-          {!isCollapsed && (
+          {(!isCollapsed || isMobileOpen) && (
             <>
               <div className="admin-sidebar-profile-copy">
                 <strong>{user?.fullName || user?.username || "Admin User"}</strong>
@@ -191,7 +205,7 @@ export default function AdminLayout() {
         <nav className="admin-nav-pro">
           {NAV_GROUPS.map((group) => (
             <div key={group.label} className="admin-nav-group">
-              {!isCollapsed && <span className="admin-nav-label">{group.label}</span>}
+              {(!isCollapsed || isMobileOpen) && <span className="admin-nav-label">{group.label}</span>}
               {group.links.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -201,9 +215,10 @@ export default function AdminLayout() {
                     end={item.end}
                     className={({ isActive }) => `admin-nav-link-pro ${isActive ? "active" : ""}`}
                     title={isCollapsed ? item.label : ""}
+                    onClick={() => setIsMobileOpen(false)}
                   >
                     <Icon size={18} />
-                    {!isCollapsed && <span>{item.label}</span>}
+                    {(!isCollapsed || isMobileOpen) && <span>{item.label}</span>}
                   </NavLink>
                 );
               })}
@@ -212,21 +227,32 @@ export default function AdminLayout() {
         </nav>
 
         <div className="admin-sidebar-footer-pro">
-          {!isCollapsed && (
-            <Link to={routes.adminExports} className="admin-sidebar-secondary-link">
+          {(!isCollapsed || isMobileOpen) && (
+            <Link to={routes.adminExports} className="admin-sidebar-secondary-link" onClick={() => setIsMobileOpen(false)}>
               <Database size={16} />
               Export records and reports
             </Link>
           )}
           <button type="button" className="btn-terminate" onClick={handleLogout} title={isCollapsed ? "Log Out" : ""}>
             <LogOut size={18} />
-            {!isCollapsed && <span>Log Out</span>}
+            {(!isCollapsed || isMobileOpen) && <span>Log Out</span>}
           </button>
         </div>
       </aside>
 
+      {isMobileOpen && (
+        <div className="mobile-overlay mobile-open" onClick={() => setIsMobileOpen(false)} />
+      )}
+
       <div className="workspace-main admin-main-panel">
         <header className="admin-topbar-pro">
+          <button 
+            className="mobile-menu-btn" 
+            onClick={() => setIsMobileOpen(prev => !prev)}
+            aria-label="Toggle menu"
+          >
+            <Menu size={24} />
+          </button>
           <div className="admin-topbar-copy">
             <h2>{currentNavItem.label}</h2>
           </div>

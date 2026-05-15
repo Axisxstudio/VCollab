@@ -129,6 +129,7 @@ export default function HomePage() {
 
   return (
     <div className="home-social-container">
+
       <aside className="social-sidebar-left">
         <div className="profile-card-pro">
           <div className="profile-card-cover" />

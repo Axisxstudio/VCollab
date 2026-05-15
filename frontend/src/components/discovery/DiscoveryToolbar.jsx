@@ -107,11 +107,13 @@ export default function DiscoveryToolbar({
             onClick={() => setShowAdvanced(!showAdvanced)}
           >
             <SlidersHorizontal size={18} />
-            Filters
-            {showAdvanced ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            <span className="discovery-btn-label">Filters</span>
+            <span className="discovery-btn-chevron">
+              {showAdvanced ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </span>
           </button>
           
-          <button type="button" className="btn-reset-light" onClick={onReset} title="Reset all filters">
+          <button type="button" className="btn-reset-light discovery-btn-reset" onClick={onReset} title="Reset all filters">
             <X size={18} />
           </button>
         </div>
