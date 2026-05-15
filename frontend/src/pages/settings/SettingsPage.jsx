@@ -1,327 +1,422 @@
-import { useState } from "react";
-import { 
-  Bookmark, 
-  Archive, 
-  Activity, 
-  Trash2, 
-  LogOut, 
-  User, 
-  Settings, 
-  Bell, 
-  ShieldCheck,
+import { useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Bell,
+  Bookmark,
   ChevronRight,
-  UserCircle,
-  HelpCircle,
-  History,
-  Layout,
-  FileText,
-  MessageSquare,
-  Layers,
-  Clock,
+  CircleHelp,
   ExternalLink,
-  ChevronDown
+  FileText,
+  Folder,
+  Globe,
+  LibraryBig,
+  LogOut,
+  Mail,
+  MessageSquare,
+  Phone,
+  Search,
+  Trash2,
+  UserRound,
+  UserRoundCog,
+  UsersRound
 } from "lucide-react";
-import { useAuthStore } from "../../store/authStore";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { routes } from "../../config/routes";
+import { listSavedContent, unsaveContent } from "../../services/save.service";
+import { useAuthStore } from "../../store/authStore";
+
+function getSavedPath(item) {
+  const type = String(item.content_type || item.contentType || "").toUpperCase();
+  const id = item.content_id || item.contentId;
+  if (!id) return routes.search;
+  if (type === "PROJECT") return routes.projectDetail.replace(":id", id);
+  if (type === "POST") return routes.postDetail.replace(":id", id);
+  if (type === "BLOG") return routes.blogDetail.replace(":id", id);
+  return routes.search;
+}
+
+function getSavedLabel(item) {
+  return String(item.content_type || item.contentType || "Content").replaceAll("_", " ").toLowerCase();
+}
+
+const axisxContact = {
+  email: "info@axisxstudio.com",
+  phone: "077 453 4056",
+  phoneHref: "tel:0774534056",
+  website: "https://axisxstudio.com"
+};
+
+const settingsPanels = {
+  saved: {
+    group: "Workspace",
+    title: "Saved",
+    icon: Bookmark
+  },
+  about: {
+    group: "Support",
+    title: "Help and about",
+    icon: CircleHelp,
+    intro: "VCollab is a professional collaboration platform for students, developers, and creators to publish work, connect with others, and grow projects through visible community interaction.",
+    sections: [
+      {
+        title: "What VCollab helps you do",
+        body: "Create and showcase projects, share posts and blogs, manage resources, send project requests, and keep conversations organized in one workspace."
+      },
+      {
+        title: "Built for professional collaboration",
+        body: "Instead of leaving projects, ideas, and useful content scattered across chats and drives, VCollab brings publishing, discovery, messaging, and feedback into one focused platform."
+      },
+      {
+        title: "Getting started",
+        body: "Complete your profile, publish your first project or post, explore contributors, save useful content, and use messages or project requests when you want to collaborate."
+      },
+      {
+        title: "Need support?",
+        body: `For platform questions or account support, contact AxisX Studio at ${axisxContact.email} or ${axisxContact.phone}.`
+      }
+    ]
+  },
+  privacy: {
+    group: "Support",
+    title: "Privacy Policy",
+    icon: FileText,
+    intro: "This policy explains how VCollab handles account, content, and collaboration data across the signed-in workspace.",
+    meta: [
+      ["Effective date", "March 23, 2026"],
+      ["Scope", "Accounts, content, messaging, notifications, and live collaboration features"]
+    ],
+    sections: [
+      {
+        title: "Information we collect",
+        body: "VCollab collects the information needed to operate the platform, including account details, profile information, published content, uploaded media, messages, engagement activity, and technical usage data."
+      },
+      {
+        title: "How information is used",
+        body: "We use information to provide core functionality, personalize discovery, support moderation, improve reliability, protect platform security, and deliver real-time collaboration experiences."
+      },
+      {
+        title: "Visibility and sharing",
+        body: "Public content such as projects, posts, blogs, selected profile details, and engagement counts may be visible to other users and, where configured, public visitors. VCollab does not sell personal information."
+      },
+      {
+        title: "Retention and security",
+        body: "Data is retained only as long as reasonably necessary for platform operations, legal obligations, dispute resolution, and safety controls. Administrative, technical, and operational safeguards are applied to protect account data and content."
+      },
+      {
+        title: "Your choices",
+        body: "You can manage profile information, edit or remove content you own, and contact support for account access or data concerns."
+      },
+      {
+        title: "Privacy support",
+        body: `For privacy questions, data requests, or account concerns, contact AxisX Studio at ${axisxContact.email} or ${axisxContact.phone}.`
+      }
+    ]
+  },
+  terms: {
+    group: "Support",
+    title: "Terms of Service",
+    icon: FileText,
+    intro: "These terms define how VCollab can be used across public discovery, publishing, messaging, and real-time collaboration.",
+    meta: [
+      ["Effective date", "March 23, 2026"],
+      ["Operator", "AxisX Studio"]
+    ],
+    sections: [
+      {
+        title: "Using the platform",
+        body: "VCollab is intended for professional collaboration, project discovery, publishing, and communication. You are responsible for the accuracy of your account details and activity performed through your account."
+      },
+      {
+        title: "Content ownership and responsibility",
+        body: "You retain ownership of content you create and upload. By publishing content on VCollab, you grant the rights needed to host, display, distribute, and process that content within platform features."
+      },
+      {
+        title: "Content standards",
+        body: "Do not upload unlawful, infringing, deceptive, abusive, or malicious content. Content that violates platform rules, safety standards, or legal requirements may be removed or restricted."
+      },
+      {
+        title: "Realtime features and availability",
+        body: "Notifications, live feeds, comments, messaging, and collaboration updates are provided on a best-effort basis and may be affected by browser support, network conditions, maintenance, or security controls."
+      },
+      {
+        title: "Moderation and enforcement",
+        body: "VCollab may investigate abuse, enforce content standards, limit access, suspend accounts, or preserve records when necessary to protect the community or comply with law."
+      },
+      {
+        title: "Questions about these terms",
+        body: `Questions about these terms can be sent to AxisX Studio at ${axisxContact.email} or ${axisxContact.phone}.`
+      }
+    ]
+  }
+};
 
 export default function SettingsPage() {
   const { user, clearAuth } = useAuthStore();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("my-activity");
-  const [contentFilter, setContentFilter] = useState("All");
+  const { panel } = useParams();
+  const queryClient = useQueryClient();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const profilePath = user?.username ? routes.profile.replace(":username", user.username) : routes.home;
+
+  const { data: savedItems = [], isLoading: savedLoading } = useQuery({
+    queryKey: ["saved-content"],
+    queryFn: listSavedContent
+  });
 
   const handleLogout = () => {
     clearAuth();
     navigate(routes.landing);
   };
 
-  const menuGroups = [
+  const handleUnsave = async (item) => {
+    await unsaveContent(item.content_type || item.contentType, item.content_id || item.contentId);
+    await queryClient.invalidateQueries({ queryKey: ["saved-content"] });
+  };
+
+  const settingsGroups = [
     {
-      label: "How you use VCollab",
+      label: "Account",
       items: [
-        { id: "saved", label: "Saved", icon: Bookmark, description: "Manage your bookmarked projects and posts" },
-        { id: "archived", label: "Archived", icon: Archive, description: "View and restore your hidden projects" },
-        { id: "my-activity", label: "My Activity", icon: Activity, description: "Track your interactions and history" },
+        { id: "profile", label: "My profile", description: "View your public profile", icon: UserRound, path: profilePath },
+        { id: "edit-profile", label: "Edit profile", description: "Update profile details and images", icon: UserRoundCog, path: routes.profileEdit }
       ]
     },
     {
-      label: "Your account",
+      label: "Workspace",
       items: [
-        { id: "recycle-bin", label: "Recycle Bin", icon: Trash2, description: "Recently deleted content" },
-        { id: "account", label: "Account Center", icon: UserCircle, description: "Security, login, and personal details" },
+        { id: "saved", label: "Saved", description: `${savedItems.length} saved item${savedItems.length === 1 ? "" : "s"}`, icon: Bookmark, panel: "saved" },
+        { id: "notifications", label: "Notifications", description: "Open your realtime inbox", icon: Bell, path: routes.notifications },
+        { id: "messages", label: "Messages", description: "Open conversations", icon: MessageSquare, path: routes.messages },
+        { id: "requests", label: "Project requests", description: "Review sent and received requests", icon: UsersRound, path: routes.requests },
+        { id: "resources", label: "Resources", description: "Manage your resource files", icon: LibraryBig, path: routes.resourceManage },
+        { id: "warnings", label: "Warnings", description: "Review moderation and safety alerts", icon: AlertTriangle, path: routes.warnings }
+      ]
+    },
+    {
+      label: "Support",
+      items: [
+        { id: "search", label: "Search VCollab", description: "Find people, projects, posts, and blogs", icon: Search, path: routes.search },
+        { id: "about", label: "Help and about", description: "Learn about VCollab", icon: CircleHelp, panel: "about" },
+        { id: "privacy", label: "Privacy Policy", description: "Read data and privacy details", icon: FileText, panel: "privacy" },
+        { id: "terms", label: "Terms of Service", description: "Read platform terms", icon: FileText, panel: "terms" }
       ]
     }
   ];
 
-  const bottomItems = [
-    { id: "help", label: "Help Center", icon: HelpCircle },
-    { id: "logout", label: "Log out", icon: LogOut, color: "var(--color-error)", action: handleLogout }
-  ];
+  const visibleGroups = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return settingsGroups;
+    return settingsGroups
+      .map((group) => ({
+        ...group,
+        items: group.items.filter((item) => `${item.label} ${item.description}`.toLowerCase().includes(query))
+      }))
+      .filter((group) => group.items.length > 0);
+  }, [searchQuery, savedItems.length]);
 
-  const filterToggles = [
-    { id: "All", label: "All", icon: Layers },
-    { id: "Projects", label: "Projects", icon: Layout },
-    { id: "Blogs", label: "Blogs", icon: FileText },
-    { id: "Posts", label: "Posts", icon: MessageSquare },
-  ];
-
-  // Mock data for "Activity"
-  const mockActivities = [
-    { id: 1, type: "Projects", title: "Titan AI Platform", date: "2 hours ago", status: "Active" },
-    { id: 2, type: "Posts", title: "Update on Sprint 4", date: "5 hours ago", status: "Published" },
-    { id: 3, type: "Blogs", title: "Future of Agentic AI", date: "Yesterday", status: "Draft" },
-    { id: 4, type: "Projects", title: "VCollab Frontend Hub", date: "3 days ago", status: "Active" },
-    { id: 5, type: "Posts", title: "Happy Coding!", date: "1 week ago", status: "Archived" },
-  ];
-
-  const filteredActivities = contentFilter === "All" 
-    ? mockActivities 
-    : mockActivities.filter(a => a.type === contentFilter);
-
-  const activeInfo = [...menuGroups.flatMap(g => g.items), ...bottomItems].find(i => i.id === activeTab);
-  const showFilters = ["my-activity", "saved", "archived", "recycle-bin"].includes(activeTab);
-
-  const getIcon = (type) => {
-    if (type === "Projects") return <Layout size={16} />;
-    if (type === "Blogs") return <FileText size={16} />;
-    return <MessageSquare size={16} />;
+  const handleItemClick = (item) => {
+    if (item.panel) {
+      navigate(routes.settingsPanel.replace(":panel", item.panel));
+      return;
+    }
+    if (item.path) navigate(item.path);
   };
 
-  return (
-    <div className="section">
-      <div className="discovery-results-header">
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-            <span style={{ padding: "4px 10px", background: "var(--color-primary-light)", color: "var(--color-primary)", borderRadius: "20px", fontSize: "0.75rem", fontWeight: "700" }}>USER HUB</span>
-        </div>
-        <h2 style={{ fontSize: "2.5rem", fontWeight: "900", letterSpacing: "-0.02em" }}>Settings & Activity</h2>
-        <p className="profile-meta">Experience the power of complete control over your collaboration history.</p>
-      </div>
+  const activePanel = panel || null;
+  const activePanelInfo = activePanel ? settingsPanels[activePanel] : null;
+  const ActivePanelIcon = activePanelInfo?.icon || Bookmark;
 
-      <div className="split" style={{ gridTemplateColumns: "320px 1fr", gap: "32px", marginTop: "40px" }}>
-        {/* Sidebar Navigation */}
-        <aside className="social-sidebar-left" style={{ position: "sticky", top: "100px" }}>
-          <div className="card" style={{ padding: "12px", borderRadius: "24px", boxShadow: "0 10px 25px -5px rgba(0,0,0,0.05)" }}>
-            <div className="settings-user-info" style={{ padding: "20px", borderBottom: "1px solid #f1f5f9", marginBottom: "16px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                 <div style={{ 
-                    width: "52px", 
-                    height: "52px", 
-                    borderRadius: "50%", 
-                    background: "linear-gradient(135deg, var(--color-primary), #8b5cf6)", 
-                    color: "#fff", 
-                    display: "grid", 
-                    placeItems: "center", 
-                    fontWeight: "900",
-                    fontSize: "1.25rem",
-                    boxShadow: "0 10px 15px -3px rgba(24, 119, 242, 0.3)"
-                 }}>
-                    {user?.fullName?.charAt(0) || "V"}
-                 </div>
-                 <div>
-                    <strong style={{ display: "block", fontSize: "1.1rem", color: "#0f172a" }}>{user?.fullName}</strong>
-                    <span style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "500" }}>@{user?.username}</span>
-                 </div>
-              </div>
-            </div>
+  const renderPanelContent = () => {
+    if (activePanel === "saved") {
+      return (
+        <div className="settings-ig-detail__stack">
+          {savedLoading && <div className="settings-ig-no-results">Loading saved content...</div>}
 
-            {menuGroups.map((group, idx) => (
-              <div key={idx} style={{ marginBottom: "20px" }}>
-                <span style={{ fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "#94a3b8", padding: "0 16px", marginBottom: "12px", display: "block", fontWeight: "800" }}>{group.label}</span>
-                {group.items.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`share-action-item ${activeTab === item.id ? "active-setting-tab" : ""}`}
-                    style={{ 
-                      width: "100%", 
-                      justifyContent: "space-between", 
-                      padding: "12px 16px",
-                      background: activeTab === item.id ? "var(--color-primary-light)" : "transparent",
-                      border: "none",
-                      borderRadius: "12px",
-                      cursor: "pointer",
-                      color: activeTab === item.id ? "var(--color-primary)" : "#475569",
-                      transition: "all 0.2s",
-                      marginBottom: "4px"
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                      <item.icon size={20} style={{ opacity: activeTab === item.id ? 1 : 0.7 }} />
-                      <span style={{ fontWeight: activeTab === item.id ? "700" : "600", fontSize: "0.95rem" }}>{item.label}</span>
-                    </div>
-                    <ChevronRight size={16} style={{ opacity: activeTab === item.id ? 1 : 0.3 }} />
-                  </button>
-                ))}
-              </div>
-            ))}
-
-            <div style={{ margin: "16px 0", borderTop: "1px solid #f1f5f9" }} />
-            
-            {bottomItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={item.action ? item.action : () => setActiveTab(item.id)}
-                className="share-action-item"
-                style={{ 
-                  width: "100%", 
-                  justifyContent: "flex-start", 
-                  padding: "12px 16px",
-                  background: activeTab === item.id ? "var(--color-primary-light)" : "transparent",
-                  border: "none",
-                  borderRadius: "12px",
-                  cursor: "pointer",
-                  color: item.color || (activeTab === item.id ? "var(--color-primary)" : "#475569")
-                }}
-              >
-                <item.icon size={20} style={{ marginRight: "12px", opacity: 0.7 }} />
-                <span style={{ fontWeight: "700", fontSize: "0.95rem" }}>{item.label}</span>
+          {!savedLoading && savedItems.length === 0 && (
+            <div className="settings-ig-placeholder">
+              <Bookmark size={54} />
+              <h4>No saved content yet</h4>
+              <p>Projects, posts, and blogs you save will appear here.</p>
+              <button className="settings-ig-action" type="button" onClick={() => navigate(routes.search)}>
+                <Search size={18} />
+                <span>Explore content</span>
               </button>
+            </div>
+          )}
+
+          {!savedLoading && savedItems.length > 0 && (
+            <div className="settings-ig-saved-list">
+              {savedItems.map((item) => (
+                <article className="settings-ig-saved-item" key={item.id}>
+                  <span className="settings-ig-saved-item__icon">
+                    {String(item.content_type || item.contentType).toUpperCase() === "PROJECT" ? <Folder size={18} /> : <FileText size={18} />}
+                  </span>
+                  <div>
+                    <strong>{getSavedLabel(item)}</strong>
+                    <span>Saved item #{item.content_id || item.contentId}</span>
+                  </div>
+                  <div className="settings-ig-saved-item__actions">
+                    <button type="button" onClick={() => navigate(getSavedPath(item))} aria-label="Open saved item">
+                      <ExternalLink size={16} />
+                    </button>
+                    <button type="button" onClick={() => handleUnsave(item)} aria-label="Remove saved item">
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="settings-account-doc">
+        <p className="settings-account-doc__intro">{activePanelInfo.intro}</p>
+
+        <div className="settings-contact-card">
+          <div>
+            <span>Contact AxisX Studio</span>
+            <strong>Support for VCollab users</strong>
+          </div>
+          <div className="settings-contact-card__actions">
+            <a href={`mailto:${axisxContact.email}`} aria-label="Email AxisX Studio">
+              <Mail size={16} />
+              <span>Email</span>
+            </a>
+            <a href={axisxContact.phoneHref} aria-label="Call AxisX Studio">
+              <Phone size={16} />
+              <span>Call</span>
+            </a>
+            <a href={axisxContact.website} target="_blank" rel="noreferrer" aria-label="Open AxisX Studio website">
+              <Globe size={16} />
+              <span>Website</span>
+            </a>
+          </div>
+        </div>
+
+        {activePanelInfo.meta && (
+          <div className="settings-account-doc__meta">
+            {activePanelInfo.meta.map(([label, value]) => (
+              <div key={label}>
+                <span>{label}</span>
+                <strong>{value}</strong>
+              </div>
             ))}
           </div>
-        </aside>
+        )}
 
-        {/* Content Area */}
-        <main className="card" style={{ padding: "48px", borderRadius: "24px", minHeight: "750px", border: "1px solid rgba(0,0,0,0.05)", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.03)" }}>
-          <div style={{ maxWidth: "850px" }}>
-            <div style={{ marginBottom: "48px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <div>
-                    <div style={{ width: "64px", height: "64px", borderRadius: "18px", background: "var(--color-primary-light)", color: "var(--color-primary)", display: "grid", placeItems: "center", marginBottom: "20px" }}>
-                    {activeInfo?.icon && <activeInfo.icon size={32} />}
-                    </div>
-                    <h3 style={{ fontSize: "2rem", fontWeight: "900", marginBottom: "8px", color: "#0f172a" }}>{activeInfo?.label}</h3>
-                    <p style={{ color: "#64748b", fontSize: "1.1rem", fontWeight: "500", maxWidth: "450px" }}>{activeInfo?.description || "Configure your preferences and account security."}</p>
-                </div>
-                
-                {showFilters && (
-                    <div style={{ 
-                    display: "flex", 
-                    background: "#f8fafc", 
-                    padding: "6px", 
-                    borderRadius: "16px",
-                    border: "1px solid #e2e8f0",
-                    boxShadow: "inset 0 2px 4px rgba(0,0,0,0.02)"
-                    }}>
-                    {filterToggles.map((f) => (
-                        <button
-                        key={f.id}
-                        onClick={() => setContentFilter(f.id)}
-                        style={{
-                            padding: "10px 18px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "10px",
-                            border: "none",
-                            borderRadius: "12px",
-                            fontSize: "0.9rem",
-                            fontWeight: "700",
-                            cursor: "pointer",
-                            background: contentFilter === f.id ? "#fff" : "transparent",
-                            color: contentFilter === f.id ? "var(--color-primary)" : "#64748b",
-                            boxShadow: contentFilter === f.id ? "0 4px 6px -1px rgba(0,0,0,0.1)" : "none",
-                            transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)"
-                        }}
-                        >
-                        <f.icon size={18} />
-                        {f.label}
-                        </button>
-                    ))}
-                    </div>
-                )}
+        <div className="settings-account-doc__sections">
+          {activePanelInfo.sections.map((section) => (
+            <section key={section.title} className="settings-account-doc__section">
+              <h4>{section.title}</h4>
+              <p>{section.body}</p>
+            </section>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  if (activePanel && !activePanelInfo) {
+    return <Navigate to={routes.settings} replace />;
+  }
+
+  if (activePanelInfo) {
+    return (
+      <div className="settings-ig section">
+        <div className="settings-subpage">
+          <button type="button" className="settings-subpage__back" onClick={() => navigate(routes.settings)}>
+            <ArrowLeft size={18} />
+            <span>Settings</span>
+          </button>
+
+          <section className="settings-ig-detail settings-ig-detail--page" aria-live="polite">
+            <div className="settings-ig-detail__header">
+              <span className="settings-ig-detail__icon">
+                <ActivePanelIcon size={24} />
+              </span>
+              <div>
+                <span>{activePanelInfo.group}</span>
+                <h3>{activePanelInfo.title}</h3>
               </div>
             </div>
 
-            {activeTab === "my-activity" ? (
-                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-                    {filteredActivities.length > 0 ? (
-                        filteredActivities.map((activity) => (
-                            <div key={activity.id} className="activity-item-pro" style={{ 
-                                display: "flex", 
-                                alignItems: "center", 
-                                justifyContent: "space-between", 
-                                padding: "20px", 
-                                background: "#fff", 
-                                borderRadius: "20px", 
-                                border: "1px solid #f1f5f9",
-                                cursor: "pointer"
-                            }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-                                    <div style={{ 
-                                        width: "48px", 
-                                        height: "48px", 
-                                        borderRadius: "12px", 
-                                        background: "#f1f5f9", 
-                                        display: "grid", 
-                                        placeItems: "center", 
-                                        color: "var(--color-primary)" 
-                                    }}>
-                                        {getIcon(activity.type)}
-                                    </div>
-                                    <div>
-                                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                            <span style={{ fontSize: "0.75rem", fontWeight: "800", color: "var(--color-primary)", textTransform: "uppercase" }}>{activity.type.slice(0, -1)}</span>
-                                            <span style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#cbd5e1" }}></span>
-                                            <span style={{ fontSize: "0.85rem", color: "#64748b", fontWeight: "600" }}>{activity.date}</span>
-                                        </div>
-                                        <h4 style={{ fontSize: "1.1rem", fontWeight: "700", margin: "4px 0 0", color: "#1e293b" }}>{activity.title}</h4>
-                                    </div>
-                                </div>
-                                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                                    <span style={{ 
-                                        padding: "4px 12px", 
-                                        borderRadius: "20px", 
-                                        fontSize: "0.75rem", 
-                                        fontWeight: "700", 
-                                        background: activity.status === 'Archived' ? '#f1f5f9' : '#ecfdf5',
-                                        color: activity.status === 'Archived' ? '#64748b' : '#10b981',
-                                        border: `1px solid ${activity.status === 'Archived' ? '#e2e8f0' : '#d1fae5'}`
-                                    }}>{activity.status}</span>
-                                    <ChevronRight size={18} color="#cbd5e1" />
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div style={{ textAlign: "center", padding: "80px 40px" }}>
-                            <div style={{ opacity: 0.1, marginBottom: "20px" }}>
-                                <History size={80} />
-                            </div>
-                            <h4 style={{ fontSize: "1.25rem", fontWeight: "800", color: "#1e293b" }}>No {contentFilter.toLowerCase()} found</h4>
-                            <p style={{ color: "#64748b", maxWidth: "320px", margin: "8px auto 0" }}>Refine your filter or check back later after contributing to the platform.</p>
-                        </div>
-                    )}
-                    
-                    <button className="btn-outline" style={{ marginTop: "20px", width: "100%", padding: "16px", borderRadius: "16px", fontWeight: "700", color: "#64748b" }}>
-                        Load More Activity
-                    </button>
+            {renderPanelContent()}
+          </section>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="settings-ig section">
+      <div className="settings-ig__shell settings-ig__shell--single">
+        <section className="settings-ig-menu" aria-label="Settings">
+          <div className="settings-ig-menu__header">
+            <div>
+              <span>Settings</span>
+              <h2>{user?.fullName || user?.username || "VCollab"}</h2>
+            </div>
+            <Link to={profilePath} className="settings-ig-menu__avatar" aria-label="Open profile">
+              {user?.fullName?.charAt(0) || user?.username?.charAt(0) || "V"}
+            </Link>
+          </div>
+
+          <label className="settings-ig-search">
+            <Search size={18} />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search settings"
+            />
+          </label>
+
+          <div className="settings-ig-list">
+            {visibleGroups.length > 0 ? (
+              visibleGroups.map((group) => (
+                <div className="settings-ig-group" key={group.label}>
+                  <h3>{group.label}</h3>
+                  <div className="settings-ig-group__items">
+                    {group.items.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleItemClick(item)}
+                        className="settings-ig-row"
+                      >
+                        <span className="settings-ig-row__icon">
+                          <item.icon size={21} />
+                        </span>
+                        <span className="settings-ig-row__copy">
+                          <strong>{item.label}</strong>
+                          <span>{item.description}</span>
+                        </span>
+                        <ChevronRight className="settings-ig-row__chevron" size={18} />
+                      </button>
+                    ))}
+                  </div>
                 </div>
+              ))
             ) : (
-                <div className="settings-content-placeholder" style={{ 
-                    borderRadius: "24px",
-                    padding: "80px 40px",
-                    textAlign: "center",
-                    background: "#fcfdfe",
-                    border: "2px dashed #f1f5f9"
-                    }}>
-                    <div style={{ opacity: 0.2, marginBottom: "24px" }}>
-                        <History size={72} />
-                    </div>
-                    <h4 style={{ fontSize: "1.5rem", marginBottom: "12px", fontWeight: "900", color: "#1e293b" }}>
-                        {contentFilter === "All" ? "No content history yet" : `No ${contentFilter.toLowerCase()} found`}
-                    </h4>
-                    <p style={{ color: "#64748b", fontSize: "1.1rem", fontWeight: "500", maxWidth: "400px", margin: "0 auto", lineHeight: "1.6" }}>
-                        {contentFilter === "All" 
-                        ? `Your ${activeInfo?.label.toLowerCase()} is currently empty. Start interacting with the platform to see items here.`
-                        : `You haven't added or saved any ${contentFilter.toLowerCase()} in your ${activeInfo?.label.toLowerCase()} yet.`}
-                    </p>
-                    
-                    <button className="btn-primary" style={{ marginTop: "32px", padding: "14px 40px", borderRadius: "16px", fontSize: "1rem", fontWeight: "800" }}>
-                        Explore Collaboration
-                    </button>
-                </div>
+              <div className="settings-ig-no-results">
+                <Search size={30} />
+                <strong>No settings found</strong>
+                <span>Try a different search term.</span>
+              </div>
             )}
           </div>
-        </main>
+
+          <button type="button" className="settings-ig-logout" onClick={handleLogout}>
+            <LogOut size={20} />
+            <span>Log out</span>
+          </button>
+        </section>
       </div>
     </div>
   );

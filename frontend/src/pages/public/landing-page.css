@@ -674,7 +674,7 @@ html {
 }
 
 .lp-dual-section#contributors {
-  background: linear-gradient(180deg, #fbfaff 0%, #f6f4ff 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
 }
 
 .lp-dual-section#blogs {
@@ -2056,19 +2056,21 @@ html {
 
 /* --- Contributor Cards --- */
 .lp-cc-card {
-  background: white;
-  border: 1px solid var(--lp-border);
-  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 18px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 254px;
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.06);
   transition: transform var(--lp-motion-base), box-shadow var(--lp-motion-base), border-color var(--lp-motion-fast);
 }
 
 .lp-cc-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 14px 28px -18px rgba(15, 23, 42, 0.22);
-  border-color: rgba(37, 99, 235, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 22px 52px rgba(15, 23, 42, 0.12);
+  border-color: rgba(37, 99, 235, 0.22);
 }
 
 .lp-cc-cover {
@@ -2086,7 +2088,7 @@ html {
 }
 
 .lp-cc-body {
-  padding: 0 16px 16px;
+  padding: 28px 22px 22px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2105,10 +2107,13 @@ html {
 }
 
 .lp-cc-avatar {
-  width: 64px;
-  height: 64px;
+  width: 86px;
+  height: 86px;
   border-radius: 50%;
   object-fit: cover;
+  display: block;
+  border: 4px solid #eff6ff;
+  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.16);
   transition: transform var(--lp-motion-base);
 }
 
@@ -2117,19 +2122,72 @@ html {
 }
 
 .lp-cc-name {
-  font-size: 1.05rem;
-  font-weight: 700;
+  width: 100%;
+  margin: 16px 0 6px;
+  overflow: hidden;
   color: var(--lp-text);
-  margin-bottom: 4px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .lp-cc-role-badge {
-  font-size: 0.75rem;
-  padding: 3px 8px;
+  max-width: 100%;
+  margin-bottom: 18px;
+  padding: 6px 10px;
+  overflow: hidden;
   background: #f1f5f9;
-  color: #64748b;
-  border-radius: 6px;
+  color: #475569;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lp-cc-handle {
+  width: 100%;
   margin-bottom: 12px;
+  overflow: hidden;
+  color: #64748b;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lp-cc-cta {
+  width: 100%;
+  min-height: 42px;
+  justify-content: center;
+  margin-top: auto;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+.lp-carousel-wrapper {
+  position: relative;
+  padding: 6px 38px 4px;
+}
+
+.lp-carousel-grid {
+  align-items: stretch;
+}
+
+.lp-carousel-grid .lp-cc-card {
+  width: 100%;
+}
+
+/* Legacy/simple contributor card styles kept for older markup. */
+.lp-contributor-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--lp-text);
+  margin-bottom: 4px;
 }
 
 .lp-cc-stats-icons {
@@ -2204,4 +2262,115 @@ html {
 
 .lp-carousel-btn--next {
   right: -20px;
+}
+
+/* Professional landing contributor refresh */
+#contributors .lp-carousel-wrapper {
+  padding: 8px 48px 6px;
+}
+
+#contributors .lp-carousel-grid {
+  gap: 22px !important;
+}
+
+#contributors .lp-cc-card {
+  width: 100%;
+  max-width: 320px;
+  min-height: 276px !important;
+  margin: 0 auto;
+  border-radius: 18px !important;
+}
+
+#contributors .lp-cc-body {
+  padding: 30px 24px 24px !important;
+}
+
+#contributors .lp-cc-avatar {
+  width: 88px !important;
+  height: 88px !important;
+}
+
+#contributors .lp-cc-name {
+  padding: 0;
+  font-size: 1.15rem !important;
+}
+
+#contributors .lp-cc-role-badge {
+  max-width: 100%;
+  padding: 6px 12px !important;
+  font-size: 0.78rem !important;
+}
+
+#contributors .lp-cc-cta {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 14px !important;
+}
+
+@media (max-width: 768px) {
+  #contributors.lp-dual-section {
+    padding: 52px 0;
+  }
+
+  #contributors .lp-section-header-row {
+    align-items: flex-start !important;
+  }
+
+  #contributors .lp-carousel-wrapper {
+    padding: 10px 34px;
+  }
+
+  #contributors .lp-carousel-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-items: center;
+  }
+
+  #contributors .lp-cc-card {
+    width: min(100%, 340px);
+    max-width: 340px;
+    min-height: 286px !important;
+  }
+
+  #contributors .lp-cc-avatar {
+    width: 92px !important;
+    height: 92px !important;
+  }
+
+  #contributors .lp-cc-body {
+    padding: 32px 24px 24px !important;
+  }
+
+  #contributors .lp-carousel-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  #contributors .lp-carousel-btn--prev {
+    left: 0;
+  }
+
+  #contributors .lp-carousel-btn--next {
+    right: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  #contributors .lp-carousel-wrapper {
+    padding: 8px 28px;
+  }
+
+  #contributors .lp-cc-card {
+    width: min(100%, 300px);
+    min-height: 270px !important;
+  }
+
+  #contributors .lp-cc-avatar {
+    width: 82px !important;
+    height: 82px !important;
+  }
+
+  #contributors .lp-cc-name {
+    font-size: 1.05rem !important;
+  }
 }

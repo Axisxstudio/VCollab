@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { CalendarDays, FileCheck2, HelpCircle, Scale } from "lucide-react";
 import SEO from "../../components/seo/SEO";
 import PublicFooter from "../../components/public/PublicFooter";
 import { routes } from "../../config/routes";
@@ -36,7 +37,7 @@ const sections = [
   {
     title: "Liability and Contact",
     paragraphs: [
-      "VCollab is provided on an as-available basis. To the fullest extent permitted by law, AxisX Studio (Branding) disclaims warranties not expressly stated here and is not liable for indirect, incidental, or consequential damages arising from platform use.",
+      "VCollab is provided on an as-available basis. To the fullest extent permitted by law, AxisX Studio disclaims warranties not expressly stated here and is not liable for indirect, incidental, or consequential damages arising from platform use.",
       "Questions about these terms can be sent to info@axisxstudio.com or 077 453 4056."
     ]
   }
@@ -57,6 +58,10 @@ export default function TermsOfServicePage() {
           <p>
             These terms define how VCollab can be used across public discovery, publishing, messaging, and real-time collaboration.
           </p>
+          <div className="legal-hero__actions">
+            <a href="#legal-document" className="legal-primary-link">Read Terms</a>
+            <Link to={routes.privacy} className="legal-secondary-link">View Privacy Policy</Link>
+          </div>
         </div>
       </section>
 
@@ -64,29 +69,59 @@ export default function TermsOfServicePage() {
         <div className="container legal-layout">
           <aside className="legal-sidebar">
             <div className="legal-sidebar-card reveal-up" style={{ "--delay": "80ms" }}>
-              <span className="legal-sidebar-label">Effective Date</span>
-              <strong>March 23, 2026</strong>
+              <CalendarDays size={18} />
+              <div>
+                <span className="legal-sidebar-label">Effective Date</span>
+                <strong>March 23, 2026</strong>
+              </div>
             </div>
             <div className="legal-sidebar-card reveal-up" style={{ "--delay": "140ms" }}>
-              <span className="legal-sidebar-label">Operator</span>
-              <strong>AxisX Studio (Branding)</strong>
+              <Scale size={18} />
+              <div>
+                <span className="legal-sidebar-label">Operator</span>
+                <strong>AxisX Studio</strong>
+              </div>
             </div>
             <div className="legal-sidebar-card reveal-up" style={{ "--delay": "200ms" }}>
-              <span className="legal-sidebar-label">Related Policy</span>
-              <Link to={routes.privacy}>Privacy Policy</Link>
+              <HelpCircle size={18} />
+              <div>
+                <span className="legal-sidebar-label">Related Policy</span>
+                <Link to={routes.privacy}>Privacy Policy</Link>
+              </div>
             </div>
+
+            <nav className="legal-toc reveal-up" style={{ "--delay": "260ms" }} aria-label="Terms of service sections">
+              <span className="legal-sidebar-label">On this page</span>
+              {sections.map((section, index) => (
+                <a key={section.title} href={`#terms-${index + 1}`}>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  {section.title}
+                </a>
+              ))}
+            </nav>
           </aside>
 
-          <article className="legal-card reveal-up" style={{ "--delay": "120ms" }}>
+          <article id="legal-document" className="legal-card reveal-up" style={{ "--delay": "120ms" }}>
+            <div className="legal-card__masthead">
+              <div className="legal-card__icon"><FileCheck2 size={22} /></div>
+              <div>
+                <span>VCollab Service Agreement</span>
+                <strong>The rules for using the platform responsibly</strong>
+              </div>
+            </div>
+
             <div className="legal-card__intro">
               <p>
                 By accessing or using VCollab, you agree to these Terms of Service. If you do not agree, please do not use the platform.
               </p>
             </div>
 
-            {sections.map((section) => (
-              <section key={section.title} className="legal-section">
-                <h2>{section.title}</h2>
+            {sections.map((section, index) => (
+              <section key={section.title} id={`terms-${index + 1}`} className="legal-section">
+                <div className="legal-section__heading">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <h2>{section.title}</h2>
+                </div>
                 {section.paragraphs.map((paragraph) => (
                   <p key={paragraph}>{paragraph}</p>
                 ))}

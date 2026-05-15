@@ -55,6 +55,7 @@ export default function MainLayout() {
   const navigate = useNavigate();
   const searchInputRef = useRef(null);
   const searchContainerRef = useRef(null);
+  const userDropdownRef = useRef(null);
   const user = useAuthStore((state) => state.user);
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const profilePath = user?.username
@@ -79,6 +80,7 @@ export default function MainLayout() {
   };
 
   const handleLogout = () => {
+    setShowDropdown(false);
     clearAuth();
     navigate(routes.landing);
   };
@@ -121,6 +123,17 @@ export default function MainLayout() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [searchQuery]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className={`workspace-shell ${isCollapsed ? "sidebar-collapsed" : ""}`}>
@@ -361,12 +374,18 @@ export default function MainLayout() {
             <NotificationBell size={18} />
             
             <div 
+              ref={userDropdownRef}
               className="user-nav-container"
-              onMouseEnter={() => setShowDropdown(true)}
-              onMouseLeave={() => setShowDropdown(false)}
               style={{ position: 'relative' }}
             >
-              <Link to={profilePath} className="icon-btn-pro admin-avatar-btn">
+              <button
+                type="button"
+                className="icon-btn-pro admin-avatar-btn"
+                onClick={() => setShowDropdown((current) => !current)}
+                aria-label="Open profile menu"
+                aria-haspopup="menu"
+                aria-expanded={showDropdown}
+              >
                 <div className="admin-user-nav-avatar">
                   {user?.profileImage ? (
                     <img src={user.profileImage} alt={user?.fullName || user?.username || "Collaborator"} />
@@ -374,25 +393,25 @@ export default function MainLayout() {
                     getInitials(user?.fullName || user?.username)
                   )}
                 </div>
-              </Link>
+              </button>
 
               {showDropdown && (
-                <div className="user-nav-dropdown">
+                <div className="user-nav-dropdown" role="menu">
                   <div className="dropdown-header">
                     <strong>{user?.fullName || user?.username}</strong>
                     <span>@{user?.username}</span>
                   </div>
                   <div className="dropdown-divider" />
-                  <Link to={profilePath} className="dropdown-item">
+                  <Link to={profilePath} className="dropdown-item" onClick={() => setShowDropdown(false)} role="menuitem">
                     <User size={16} />
                     <span>My Profile</span>
                   </Link>
-                  <Link to={routes.settings} className="dropdown-item">
+                  <Link to={routes.settings} className="dropdown-item" onClick={() => setShowDropdown(false)} role="menuitem">
                     <Settings size={16} />
                     <span>Settings</span>
                   </Link>
                   <div className="dropdown-divider" />
-                  <button type="button" className="dropdown-item dropdown-item--danger" onClick={handleLogout}>
+                  <button type="button" className="dropdown-item dropdown-item--danger" onClick={handleLogout} role="menuitem">
                     <LogOut size={16} />
                     <span>Logout</span>
                   </button>

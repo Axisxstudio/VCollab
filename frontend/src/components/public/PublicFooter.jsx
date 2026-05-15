@@ -41,7 +41,7 @@ export default function PublicFooter() {
       </div>
 
       <div className="lp-footer-bottom">
-        <div className="container">&copy; {new Date().getFullYear()} Developed by AxisX Studio (Branding). All rights reserved.</div>
+        <div className="container">&copy; {new Date().getFullYear()} Developed by AxisX Studio. All rights reserved.</div>
       </div>
     </footer>
   );

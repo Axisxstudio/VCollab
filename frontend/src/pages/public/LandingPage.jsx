@@ -261,6 +261,7 @@ function ContributorCard({ user, ctaPath, ctaLabel, delay = "0ms" }) {
         <img src={avatarUrl} alt={user.fullName || user.username || "Contributor"} className="lp-cc-avatar" />
 
         <h3 className="lp-cc-name">{user.fullName || user.username}</h3>
+        {user.username && <span className="lp-cc-handle">@{user.username}</span>}
         <span className="lp-cc-role-badge">{role}</span>
 
         <Link to={ctaPath || profilePath} className="lp-btn-outline lp-cc-cta">

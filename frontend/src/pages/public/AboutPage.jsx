@@ -101,7 +101,7 @@ export default function AboutPage() {
             </div>
             <div className="ap-story-body">
               <p>
-                Developed by <strong>AxisX Studio (Branding)</strong>, VCollab was designed to make project collaboration more trusted, visible, and practical for people building real work.
+                Developed by <strong>AxisX Studio</strong>, VCollab was designed to make project collaboration more trusted, visible, and practical for people building real work.
               </p>
               <p>
                 Instead of leaving projects, ideas, and useful content scattered across chats, drives, and short-lived submissions, VCollab brings collaboration, publishing, and discovery into one professional platform.

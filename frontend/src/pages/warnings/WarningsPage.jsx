@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { AlertTriangle, CheckCircle2, ShieldAlert } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { acknowledgeWarning, listWarnings } from "../../services/warning.service";
@@ -59,6 +60,7 @@ function WarningCard({ warning, onAcknowledge }) {
 
 export default function WarningsPage() {
   const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState("active");
   const { data, isLoading } = useQuery({
     queryKey: ["warnings"],
     queryFn: () => listWarnings({ page: 0, size: 20, sort: "createdAt,desc" })
@@ -74,7 +76,7 @@ export default function WarningsPage() {
   };
 
   return (
-    <div className="collab-page">
+    <div className="collab-page warnings-page">
       <section className="collab-page__hero warning-hero">
         <div>
           <span className="collab-page__eyebrow">Moderation & Safety</span>
@@ -109,22 +111,86 @@ export default function WarningsPage() {
         </article>
       </section>
 
-      {isLoading && <div className="collab-empty-panel">Loading warnings...</div>}
+      <div className="request-toggle" role="tablist" aria-label="Warning views">
+        <button
+          type="button"
+          className={`request-toggle__button ${activeTab === "active" ? "active" : ""}`}
+          onClick={() => setActiveTab("active")}
+          role="tab"
+          aria-selected={activeTab === "active"}
+        >
+          Needs review
+        </button>
+        <button
+          type="button"
+          className={`request-toggle__button ${activeTab === "acknowledged" ? "active" : ""}`}
+          onClick={() => setActiveTab("acknowledged")}
+          role="tab"
+          aria-selected={activeTab === "acknowledged"}
+        >
+          Acknowledged
+        </button>
+      </div>
 
-      {!isLoading && warnings.length === 0 && (
-        <div className="collab-empty-panel">
-          <h3>No warnings at this time</h3>
-          <p>Your account currently has no active moderation notes.</p>
-        </div>
-      )}
+      <div className="requests-board requests-board--toggle">
+        {activeTab === "active" && (
+          <section className="collab-surface">
+            <div className="collab-surface__header">
+              <div>
+                <h3>Needs review</h3>
+                <p>Warnings and guidance that still need your acknowledgement.</p>
+              </div>
+              <span className="collab-pill">{activeWarnings.length}</span>
+            </div>
 
-      {!isLoading && warnings.length > 0 && (
-        <div className="warning-upgrade-grid">
-          {warnings.map((warning) => (
-            <WarningCard key={warning.id} warning={warning} onAcknowledge={handleAck} />
-          ))}
-        </div>
-      )}
+            {isLoading && <div className="collab-empty-panel slim">Loading warnings...</div>}
+
+            {!isLoading && activeWarnings.length === 0 && (
+              <div className="collab-empty-panel slim">
+                <h3>No active warnings</h3>
+                <p>Your account currently has no moderation notes awaiting review.</p>
+              </div>
+            )}
+
+            {!isLoading && activeWarnings.length > 0 && (
+              <div className="warning-upgrade-grid">
+                {activeWarnings.map((warning) => (
+                  <WarningCard key={warning.id} warning={warning} onAcknowledge={handleAck} />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {activeTab === "acknowledged" && (
+          <section className="collab-surface">
+            <div className="collab-surface__header">
+              <div>
+                <h3>Acknowledged</h3>
+                <p>Past warnings you have already reviewed.</p>
+              </div>
+              <span className="collab-pill">{acknowledgedWarnings.length}</span>
+            </div>
+
+            {isLoading && <div className="collab-empty-panel slim">Loading warnings...</div>}
+
+            {!isLoading && acknowledgedWarnings.length === 0 && (
+              <div className="collab-empty-panel slim">
+                <h3>No acknowledged warnings</h3>
+                <p>Warnings you acknowledge will remain available here for reference.</p>
+              </div>
+            )}
+
+            {!isLoading && acknowledgedWarnings.length > 0 && (
+              <div className="warning-upgrade-grid">
+                {acknowledgedWarnings.map((warning) => (
+                  <WarningCard key={warning.id} warning={warning} onAcknowledge={handleAck} />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+      </div>
     </div>
   );
 }

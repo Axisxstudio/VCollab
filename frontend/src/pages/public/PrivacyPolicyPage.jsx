@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { CalendarDays, HelpCircle, LockKeyhole, ShieldCheck } from "lucide-react";
 import SEO from "../../components/seo/SEO";
 import PublicFooter from "../../components/public/PublicFooter";
 import { routes } from "../../config/routes";
@@ -57,6 +58,10 @@ export default function PrivacyPolicyPage() {
           <p>
             This policy explains how VCollab handles account, content, and collaboration data across the platform.
           </p>
+          <div className="legal-hero__actions">
+            <a href="#legal-document" className="legal-primary-link">Read Policy</a>
+            <Link to={routes.terms} className="legal-secondary-link">View Terms</Link>
+          </div>
         </div>
       </section>
 
@@ -64,29 +69,59 @@ export default function PrivacyPolicyPage() {
         <div className="container legal-layout">
           <aside className="legal-sidebar">
             <div className="legal-sidebar-card reveal-up" style={{ "--delay": "80ms" }}>
-              <span className="legal-sidebar-label">Effective Date</span>
-              <strong>March 23, 2026</strong>
+              <CalendarDays size={18} />
+              <div>
+                <span className="legal-sidebar-label">Effective Date</span>
+                <strong>March 23, 2026</strong>
+              </div>
             </div>
             <div className="legal-sidebar-card reveal-up" style={{ "--delay": "140ms" }}>
-              <span className="legal-sidebar-label">Scope</span>
-              <strong>Public pages, accounts, content, messaging, and live collaboration features</strong>
+              <ShieldCheck size={18} />
+              <div>
+                <span className="legal-sidebar-label">Scope</span>
+                <strong>Public pages, accounts, content, messaging, and live collaboration features</strong>
+              </div>
             </div>
             <div className="legal-sidebar-card reveal-up" style={{ "--delay": "200ms" }}>
-              <span className="legal-sidebar-label">Need Help?</span>
-              <a href="mailto:info@axisxstudio.com">info@axisxstudio.com</a>
+              <HelpCircle size={18} />
+              <div>
+                <span className="legal-sidebar-label">Need Help?</span>
+                <a href="mailto:info@axisxstudio.com">info@axisxstudio.com</a>
+              </div>
             </div>
+
+            <nav className="legal-toc reveal-up" style={{ "--delay": "260ms" }} aria-label="Privacy policy sections">
+              <span className="legal-sidebar-label">On this page</span>
+              {sections.map((section, index) => (
+                <a key={section.title} href={`#privacy-${index + 1}`}>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  {section.title}
+                </a>
+              ))}
+            </nav>
           </aside>
 
-          <article className="legal-card reveal-up" style={{ "--delay": "120ms" }}>
+          <article id="legal-document" className="legal-card reveal-up" style={{ "--delay": "120ms" }}>
+            <div className="legal-card__masthead">
+              <div className="legal-card__icon"><LockKeyhole size={22} /></div>
+              <div>
+                <span>VCollab Data Notice</span>
+                <strong>How privacy is handled across the platform</strong>
+              </div>
+            </div>
+
             <div className="legal-card__intro">
               <p>
-                VCollab is operated by AxisX Studio (Branding) to support student collaboration, public discovery, and professional portfolio building. By using the platform, you acknowledge the practices described in this Privacy Policy.
+                VCollab is operated by AxisX Studio to support student collaboration, public discovery, and professional portfolio building. By using the platform, you acknowledge the practices described in this Privacy Policy.
               </p>
             </div>
 
-            {sections.map((section) => (
-              <section key={section.title} className="legal-section">
-                <h2>{section.title}</h2>
+            {sections.map((section, index) => (
+              <section key={section.title} id={`privacy-${index + 1}`} className="legal-section">
+                <div className="legal-section__heading">
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <h2>{section.title}</h2>
+                </div>
                 {section.paragraphs.map((paragraph) => (
                   <p key={paragraph}>{paragraph}</p>
                 ))}

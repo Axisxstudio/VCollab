@@ -17,7 +17,9 @@ import {
 import {
   Check,
   Edit2,
+  ArrowLeft,
   ImagePlus,
+  Inbox,
   Loader2,
   MessageSquare,
   Search,
@@ -93,6 +95,7 @@ export default function MessagesPage() {
   const navigate = useNavigate();
   const currentUser = useAuthStore((state) => state.user);
   const [activeId, setActiveId] = useState(null);
+  const [mobilePane, setMobilePane] = useState(searchParams.get("conversation") ? "thread" : "inbox");
   const [draft, setDraft] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -299,6 +302,12 @@ export default function MessagesPage() {
     });
   }, [conversations, currentUser?.id, searchValue]);
 
+  const summary = useMemo(() => ({
+    conversations: conversations.length,
+    unread: conversations.reduce((total, conversation) => total + (conversation.unreadCount || 0), 0),
+    active: conversations.filter((conversation) => getParticipant(conversation, currentUser?.id)?.online).length
+  }), [conversations, currentUser?.id]);
+
   const activeConversation = conversations.find((conversation) => conversation.id === activeId);
   const activeParticipant = getParticipant(activeConversation, currentUser?.id);
   const activeProfilePath = activeParticipant?.username
@@ -415,8 +424,61 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="collab-page">
-      <div className="messenger-shell">
+    <div className="collab-page messages-page">
+      <section className="collab-page__hero">
+        <div>
+          <span className="collab-page__eyebrow">VCollab Workflow</span>
+          <h2 className="collab-page__title">Messages</h2>
+        </div>
+      </section>
+
+      <section className="collab-stat-grid">
+        <article className="collab-stat-card">
+          <span className="collab-stat-card__icon"><Inbox size={18} /></span>
+          <div>
+            <strong>{summary.conversations}</strong>
+            <span>Conversations</span>
+          </div>
+        </article>
+        <article className="collab-stat-card">
+          <span className="collab-stat-card__icon"><MessageSquare size={18} /></span>
+          <div>
+            <strong>{summary.unread}</strong>
+            <span>Unread</span>
+          </div>
+        </article>
+        <article className="collab-stat-card">
+          <span className="collab-stat-card__icon"><Users size={18} /></span>
+          <div>
+            <strong>{summary.active}</strong>
+            <span>Active now</span>
+          </div>
+        </article>
+      </section>
+
+      <div className="request-toggle messages-mobile-toggle" role="tablist" aria-label="Message views">
+        <button
+          type="button"
+          className={`request-toggle__button ${mobilePane === "inbox" ? "active" : ""}`}
+          onClick={() => setMobilePane("inbox")}
+          role="tab"
+          aria-selected={mobilePane === "inbox"}
+        >
+          Inbox
+        </button>
+        <button
+          type="button"
+          className={`request-toggle__button ${mobilePane === "thread" ? "active" : ""}`}
+          onClick={() => setMobilePane("thread")}
+          disabled={!activeConversation}
+          role="tab"
+          aria-selected={mobilePane === "thread"}
+        >
+          Thread
+        </button>
+      </div>
+
+      <div className={`messenger-shell messenger-shell--${mobilePane === "thread" && activeConversation ? "thread" : "inbox"}`}>
         <aside className="messenger-sidebar">
           <div className="messenger-sidebar__top">
             <label className="messenger-search">
@@ -465,6 +527,7 @@ export default function MessagesPage() {
                   className={`messenger-conversation-card ${activeId === conversation.id ? "active" : ""}`}
                   onClick={() => {
                     setActiveId(conversation.id);
+                    setMobilePane("thread");
                     navigateToConversation(conversation.id);
                   }}
                 >
@@ -501,6 +564,15 @@ export default function MessagesPage() {
           {activeConversation ? (
             <>
               <header className="messenger-thread__header">
+                <button
+                  type="button"
+                  className="messenger-mobile-back"
+                  onClick={() => setMobilePane("inbox")}
+                  aria-label="Back to inbox"
+                  title="Back to inbox"
+                >
+                  <ArrowLeft size={16} />
+                </button>
                 <div className="messenger-thread__identity">
                   <div className="messenger-thread__avatar">
                     {activeParticipant?.profileImage ? (

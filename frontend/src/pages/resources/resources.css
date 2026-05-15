@@ -4781,3 +4781,640 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ============================================================
+   RESOURCE PAGES RESPONSIVE REFRESH
+   ============================================================ */
+
+.rl2-shell *,
+.resources-shell *,
+.rm2-shell * {
+  box-sizing: border-box;
+}
+
+.rl2-inst-card,
+.rl2-recent-row,
+.professional-folder-card,
+.professional-file-card,
+.rm2-card,
+.rm2-folder-card,
+.rm2-lib-item,
+.rm2-file-row,
+.resources-modal__card {
+  min-width: 0;
+}
+
+.rl2-inst-name,
+.rl2-file-name,
+.folder-card__copy h3,
+.file-card__details strong,
+.rm2-lib-copy strong,
+.rm2-folder-card h3,
+.rm2-file-row__identity strong,
+.resources-modal__card-copy strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 769px) {
+  .rl2-institutions-grid,
+  .rl2-recent-list,
+  .explorer-content-grid,
+  .files-grid {
+    gap: 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  .rl2-container,
+  .container,
+  .rm2-topbar__inner,
+  .rm2-layout {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .rl2-container,
+  .container {
+    padding-inline: 16px;
+  }
+
+  .rl2-sticky-search {
+    padding: 8px 12px;
+  }
+
+  .rl2-sticky-form {
+    gap: 8px;
+    padding: 7px 10px 7px 12px;
+  }
+
+  .rl2-sticky-submit {
+    padding-inline: 12px;
+  }
+
+  .rl2-topbar {
+    padding-top: 12px;
+  }
+
+  .rl2-hero {
+    padding: 34px 0 28px;
+  }
+
+  .rl2-hero__title {
+    margin-bottom: 10px;
+    font-size: clamp(2rem, 10vw, 2.7rem);
+    letter-spacing: -0.03em;
+  }
+
+  .rl2-hero__subtitle {
+    margin-bottom: 24px;
+    font-size: 0.98rem;
+  }
+
+  .rl2-search-bar {
+    max-width: none;
+    gap: 10px;
+    padding: 7px 7px 7px 14px;
+  }
+
+  .rl2-search-submit {
+    width: 42px;
+    height: 42px;
+  }
+
+  .rl2-hero__actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .rl2-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .rl2-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .rl2-stat-item {
+    min-width: 0;
+    padding: 12px 8px;
+    border-radius: 16px;
+  }
+
+  .rl2-stat-item strong {
+    font-size: 1rem;
+  }
+
+  .rl2-stat-item span {
+    font-size: 0.68rem;
+    white-space: nowrap;
+  }
+
+  .rl2-categories {
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .rl2-categories::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rl2-chip-row {
+    width: max-content;
+    min-width: 100%;
+    justify-content: flex-start;
+  }
+
+  .rl2-section__head {
+    align-items: center;
+    gap: 12px;
+  }
+
+  .rl2-section__head h2 {
+    font-size: 1.18rem;
+  }
+
+  .rl2-institutions-grid,
+  .rl2-recent-list {
+    grid-template-columns: 1fr;
+  }
+
+  .rl2-inst-card,
+  .rl2-recent-row {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .rl2-inst-count {
+    margin-left: auto;
+  }
+
+  .rl2-file-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .rl2-footer {
+    padding: 28px 0;
+  }
+
+  .explorer-header--premium {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+
+  .header-content {
+    gap: 10px;
+  }
+
+  .breadcrumb-trail {
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+
+  .breadcrumb-trail::-webkit-scrollbar {
+    display: none;
+  }
+
+  .explorer-main {
+    padding-top: 16px;
+  }
+
+  .explorer-controls {
+    position: sticky;
+    top: 58px;
+    z-index: 20;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--resources-border);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(14px);
+    box-shadow: var(--resources-shadow-sm);
+  }
+
+  .search-pill {
+    width: 100%;
+    max-width: none;
+  }
+
+  .filter-selects {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .filter-selects select {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .explorer-content-grid,
+  .files-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .professional-folder-card,
+  .professional-file-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .folder-card__icon,
+  .file-card__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    flex: 0 0 auto;
+  }
+
+  .folder-card__copy,
+  .file-card__details {
+    min-width: 0;
+  }
+
+  .folder-card__copy h3,
+  .file-card__details strong {
+    max-width: none;
+    white-space: nowrap;
+  }
+
+  .file-card__actions {
+    flex: 0 0 auto;
+  }
+
+  .explorer-files-section {
+    padding-top: 24px;
+  }
+
+  .section-title h2 {
+    font-size: 1.16rem;
+  }
+
+  .rm2-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+
+  .rm2-topbar__inner {
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .rm2-topbar__title span,
+  .rm2-back-link span,
+  .rm2-upload-trigger span {
+    white-space: nowrap;
+  }
+
+  .rm2-upload-trigger {
+    min-width: 42px;
+    padding-inline: 12px;
+  }
+
+  .rm2-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .rm2-sidebar {
+    position: static;
+    display: grid;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .rm2-sidebar-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .rm2-sstat {
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .rm2-sstat__icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .rm2-sstat strong {
+    font-size: 0.92rem;
+  }
+
+  .rm2-sstat span {
+    font-size: 0.68rem;
+    white-space: nowrap;
+  }
+
+  .rm2-sidebar-nav {
+    padding: 10px;
+  }
+
+  .rm2-sidebar-nav__label {
+    padding-inline: 4px;
+  }
+
+  .rm2-sidebar-nav {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .rm2-sidebar-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rm2-sidebar-nav .rm2-nav-item {
+    min-width: 0;
+  }
+
+  .rm2-panel {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .rm2-panel__head {
+    display: grid;
+    gap: 14px;
+  }
+
+  .rm2-panel__title {
+    font-size: 1.35rem;
+  }
+
+  .rm2-panel__desc {
+    font-size: 0.9rem;
+  }
+
+  .rm2-panel__actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .rm2-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .rm2-overview-grid,
+  .rm2-folder-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .rm2-lib-item,
+  .rm2-folder-card,
+  .rm2-file-row {
+    border-radius: 16px;
+  }
+
+  .rm2-toolbar {
+    display: grid;
+    gap: 10px;
+  }
+
+  .rm2-toolbar-search,
+  .rm2-toolbar-create {
+    width: 100%;
+  }
+
+  .rm2-toolbar-create {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .rm2-file-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .rm2-file-row__identity,
+  .rm2-file-row__actions {
+    min-width: 0;
+  }
+
+  .rm2-file-row__actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .rm2-action-btn {
+    width: 100%;
+  }
+
+  .rm2-modal {
+    width: min(100%, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
+    border-radius: 22px;
+  }
+
+  .rm2-modal__head,
+  .rm2-modal__body,
+  .rm2-modal__foot {
+    padding-inline: 16px;
+  }
+
+  .rm2-stepper {
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scrollbar-width: none;
+  }
+
+  .rm2-stepper::-webkit-scrollbar {
+    display: none;
+  }
+
+  .rm2-step-wrap {
+    min-width: 84px;
+  }
+
+  .rm2-two-col,
+  .rm2-choice-grid,
+  .rm2-draft-row {
+    grid-template-columns: 1fr;
+  }
+
+  .rm2-draft-row {
+    align-items: stretch;
+  }
+
+  .resources-modal-overlay {
+    padding: 12px;
+    align-items: stretch;
+  }
+
+  .resources-modal {
+    width: 100%;
+    max-height: calc(100dvh - 24px);
+    border-radius: 22px;
+  }
+
+  .resources-modal__header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .resources-modal__header-info {
+    min-width: 0;
+  }
+
+  .resources-modal__breadcrumbs {
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+
+  .resources-modal__breadcrumbs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .resources-modal__body {
+    padding: 16px;
+  }
+
+  .resources-modal__grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .resources-modal__card {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .resources-modal__footer {
+    display: grid;
+    gap: 10px;
+    padding: 14px 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .rl2-container,
+  .container {
+    padding-inline: 12px;
+  }
+
+  .rl2-badge {
+    margin-bottom: 14px;
+  }
+
+  .rl2-search-bar input,
+  .rl2-sticky-form input,
+  .search-pill input,
+  .rm2-toolbar-search input,
+  .rm2-field-search input {
+    font-size: 16px;
+  }
+
+  .rl2-sticky-submit,
+  .rl2-search-icon {
+    display: none;
+  }
+
+  .rl2-stats-row,
+  .rm2-sidebar-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .rl2-stat-item,
+  .rm2-sstat {
+    justify-content: flex-start;
+  }
+
+  .rl2-section__head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .rl2-inst-card {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .rl2-inst-arrow {
+    display: none;
+  }
+
+  .rl2-recent-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .rl2-row-arrow {
+    display: none;
+  }
+
+  .filter-selects {
+    grid-template-columns: 1fr;
+  }
+
+  .professional-folder-card,
+  .professional-file-card {
+    gap: 12px;
+  }
+
+  .professional-file-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .file-card__actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .file-card__btn {
+    width: 100%;
+  }
+
+  .rm2-topbar__title {
+    justify-content: center;
+  }
+
+  .rm2-topbar__title span,
+  .rm2-back-link span,
+  .rm2-upload-trigger span,
+  .rm2-btn--icon-mobile span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .rm2-file-row__actions {
+    grid-template-columns: 1fr;
+  }
+
+  .rm2-modal__foot {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
