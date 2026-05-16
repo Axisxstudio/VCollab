@@ -187,16 +187,68 @@ export async function feed(request: Request) {
   const bounds = pageInput(request, 12);
   const admin = createSupabaseAdminClient();
   const [projects, posts, blogs] = await Promise.all([
-    admin.from("projects").select("id,title,short_desc,thumbnail,created_at").eq("visibility", "PUBLIC").eq("is_active", true).is("deleted_at", null).order("created_at", { ascending: false }).limit(10),
-    admin.from("posts").select("id,content,created_at").eq("visibility", "PUBLIC").eq("is_active", true).is("deleted_at", null).order("created_at", { ascending: false }).limit(10),
-    admin.from("blogs").select("id,title,cover_image,created_at").eq("visibility", "PUBLIC").eq("is_active", true).is("deleted_at", null).order("created_at", { ascending: false }).limit(10),
+    admin.from("projects")
+      .select("*,author:users!projects_author_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image))")
+      .eq("visibility", "PUBLIC").eq("is_active", true).is("deleted_at", null)
+      .order("created_at", { ascending: false }).limit(20),
+    admin.from("posts")
+      .select("*,author:users!posts_author_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image))")
+      .eq("visibility", "PUBLIC").eq("is_active", true).is("deleted_at", null)
+      .order("created_at", { ascending: false }).limit(20),
+    admin.from("blogs")
+      .select("*,author:users!blogs_author_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image))")
+      .eq("visibility", "PUBLIC").eq("is_active", true).is("deleted_at", null)
+      .order("created_at", { ascending: false }).limit(20),
   ]);
+
   const items = [
-    ...(projects.data ?? []).map((item: any) => ({ type: "PROJECT", contentType: "PROJECT", contentId: item.id, title: item.title, excerpt: item.short_desc, thumbnailUrl: item.thumbnail, createdAt: item.created_at })),
-    ...(posts.data ?? []).map((item: any) => ({ type: "POST", contentType: "POST", contentId: item.id, title: `Post #${item.id}`, excerpt: item.content, createdAt: item.created_at })),
-    ...(blogs.data ?? []).map((item: any) => ({ type: "BLOG", contentType: "BLOG", contentId: item.id, title: item.title, thumbnailUrl: item.cover_image, createdAt: item.created_at })),
+    ...(projects.data ?? []).map((item: any) => ({
+      id: item.id,
+      type: "PROJECT",
+      contentType: "PROJECT",
+      title: item.title,
+      excerpt: item.short_desc,
+      thumbnailUrl: item.thumbnail,
+      createdAt: item.created_at,
+      author: mapUser(item.author),
+      likeCount: item.like_count,
+      commentCount: item.comment_count,
+      saveCount: item.save_count,
+      shareCount: item.share_count,
+      tags: item.tags || []
+    })),
+    ...(posts.data ?? []).map((item: any) => ({
+      id: item.id,
+      type: "POST",
+      contentType: "POST",
+      title: item.title || `Post #${item.id}`,
+      excerpt: item.content,
+      createdAt: item.created_at,
+      author: mapUser(item.author),
+      likeCount: item.like_count,
+      commentCount: item.comment_count,
+      saveCount: item.save_count,
+      shareCount: item.share_count,
+      tags: item.tags || []
+    })),
+    ...(blogs.data ?? []).map((item: any) => ({
+      id: item.id,
+      type: "BLOG",
+      contentType: "BLOG",
+      title: item.title,
+      excerpt: item.excerpt,
+      thumbnailUrl: item.cover_image,
+      createdAt: item.created_at,
+      author: mapUser(item.author),
+      likeCount: item.like_count,
+      commentCount: item.comment_count,
+      saveCount: item.save_count,
+      shareCount: item.share_count,
+      tags: item.tags || []
+    })),
   ].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
-  return toPageResponse(items.slice(0, bounds.size), items.length, bounds.page, bounds.size);
+
+  return toPageResponse(items.slice(bounds.from, bounds.to + 1), items.length, bounds.page, bounds.size);
 }
 
 export async function listNotifications(request: Request) {
