@@ -21,9 +21,11 @@ import {
   Trash2,
   TriangleAlert,
   Users,
+  User,
   ChevronLeft,
   ChevronRight,
-  Menu
+  Menu,
+  X
 } from "lucide-react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import NotificationBell from "../components/notifications/NotificationBell";
@@ -91,7 +93,9 @@ export default function AdminLayout() {
   });
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const createRef = useRef(null);
+  const userDropdownRef = useRef(null);
 
   const toggleSidebar = () => {
     const newState = !isCollapsed;
@@ -134,6 +138,17 @@ export default function AdminLayout() {
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleEscape);
     };
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleSearchSubmit = (event) => {
@@ -250,6 +265,7 @@ export default function AdminLayout() {
             className="mobile-menu-btn" 
             onClick={() => setIsMobileOpen(prev => !prev)}
             aria-label="Toggle menu"
+            style={{ zIndex: 1100, position: 'relative' }}
           >
             <Menu size={24} />
           </button>
@@ -312,15 +328,51 @@ export default function AdminLayout() {
                 <div className="icon-btn-pro">
                   <Settings size={18} />
                 </div>
-                <Link to={getProfilePath(user?.username)} className="icon-btn-pro admin-avatar-btn">
-                  <div className="admin-user-nav-avatar">
-                    {user?.profileImage ? (
-                      <img src={user.profileImage} alt={user?.fullName || user?.username || "Administrator"} />
-                    ) : (
-                      getInitials(user?.fullName || user?.username)
-                    )}
-                  </div>
-                </Link>
+                <div 
+                  ref={userDropdownRef}
+                  className="user-nav-container"
+                  style={{ position: 'relative' }}
+                >
+                  <button
+                    type="button"
+                    className="icon-btn-pro admin-avatar-btn"
+                    onClick={() => setShowDropdown((current) => !current)}
+                    aria-label="Open profile menu"
+                    aria-haspopup="menu"
+                    aria-expanded={showDropdown}
+                  >
+                    <div className="admin-user-nav-avatar">
+                      {user?.profileImage ? (
+                        <img src={user.profileImage} alt={user?.fullName || user?.username || "Administrator"} />
+                      ) : (
+                        getInitials(user?.fullName || user?.username)
+                      )}
+                    </div>
+                  </button>
+
+                  {showDropdown && (
+                    <div className="user-nav-dropdown" role="menu">
+                      <div className="dropdown-header">
+                        <strong>{user?.fullName || user?.username}</strong>
+                        <span>@{user?.username}</span>
+                      </div>
+                      <div className="dropdown-divider" />
+                      <Link to={getProfilePath(user?.username)} className="dropdown-item" onClick={() => setShowDropdown(false)} role="menuitem">
+                        <User size={16} />
+                        <span>My Profile</span>
+                      </Link>
+                      <Link to={routes.settings} className="dropdown-item" onClick={() => setShowDropdown(false)} role="menuitem">
+                        <Settings size={16} />
+                        <span>Settings</span>
+                      </Link>
+                      <div className="dropdown-divider" />
+                      <button type="button" className="dropdown-item dropdown-item--danger" onClick={handleLogout} role="menuitem">
+                        <LogOut size={16} />
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

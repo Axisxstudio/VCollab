@@ -5343,6 +5343,12 @@
     border-radius: 0 !important;
   }
 
+  .admin-sidebar-pro,
+  .admin-sidebar-pro.collapsed {
+    background: #07131f !important; /* Keep premium dark theme for admin on mobile */
+    border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
 
 
   .workspace-sidebar.mobile-open,
@@ -5358,6 +5364,13 @@
   .admin-sidebar-pro.collapsed .admin-nav-label,
   .admin-sidebar-pro.collapsed span {
     display: inline-block !important;
+  }
+
+  .admin-sidebar-pro .admin-toggle-btn,
+  .admin-sidebar-pro .mobile-close-btn {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
   }
 
   .workspace-sidebar.collapsed .workspace-brand-text {
