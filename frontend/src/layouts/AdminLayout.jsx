@@ -261,117 +261,119 @@ export default function AdminLayout() {
 
       <div className="workspace-main admin-main-panel">
         <header className="admin-topbar-pro">
-          <button 
-            className="mobile-menu-btn" 
-            onClick={() => setIsMobileOpen(prev => !prev)}
-            aria-label="Toggle menu"
-            style={{ zIndex: 1100, position: 'relative' }}
-          >
-            <Menu size={24} />
-          </button>
-          <div className="admin-topbar-copy">
-            <h2>{currentNavItem.label}</h2>
-          </div>
+          <div className="admin-topbar-inner">
+            <button 
+              className="mobile-menu-btn" 
+              onClick={() => setIsMobileOpen(prev => !prev)}
+              aria-label="Toggle menu"
+              style={{ zIndex: 1100, position: 'relative' }}
+            >
+              <Menu size={24} />
+            </button>
+            <div className="admin-topbar-copy">
+              <h2>{currentNavItem.label}</h2>
+            </div>
 
-          <div className="admin-topbar-toolbar">
-            <form className="admin-search-wrapper" onSubmit={handleSearchSubmit}>
-              <Search className="admin-search-icon" size={18} />
-              <input
-                type="text"
-                className="admin-search-input"
-                placeholder="Search contributors, projects, posts, or blogs"
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                aria-label="Search VCollab"
-              />
-            </form>
+            <div className="admin-topbar-toolbar">
+              <form className="admin-search-wrapper" onSubmit={handleSearchSubmit}>
+                <Search className="admin-search-icon" size={18} />
+                <input
+                  type="text"
+                  className="admin-search-input"
+                  placeholder="Search contributors, projects, posts, or blogs"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  aria-label="Search VCollab"
+                />
+              </form>
 
-            <div className="admin-header-actions">
-              <div
-                ref={createRef}
-                className={`admin-topbar-create-dock ${createOpen ? "is-open" : ""}`}
-                onMouseEnter={() => setCreateOpen(true)}
-                onMouseLeave={() => setCreateOpen(false)}
-              >
-                <button
-                  type="button"
-                  className="admin-topbar-create-btn"
-                  aria-haspopup="menu"
-                  aria-expanded={createOpen}
-                  aria-label="Create content"
-                  title="Create content"
-                  onClick={() => setCreateOpen((prev) => !prev)}
-                >
-                  <CirclePlus size={20} />
-                </button>
-
-                <div className="admin-topbar-create-menu" role="menu" aria-label="Create options">
-                  {QUICK_CREATE_LINKS.map((item) => (
-                    <Link
-                      key={item.to}
-                      to={item.to}
-                      className="admin-topbar-create-option"
-                      role="menuitem"
-                      onClick={() => setCreateOpen(false)}
-                    >
-                      <CirclePlus size={14} />
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              <div className="admin-utility-group">
-                <div className="icon-btn-pro">
-                  <NotificationBell icon={Bell} size={18} />
-                </div>
-                <div className="icon-btn-pro">
-                  <Settings size={18} />
-                </div>
-                <div 
-                  ref={userDropdownRef}
-                  className="user-nav-container"
-                  style={{ position: 'relative' }}
+              <div className="admin-header-actions">
+                <div
+                  ref={createRef}
+                  className={`admin-topbar-create-dock ${createOpen ? "is-open" : ""}`}
+                  onMouseEnter={() => setCreateOpen(true)}
+                  onMouseLeave={() => setCreateOpen(false)}
                 >
                   <button
                     type="button"
-                    className="icon-btn-pro admin-avatar-btn"
-                    onClick={() => setShowDropdown((current) => !current)}
-                    aria-label="Open profile menu"
+                    className="admin-topbar-create-btn"
                     aria-haspopup="menu"
-                    aria-expanded={showDropdown}
+                    aria-expanded={createOpen}
+                    aria-label="Create content"
+                    title="Create content"
+                    onClick={() => setCreateOpen((prev) => !prev)}
                   >
-                    <div className="admin-user-nav-avatar">
-                      {user?.profileImage ? (
-                        <img src={user.profileImage} alt={user?.fullName || user?.username || "Administrator"} />
-                      ) : (
-                        getInitials(user?.fullName || user?.username)
-                      )}
-                    </div>
+                    <CirclePlus size={20} />
                   </button>
 
-                  {showDropdown && (
-                    <div className="user-nav-dropdown" role="menu">
-                      <div className="dropdown-header">
-                        <strong>{user?.fullName || user?.username}</strong>
-                        <span>@{user?.username}</span>
+                  <div className="admin-topbar-create-menu" role="menu" aria-label="Create options">
+                    {QUICK_CREATE_LINKS.map((item) => (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        className="admin-topbar-create-option"
+                        role="menuitem"
+                        onClick={() => setCreateOpen(false)}
+                      >
+                        <CirclePlus size={14} />
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="admin-utility-group">
+                  <div className="icon-btn-pro">
+                    <NotificationBell icon={Bell} size={18} />
+                  </div>
+                  <div className="icon-btn-pro">
+                    <Settings size={18} />
+                  </div>
+                  <div 
+                    ref={userDropdownRef}
+                    className="user-nav-container"
+                    style={{ position: 'relative' }}
+                  >
+                    <button
+                      type="button"
+                      className="icon-btn-pro admin-avatar-btn"
+                      onClick={() => setShowDropdown((current) => !current)}
+                      aria-label="Open profile menu"
+                      aria-haspopup="menu"
+                      aria-expanded={showDropdown}
+                    >
+                      <div className="admin-user-nav-avatar">
+                        {user?.profileImage ? (
+                          <img src={user.profileImage} alt={user?.fullName || user?.username || "Administrator"} />
+                        ) : (
+                          getInitials(user?.fullName || user?.username)
+                        )}
                       </div>
-                      <div className="dropdown-divider" />
-                      <Link to={getProfilePath(user?.username)} className="dropdown-item" onClick={() => setShowDropdown(false)} role="menuitem">
-                        <User size={16} />
-                        <span>My Profile</span>
-                      </Link>
-                      <Link to={routes.settings} className="dropdown-item" onClick={() => setShowDropdown(false)} role="menuitem">
-                        <Settings size={16} />
-                        <span>Settings</span>
-                      </Link>
-                      <div className="dropdown-divider" />
-                      <button type="button" className="dropdown-item dropdown-item--danger" onClick={handleLogout} role="menuitem">
-                        <LogOut size={16} />
-                        <span>Logout</span>
-                      </button>
-                    </div>
-                  )}
+                    </button>
+
+                    {showDropdown && (
+                      <div className="user-nav-dropdown" role="menu">
+                        <div className="dropdown-header">
+                          <strong>{user?.fullName || user?.username}</strong>
+                          <span>@{user?.username}</span>
+                        </div>
+                        <div className="dropdown-divider" />
+                        <Link to={getProfilePath(user?.username)} className="dropdown-item" onClick={() => setShowDropdown(false)} role="menuitem">
+                          <User size={16} />
+                          <span>My Profile</span>
+                        </Link>
+                        <Link to={routes.settings} className="dropdown-item" onClick={() => setShowDropdown(false)} role="menuitem">
+                          <Settings size={16} />
+                          <span>Settings</span>
+                        </Link>
+                        <div className="dropdown-divider" />
+                        <button type="button" className="dropdown-item dropdown-item--danger" onClick={handleLogout} role="menuitem">
+                          <LogOut size={16} />
+                          <span>Logout</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

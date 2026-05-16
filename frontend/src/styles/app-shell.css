@@ -1237,7 +1237,11 @@
 
 /* Dashboard Content */
 .admin-pro-container {
+  max-width: 1300px;
+  width: 100%;
+  margin: 0 auto;
   padding: 16px 40px 40px;
+  box-sizing: border-box;
 }
 
 .live-status-badge {
@@ -2004,15 +2008,23 @@
   position: sticky;
   top: 0;
   z-index: 30;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 16px 32px;
   background: linear-gradient(180deg, rgba(245, 247, 251, 0.98), rgba(245, 247, 251, 0.92));
   border-bottom: 1px solid rgba(21, 50, 75, 0.08);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  width: 100%;
+}
+
+.admin-topbar-inner {
+  max-width: 1300px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  box-sizing: border-box;
 }
 
 .admin-topbar-copy {
@@ -5178,7 +5190,8 @@
   }
 
   .workspace-topbar,
-  .admin-topbar-pro {
+  .admin-topbar-pro,
+  .admin-topbar-inner {
     padding: 12px 16px !important;
     border-radius: 0 !important;
     margin: 0 !important;
@@ -5347,6 +5360,7 @@
   .admin-sidebar-pro.collapsed {
     background: #07131f !important; /* Keep premium dark theme for admin on mobile */
     border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+    overflow: hidden !important;
   }
 
 
@@ -5371,6 +5385,22 @@
     background: rgba(255, 255, 255, 0.1) !important;
     border-color: rgba(255, 255, 255, 0.1) !important;
     color: #ffffff !important;
+  }
+
+  .admin-nav-pro {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    padding-right: 4px !important;
+    margin-right: -4px !important;
+  }
+
+  .admin-nav-pro::-webkit-scrollbar {
+    width: 4px !important;
+  }
+
+  .admin-nav-pro::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 2px !important;
   }
 
   .workspace-sidebar.collapsed .workspace-brand-text {
