@@ -1,4 +1,4 @@
-﻿import api from "../lib/axios";
+import api from "../lib/axios";
 
 function normalizeParams(params = {}) {
   return Object.fromEntries(
@@ -35,7 +35,9 @@ export async function getAdminDashboardSummary() {
 }
 
 export async function listAdminUsers(params) {
-  const response = await api.get("/admin/users", { params });
+  const response = await api.get("/admin/users", {
+    params: normalizeParams(params)
+  });
   return response.data.data;
 }
 
@@ -50,7 +52,9 @@ export async function deleteAdminUser(id) {
 }
 
 export async function listAdminReports(params) {
-  const response = await api.get("/admin/reports", { params });
+  const response = await api.get("/admin/reports", {
+    params: normalizeParams(params)
+  });
   return response.data.data;
 }
 
@@ -65,7 +69,9 @@ export async function deleteAdminReport(id) {
 }
 
 export async function listAdminWarnings(params) {
-  const response = await api.get("/admin/warnings", { params });
+  const response = await api.get("/admin/warnings", {
+    params: normalizeParams(params)
+  });
   return response.data.data;
 }
 
@@ -97,7 +103,9 @@ export async function updateAdminCmsBlock(id, payload) {
 }
 
 export async function listAdminProjects(params) {
-  const response = await api.get("/admin/projects", { params });
+  const response = await api.get("/admin/projects", {
+    params: normalizeParams(params)
+  });
   return response.data.data;
 }
 
@@ -117,7 +125,9 @@ export async function restoreAdminProject(id) {
 }
 
 export async function listAdminPosts(params) {
-  const response = await api.get("/admin/posts", { params });
+  const response = await api.get("/admin/posts", {
+    params: normalizeParams(params)
+  });
   return response.data.data;
 }
 
@@ -137,7 +147,9 @@ export async function restoreAdminPost(id) {
 }
 
 export async function listAdminBlogs(params) {
-  const response = await api.get("/admin/blogs", { params });
+  const response = await api.get("/admin/blogs", {
+    params: normalizeParams(params)
+  });
   return response.data.data;
 }
 

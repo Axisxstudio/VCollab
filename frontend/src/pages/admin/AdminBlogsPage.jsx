@@ -10,7 +10,6 @@ export default function AdminBlogsPage() {
   return (
     <AdminContentManager
       title="Blog moderation"
-      description="Review article visibility, manage published blog status, and recover moderated pieces when needed."
       contentType="BLOG"
       queryKeyPrefix={["admin", "blogs"]}
       listFn={listAdminBlogs}

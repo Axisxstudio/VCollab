@@ -88,6 +88,7 @@ export default function AdminLayout() {
   const user = useAuthStore((state) => state.user);
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(() => {
     return localStorage.getItem("sidebar-collapsed-admin") === "true";
   });
@@ -275,17 +276,37 @@ export default function AdminLayout() {
             </div>
 
             <div className="admin-topbar-toolbar">
-              <form className="admin-search-wrapper" onSubmit={handleSearchSubmit}>
-                <Search className="admin-search-icon" size={18} />
-                <input
-                  type="text"
-                  className="admin-search-input"
-                  placeholder="Search contributors, projects, posts, or blogs"
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  aria-label="Search VCollab"
-                />
-              </form>
+              <div className="admin-search-container" style={{ display: "flex", alignItems: "center" }}>
+                {!isSearchOpen ? (
+                  <button type="button" className="icon-btn-pro" onClick={() => setIsSearchOpen(true)} aria-label="Open search">
+                    <Search size={18} />
+                  </button>
+                ) : (
+                  <form 
+                    className="admin-search-wrapper" 
+                    onSubmit={handleSearchSubmit}
+                    style={{ display: "flex", alignItems: "center", position: "absolute", right: "24px", left: "24px", top: "50%", transform: "translateY(-50%)", zIndex: 10, background: "#ffffff", padding: "10px", borderRadius: "18px", boxShadow: "0 10px 40px rgba(0,0,0,0.1)" }}
+                  >
+                    <Search className="admin-search-icon" size={18} style={{ position: "absolute", left: "22px", zIndex: 2 }} />
+                    <input
+                      type="text"
+                      className="admin-search-input"
+                      placeholder="Search VCollab..."
+                      value={searchTerm}
+                      onChange={(event) => setSearchTerm(event.target.value)}
+                      aria-label="Search VCollab"
+                      autoFocus
+                      onBlur={() => {
+                        if (!searchTerm.trim()) setIsSearchOpen(false);
+                      }}
+                      style={{ paddingLeft: "40px", flex: 1, width: "100%", margin: 0 }}
+                    />
+                    <button type="button" className="admin-icon-btn" style={{ marginLeft: "8px", border: "none", background: "transparent", boxShadow: "none" }} onClick={() => setIsSearchOpen(false)}>
+                      <X size={18} />
+                    </button>
+                  </form>
+                )}
+              </div>
 
               <div className="admin-header-actions">
                 <div
@@ -323,9 +344,7 @@ export default function AdminLayout() {
                 </div>
 
                 <div className="admin-utility-group">
-                  <div className="icon-btn-pro">
-                    <NotificationBell icon={Bell} size={18} />
-                  </div>
+                  <NotificationBell icon={Bell} size={18} />
                   <div className="icon-btn-pro">
                     <Settings size={18} />
                   </div>

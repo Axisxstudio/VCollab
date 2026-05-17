@@ -2349,6 +2349,13 @@
   transform: translateY(-1px);
 }
 
+.btn-glass.active {
+  background: var(--admin-accent-primary) !important;
+  color: #ffffff !important;
+  border-color: var(--admin-accent-primary) !important;
+  box-shadow: 0 4px 14px rgba(29, 95, 168, 0.3) !important;
+}
+
 .btn-glow-danger,
 .admin-shell .btn-primary {
   background: linear-gradient(135deg, var(--admin-accent-primary), var(--admin-accent-secondary)) !important;
@@ -5226,11 +5233,48 @@
   .workspace-top-actions,
   .admin-topbar-toolbar {
     order: 3 !important;
-    margin-left: 0 !important;
+    margin-left: auto !important;
+    flex: none !important;
     width: auto !important;
     display: flex !important;
     align-items: center !important;
-    gap: 4px !important;
+    gap: 12px !important;
+  }
+
+  .admin-header-actions {
+    gap: 12px !important;
+    flex: none !important;
+  }
+
+  .admin-filter-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .admin-filter-grid > div {
+    grid-column: span 1 !important;
+  }
+
+  .header-btn-group {
+    display: flex !important;
+    gap: 8px !important;
+    align-items: center !important;
+  }
+
+  .header-btn-group button,
+  .header-btn-group a {
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .header-btn-group button span,
+  .header-btn-group a span {
+    display: none !important;
   }
 
   .workspace-eyebrow,
@@ -5443,9 +5487,16 @@
   }
 
   .workspace-container,
-  .admin-pro-container,
   .profile-shell {
     padding: 0 !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+  }
+
+  .admin-pro-container {
+    padding: 16px 18px !important;
     width: 100% !important;
     overflow-x: hidden !important;
     box-sizing: border-box !important;
@@ -5624,7 +5675,7 @@
   textarea {
     font-size: 16px !important;
     /* Prevents iOS zoom */
-    padding: 10px 14px !important;
+    padding: 10px 14px;
   }
 
   /* Profile Page Mobile Layout */

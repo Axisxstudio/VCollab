@@ -67,7 +67,7 @@ export async function listComments(request: Request) {
 
 function mapUser(row: any) {
   const profile = Array.isArray(row?.user_profiles) ? row.user_profiles[0] : row?.user_profiles;
-  return { id: row?.id ?? 0, username: row?.username ?? "", fullName: profile?.full_name ?? null, profileImage: profile?.profile_image ?? null };
+  return { id: row?.id ?? 0, username: row?.username ?? "", fullName: profile?.full_name ?? null, profileImage: profile?.profile_image ?? null, educationType: profile?.education_type ?? null };
 }
 
 function mapComment(row: any) {
@@ -188,15 +188,15 @@ export async function feed(request: Request) {
   const admin = createSupabaseAdminClient();
   const [projects, posts, blogs] = await Promise.all([
     admin.from("projects")
-      .select("*,author:users!projects_author_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image))")
+      .select("*,author:users!projects_owner_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image,education_type))")
       .eq("visibility", "PUBLIC").eq("is_active", true).is("deleted_at", null)
       .order("created_at", { ascending: false }).limit(20),
     admin.from("posts")
-      .select("*,author:users!posts_author_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image))")
+      .select("*,author:users!posts_author_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image,education_type))")
       .eq("visibility", "PUBLIC").eq("is_active", true).is("deleted_at", null)
       .order("created_at", { ascending: false }).limit(20),
     admin.from("blogs")
-      .select("*,author:users!blogs_author_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image))")
+      .select("*,author:users!blogs_author_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image,education_type))")
       .eq("visibility", "PUBLIC").eq("is_active", true).is("deleted_at", null)
       .order("created_at", { ascending: false }).limit(20),
   ]);
@@ -215,7 +215,8 @@ export async function feed(request: Request) {
       commentCount: item.comment_count,
       saveCount: item.save_count,
       shareCount: item.share_count,
-      tags: item.tags || []
+      tags: item.tags || [],
+      targetType: "ALL"
     })),
     ...(posts.data ?? []).map((item: any) => ({
       id: item.id,
@@ -229,7 +230,8 @@ export async function feed(request: Request) {
       commentCount: item.comment_count,
       saveCount: item.save_count,
       shareCount: item.share_count,
-      tags: item.tags || []
+      tags: item.tags || [],
+      targetType: "ALL"
     })),
     ...(blogs.data ?? []).map((item: any) => ({
       id: item.id,
@@ -244,7 +246,8 @@ export async function feed(request: Request) {
       commentCount: item.comment_count,
       saveCount: item.save_count,
       shareCount: item.share_count,
-      tags: item.tags || []
+      tags: item.tags || [],
+      targetType: "ALL"
     })),
   ].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
 

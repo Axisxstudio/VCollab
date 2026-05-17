@@ -10,7 +10,6 @@ export default function AdminPostsPage() {
   return (
     <AdminContentManager
       title="Post moderation"
-      description="Control feed visibility, deactivate disruptive updates, and send non-compliant posts into the recycle bin."
       contentType="POST"
       queryKeyPrefix={["admin", "posts"]}
       listFn={listAdminPosts}

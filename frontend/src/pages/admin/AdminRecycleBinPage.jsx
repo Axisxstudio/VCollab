@@ -112,7 +112,6 @@ export default function AdminRecycleBinPage() {
             <Trash2 size={20} color="var(--admin-accent-primary)" />
             <h3 style={{ margin: 0 }}>Storage Sectors</h3>
           </div>
-          <p className="stream-meta-label">Review decommissioned content before permanent extraction.</p>
           
           <div className="admin-tab-row" style={{ marginTop: '24px', border: 'none', gap: '8px' }}>
             {RECYCLE_TABS.map((tab) => {
@@ -151,7 +150,6 @@ export default function AdminRecycleBinPage() {
         <AdminContentManager
           key={currentTab.value}
           title={`${currentTab.label} Archive`}
-          description="Only soft-deleted content appears here. Restore carefully so visibility and active-state rules stay consistent."
           contentType={currentTab.value}
           queryKeyPrefix={["admin", "recycle-bin", currentTab.value.toLowerCase()]}
           listFn={currentTab.listFn}
@@ -165,7 +163,6 @@ export default function AdminRecycleBinPage() {
           key={currentTab.value}
           entityType={currentTab.value}
           title={`${currentTab.label} Archive`}
-          description="Deleted operational records remain recoverable here so moderation and collaboration history stay auditable."
         />
       )}
     </div>

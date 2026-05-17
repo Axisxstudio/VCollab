@@ -101,7 +101,7 @@ export default function HomePage() {
   }
 
   const feed = data || {};
-  const items = feed.items || [];
+  const items = feed.content || feed.items || [];
   const visibleItems = sortContentForViewerPriority(
     items.filter((item) => shouldShowContentForViewer({
       viewerEducationType,

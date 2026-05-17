@@ -583,18 +583,48 @@
 }
 
 @media (max-width: 640px) {
-  .admin-dashboard-stat-grid,
+  .admin-dashboard-stat-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px; /* space for layout, if needed */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  .admin-dashboard-stat-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-dashboard-stat-card {
+    min-width: 260px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    min-height: auto;
+  }
+
   .admin-dashboard-focus-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .admin-dashboard-focus-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-dashboard-focus-card {
+    min-width: 220px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
   }
 
   .admin-dashboard-masthead,
   .admin-dashboard-panel {
     padding: 16px;
-  }
-
-  .admin-dashboard-stat-card {
-    min-height: auto;
   }
 
   .admin-dashboard-activity-item {

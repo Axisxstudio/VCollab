@@ -63,7 +63,7 @@ export default function AdminRecycleRecordList({
       <div className="command-center-header admin-page-heading">
         <div>
           <h1>{title}</h1>
-          <p className="admin-page-description">{description}</p>
+          {description && <p className="admin-page-description">{description}</p>}
         </div>
       </div>
 

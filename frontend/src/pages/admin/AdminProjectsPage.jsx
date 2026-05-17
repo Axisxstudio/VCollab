@@ -10,7 +10,6 @@ export default function AdminProjectsPage() {
   return (
     <AdminContentManager
       title="Project moderation"
-      description="Review project visibility, deactivate problematic work, and move content into the recycle bin when needed."
       contentType="PROJECT"
       queryKeyPrefix={["admin", "projects"]}
       listFn={listAdminProjects}

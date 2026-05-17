@@ -8,6 +8,7 @@ import {
   CirclePlus,
   Eye,
   FileDown,
+  Filter,
   Folder,
   Globe,
   Heart,
@@ -115,6 +116,7 @@ export default function AdminContentManager({
   const [warningTarget, setWarningTarget] = useState(null);
   const [warningForm, setWarningForm] = useState({ title: "", message: "", reason: "" });
   const [warningFeedback, setWarningFeedback] = useState("");
+  const [isFiltersVisible, setIsFiltersVisible] = useState(false);
 
   useFeedUpdates({ queryKeys: [queryKeyPrefix, ["admin", "summary"]] });
 
@@ -269,24 +271,34 @@ export default function AdminContentManager({
       <div className="command-center-header admin-page-heading">
         <div>
           <h1>{title}</h1>
-          <p className="admin-page-description">{description}</p>
+          {description && <p className="admin-page-description">{description}</p>}
         </div>
         <div className="header-btn-group">
+          <button 
+            type="button" 
+            className={`btn-glass ${isFiltersVisible ? "active" : ""}`}
+            onClick={() => setIsFiltersVisible(prev => !prev)}
+            title="Toggle filters"
+          >
+            <Filter size={16} />
+            <span>Filters</span>
+          </button>
           <button type="button" className="btn-glass" onClick={handleExportFiltered} disabled={busyKey === "export-filtered"}>
             <FileDown size={16} />
-            {busyKey === "export-filtered" ? "Preparing PDF..." : "Export PDF"}
+            <span>{busyKey === "export-filtered" ? "Preparing PDF..." : "Export PDF"}</span>
           </button>
           {!deletedMode && (
             <Link to={createRoute} className="btn-glow-danger admin-primary-link">
               <CirclePlus size={16} />
-              {CREATE_LABELS[contentType]}
+              <span>{CREATE_LABELS[contentType]}</span>
             </Link>
           )}
         </div>
       </div>
 
       {/* Filters */}
-      <section className="card admin-filter-panel">
+      {isFiltersVisible && (
+        <section className="card admin-filter-panel">
         <div className="admin-filter-grid">
           <div style={{ position: "relative", gridColumn: "span 2" }}>
             <Search className="admin-search-icon" size={18} style={{ left: "12px" }} />
@@ -328,6 +340,7 @@ export default function AdminContentManager({
           </select>
         </div>
       </section>
+      )}
 
       {/* Warning panel */}
       {warningTarget && (

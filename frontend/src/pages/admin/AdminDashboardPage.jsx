@@ -240,9 +240,6 @@ export default function AdminDashboardPage() {
         <div className="admin-dashboard-masthead__copy">
           <span className="admin-dashboard-kicker">Compact command center</span>
           <h1>Operational snapshot</h1>
-          <p className="admin-page-description admin-dashboard-description">
-            A smaller, cleaner admin dashboard for publishing, moderation, and platform control.
-          </p>
         </div>
 
         <div className="admin-dashboard-masthead__signals">
@@ -293,10 +290,6 @@ export default function AdminDashboardPage() {
           <div className="admin-dashboard-panel__header">
             <div className="admin-dashboard-panel__title-block">
               <span className="admin-dashboard-panel__eyebrow">Recent signals</span>
-              <div>
-                <h3>Administrative activity</h3>
-                <p>Latest reports and warnings in a tighter review list.</p>
-              </div>
             </div>
 
             <Link
@@ -352,10 +345,6 @@ export default function AdminDashboardPage() {
             <div className="admin-dashboard-panel__header">
               <div className="admin-dashboard-panel__title-block">
                 <span className="admin-dashboard-panel__eyebrow">Quick actions</span>
-                <div>
-                  <h3>Icon-first controls</h3>
-                  <p>Compact shortcuts for content, audits, and exports.</p>
-                </div>
               </div>
             </div>
 
@@ -430,20 +419,12 @@ export default function AdminDashboardPage() {
                 );
               })}
             </div>
-
-            <p className="admin-dashboard-helper-copy">
-              Hover or click the plus button to reveal create options to the right.
-            </p>
           </section>
 
           <section className="admin-dashboard-panel">
             <div className="admin-dashboard-panel__header">
               <div className="admin-dashboard-panel__title-block">
                 <span className="admin-dashboard-panel__eyebrow">Priority counters</span>
-                <div>
-                  <h3>Moderation radar</h3>
-                  <p>Small status tiles for the queues that matter most.</p>
-                </div>
               </div>
             </div>
 

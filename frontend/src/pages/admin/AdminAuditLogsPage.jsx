@@ -48,6 +48,7 @@ export default function AdminAuditLogsPage() {
   const [filters, setFilters] = useState({ search: "", module: "", action: "" });
   const [page, setPage] = useState(0);
   const [detailLog, setDetailLog] = useState(null);
+  const [isFiltersVisible, setIsFiltersVisible] = useState(false);
 
   const params = {
     page,
@@ -75,44 +76,66 @@ export default function AdminAuditLogsPage() {
   };
 
   return (
-    <div className="admin-pro-stack admin-page-stack">
-      <div className="live-status-badge">Sequential Audit Database</div>
-
-      <div className="command-center-header admin-page-heading">
-        <div>
+    <div className="admin-dashboard-v2 admin-pro-stack admin-page-stack">
+      <section className="admin-dashboard-masthead">
+        <div className="admin-dashboard-masthead__copy">
+          <span className="admin-dashboard-kicker">Sequential Database</span>
           <h1>Audit Logs</h1>
-          <p className="admin-page-description">
-            Full sequential record of all administrative actions — actor, module, action type, target, and timestamp.
-          </p>
         </div>
-      </div>
+
+        <div className="header-btn-group">
+          <button 
+            type="button" 
+            className={`btn-glass ${isFiltersVisible ? "active" : ""}`}
+            onClick={() => setIsFiltersVisible(prev => !prev)}
+            title="Toggle filters"
+          >
+            <Filter size={16} />
+            <span>Filters</span>
+          </button>
+        </div>
+      </section>
 
       {/* Filters */}
-      <section className="card admin-filter-panel">
+      {isFiltersVisible && (
+        <section className="admin-dashboard-panel admin-filter-panel" style={{ overflow: "visible", padding: "18px" }}>
         <div className="admin-filter-grid">
           <div style={{ position: "relative", gridColumn: "span 2" }}>
-            <Search className="admin-search-icon" size={18} style={{ left: "12px" }} />
+            <Search size={16} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "#8292a3", pointerEvents: "none" }} />
             <input
-              type="text" className="admin-search-input" style={{ paddingLeft: "40px" }}
-              value={filters.search} placeholder="Search event summary, actor, or target UUID"
+              type="text" 
+              style={{ width: "100%", boxSizing: "border-box", paddingTop: "10px", paddingBottom: "10px", paddingRight: "12px", paddingLeft: "38px", border: "1px solid #d7e0ea", borderRadius: "12px", fontSize: "0.85rem", background: "#f8fbff", color: "#10233d" }}
+              value={filters.search} 
+              placeholder="Search logs..."
               onChange={(event) => handleFilterChange("search", event.target.value)}
             />
           </div>
           <div style={{ position: "relative" }}>
-            <Filter className="admin-search-icon" size={18} style={{ left: "12px" }} />
-            <select value={filters.module} style={{ paddingLeft: "40px" }} onChange={(event) => handleFilterChange("module", event.target.value)}>
+            <Filter size={16} style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "#8292a3", pointerEvents: "none" }} />
+            <select 
+              value={filters.module} 
+              style={{ width: "100%", boxSizing: "border-box", paddingTop: "10px", paddingBottom: "10px", paddingRight: "12px", paddingLeft: "38px", border: "1px solid #d7e0ea", borderRadius: "12px", fontSize: "0.85rem", background: "#f8fbff", color: "#10233d" }} 
+              onChange={(event) => handleFilterChange("module", event.target.value)}
+            >
               {MODULE_OPTIONS.map((option) => (
                 <option key={option || "all"} value={option}>{option ? `Module: ${option}` : "All Modules"}</option>
               ))}
             </select>
           </div>
-          <select value={filters.action} onChange={(event) => handleFilterChange("action", event.target.value)}>
-            {ACTION_OPTIONS.map((option) => (
-              <option key={option || "all"} value={option}>{option ? `Action: ${option}` : "All Actions"}</option>
-            ))}
-          </select>
+          <div style={{ position: "relative" }}>
+            <select 
+              value={filters.action} 
+              style={{ width: "100%", boxSizing: "border-box", paddingTop: "10px", paddingBottom: "10px", paddingRight: "12px", paddingLeft: "12px", border: "1px solid #d7e0ea", borderRadius: "12px", fontSize: "0.85rem", background: "#f8fbff", color: "#10233d" }}
+              onChange={(event) => handleFilterChange("action", event.target.value)}
+            >
+              {ACTION_OPTIONS.map((option) => (
+                <option key={option || "all"} value={option}>{option ? `Action: ${option}` : "All Actions"}</option>
+              ))}
+            </select>
+          </div>
         </div>
       </section>
+      )}
 
       {/* Table */}
       {isLoading ? (
@@ -126,8 +149,9 @@ export default function AdminAuditLogsPage() {
           <p>Audit database connection timeout.</p>
         </div>
       ) : (
-        <div className="admin-table-wrapper">
-          <table className="admin-table">
+        <section className="admin-dashboard-panel" style={{ padding: "18px" }}>
+          <div className="admin-table-wrapper">
+            <table className="admin-table">
             <thead>
               <tr>
                 <th>ID</th>
@@ -228,7 +252,8 @@ export default function AdminAuditLogsPage() {
               </div>
             </div>
           )}
-        </div>
+          </div>
+        </section>
       )}
 
       {detailLog && <AdminEntryDetailModal entryType="AUDIT_LOG" item={detailLog} onClose={() => setDetailLog(null)} />}
