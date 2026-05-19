@@ -163,6 +163,7 @@ export function mapLandingBlog(row: ContentRow) {
     title: row.title ?? "",
     slug: row.slug ?? "",
     coverImage: row.cover_image ?? null,
+    thumbnail: row.thumbnail ?? row.cover_image ?? null,
     content: row.content ?? "",
     targetType: "ALL",
     visibility: row.visibility,

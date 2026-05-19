@@ -145,7 +145,9 @@ function ContentCard({ item, type, delay = "0ms" }) {
   const category = item.category?.name || (type === "blog" ? "Blog" : "Post");
   const inactive = item.active === false;
   const detailPath = (type === "blog" ? routes.blogDetail : routes.postDetail).replace(":id", item.id);
-  const media = item.media || (item.coverImage || item.thumbnail ? [item.coverImage || item.thumbnail] : []);
+  const mediaFromArray = Array.isArray(item.media) && item.media.length > 0 ? item.media : null;
+  const fallbackUrl = item.coverImage || item.thumbnail || null;
+  const media = mediaFromArray || (fallbackUrl ? [{ url: fallbackUrl }] : []);
 
   return (
     <article className={`lp-content-card reveal-up ${inactive ? "lp-content-card--inactive" : ""}`} style={{ "--delay": delay }}>
@@ -194,7 +196,9 @@ function LandingPostCard({ post, delay = "0ms", onViewMore }) {
       author.fullName || author.username || "U"
     )}&background=dbeafe&color=1d4ed8&bold=true&size=80`;
 
-  const media = post.media || (post.coverImage || post.thumbnail ? [post.coverImage || post.thumbnail] : []);
+  const mediaFromArray = Array.isArray(post.media) && post.media.length > 0 ? post.media : null;
+  const fallbackUrl = post.coverImage || post.thumbnail || null;
+  const media = mediaFromArray || (fallbackUrl ? [{ url: fallbackUrl }] : []);
 
   return (
     <article className={`lp-insta-card reveal-up ${inactive ? "lp-insta-card--inactive" : ""}`} style={{ "--delay": delay }}>

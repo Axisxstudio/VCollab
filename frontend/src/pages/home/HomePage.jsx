@@ -245,22 +245,32 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <MediaGallery
-                  items={galleryItems}
-                  title={item.title || getContentTypeLabel(item.contentType)}
-                  variant="card"
-                  aspect={item.contentType === "POST" ? "square" : "landscape"}
-                />
+                <Link to={detailPath} style={{ display: "block", outline: "none" }}>
+                  <MediaGallery
+                    items={galleryItems}
+                    title={item.title || getContentTypeLabel(item.contentType)}
+                    variant="card"
+                    aspect={item.contentType === "POST" ? "square" : "landscape"}
+                  />
+                </Link>
 
-                {item.title && <h3 className="content-surface__title" style={{ marginBottom: '4px' }}>{item.title}</h3>}
+                {item.title && (
+                  <h3 className="content-surface__title" style={{ marginBottom: '4px' }}>
+                    <Link to={detailPath} style={{ color: "inherit", textDecoration: "none" }} className="hover-underline">
+                      {item.title}
+                    </Link>
+                  </h3>
+                )}
                 <div style={{ marginBottom: '12px' }}>
-                  <p className="content-surface__excerpt">
-                    {item.excerpt}
-                  </p>
-                  <Link to={detailPath} className="content-more-link-inline">View More</Link>
+                  <Link to={detailPath} style={{ color: "inherit", textDecoration: "none", display: "block" }}>
+                    <p className="content-surface__excerpt" style={{ margin: 0, marginBottom: '4px' }}>
+                      {item.excerpt}
+                    </p>
+                    <span className="content-more-link-inline">View More</span>
+                  </Link>
                 </div>
 
-                {item.tags?.length > 0 && (
+                {Array.isArray(item.tags) && item.tags.length > 0 && (
                   <div className="tag-list">
                     {item.tags.slice(0, 5).map((tag) => (
                       <span key={tag} className="tag-chip">{tag}</span>

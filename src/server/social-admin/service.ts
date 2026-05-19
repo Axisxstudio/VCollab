@@ -5,6 +5,7 @@ import { requireSuperAdmin, requireUser } from "@/server/auth/guards";
 import { badRequest, forbidden } from "@/server/http/errors";
 import type { Role } from "@/server/auth/types";
 import { pageBounds, toPageResponse } from "@/server/pagination/page";
+import { parseList } from "@/server/content/mapper";
 
 export function paramsObject(request: Request) {
   return Object.fromEntries(new URL(request.url).searchParams.entries());
@@ -188,15 +189,15 @@ export async function feed(request: Request) {
   const admin = createSupabaseAdminClient();
   const [projects, posts, blogs] = await Promise.all([
     admin.from("projects")
-      .select("*,author:users!projects_owner_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image,education_type))")
+      .select("*,author:users!projects_owner_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image,education_type)),project_media(id,url,media_type,sort_order)")
       .eq("visibility", "PUBLIC").eq("is_active", true).is("deleted_at", null)
       .order("created_at", { ascending: false }).limit(20),
     admin.from("posts")
-      .select("*,author:users!posts_author_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image,education_type))")
+      .select("*,author:users!posts_author_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image,education_type)),post_media(id,url,media_type,sort_order)")
       .eq("visibility", "PUBLIC").eq("is_active", true).is("deleted_at", null)
       .order("created_at", { ascending: false }).limit(20),
     admin.from("blogs")
-      .select("*,author:users!blogs_author_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image,education_type))")
+      .select("*,author:users!blogs_author_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image,education_type)),blog_media(id,url,media_type,sort_order)")
       .eq("visibility", "PUBLIC").eq("is_active", true).is("deleted_at", null)
       .order("created_at", { ascending: false }).limit(20),
   ]);
@@ -209,13 +210,20 @@ export async function feed(request: Request) {
       title: item.title,
       excerpt: item.short_desc,
       thumbnailUrl: item.thumbnail,
+      previewMediaUrl: item.thumbnail,
+      media: (item.project_media ?? []).map((m: any) => ({
+        id: m.id,
+        url: m.url,
+        mediaType: m.media_type,
+        sortOrder: m.sort_order
+      })),
       createdAt: item.created_at,
       author: mapUser(item.author),
       likeCount: item.like_count,
       commentCount: item.comment_count,
       saveCount: item.save_count,
       shareCount: item.share_count,
-      tags: item.tags || [],
+      tags: parseList(item.tags),
       targetType: "ALL"
     })),
     ...(posts.data ?? []).map((item: any) => ({
@@ -224,13 +232,19 @@ export async function feed(request: Request) {
       contentType: "POST",
       title: item.title || `Post #${item.id}`,
       excerpt: item.content,
+      media: (item.post_media ?? []).map((m: any) => ({
+        id: m.id,
+        url: m.url,
+        mediaType: m.media_type,
+        sortOrder: m.sort_order
+      })),
       createdAt: item.created_at,
       author: mapUser(item.author),
       likeCount: item.like_count,
       commentCount: item.comment_count,
       saveCount: item.save_count,
       shareCount: item.share_count,
-      tags: item.tags || [],
+      tags: parseList(item.tags),
       targetType: "ALL"
     })),
     ...(blogs.data ?? []).map((item: any) => ({
@@ -240,13 +254,20 @@ export async function feed(request: Request) {
       title: item.title,
       excerpt: item.excerpt,
       thumbnailUrl: item.cover_image,
+      previewMediaUrl: item.cover_image,
+      media: (item.blog_media ?? []).map((m: any) => ({
+        id: m.id,
+        url: m.url,
+        mediaType: m.media_type,
+        sortOrder: m.sort_order
+      })),
       createdAt: item.created_at,
       author: mapUser(item.author),
       likeCount: item.like_count,
       commentCount: item.comment_count,
       saveCount: item.save_count,
       shareCount: item.share_count,
-      tags: item.tags || [],
+      tags: parseList(item.tags),
       targetType: "ALL"
     })),
   ].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));

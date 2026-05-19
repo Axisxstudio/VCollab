@@ -464,7 +464,24 @@
   }
 
   .stellar-comment-zone {
-    padding: 18px;
-    border-radius: 20px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin-top: 10px;
+  }
+
+  .comment-composer-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .stellar-tag-sidebar-box {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
   }
 }

@@ -80,7 +80,7 @@ export default function BlogDetailPage() {
       <SEO 
         title={data.title} 
         description={data.content?.substring(0, 160) || `Read ${data.title} on VCollab.`} 
-        keywords={data.tags?.join(", ")}
+        keywords={Array.isArray(data.tags) ? data.tags.join(", ") : ""}
         image={galleryItems[0]?.url || "/VCollab_hero.png"}
       />
       <div className="card detail-page-card">
@@ -136,7 +136,7 @@ export default function BlogDetailPage() {
           <RichTextContent value={data.content} fallback="No blog content yet." />
         </section>
 
-        {data.tags?.length > 0 && (
+        {Array.isArray(data.tags) && data.tags.length > 0 && (
           <section className="detail-copy-card">
             <div className="detail-copy-card__label">
               <Folder size={15} />

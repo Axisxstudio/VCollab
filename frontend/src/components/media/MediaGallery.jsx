@@ -23,11 +23,15 @@ export default function MediaGallery({
   const boundedIndex = Math.min(activeIndex, galleryItems.length - 1);
   const activeItem = galleryItems[boundedIndex];
 
-  const goPrevious = () => {
+  const goPrevious = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     setActiveIndex((current) => (current === 0 ? galleryItems.length - 1 : current - 1));
   };
 
-  const goNext = () => {
+  const goNext = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     setActiveIndex((current) => (current === galleryItems.length - 1 ? 0 : current + 1));
   };
 
@@ -78,7 +82,11 @@ export default function MediaGallery({
               key={`${item.url}-${index}`}
               type="button"
               className={`media-gallery__dot ${index === boundedIndex ? "active" : ""}`}
-              onClick={() => setActiveIndex(index)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setActiveIndex(index);
+              }}
               aria-label={`Go to media ${index + 1}`}
             />
           ))}

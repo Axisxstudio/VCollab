@@ -86,7 +86,7 @@ export default function PostDetailPage() {
       <SEO 
         title={`Post by ${data.author?.fullName || data.author?.username}`} 
         description={data.content?.substring(0, 160) || `Read this post on VCollab.`} 
-        keywords={data.tags?.join(", ")}
+        keywords={Array.isArray(data.tags) ? data.tags.join(", ") : ""}
         image={galleryItems[0]?.url || "/VCollab_hero.png"}
       />
       <div className="card detail-page-card">
@@ -143,7 +143,7 @@ export default function PostDetailPage() {
           <RichTextContent value={data.content} fallback="No post content yet." />
         </section>
 
-        {data.tags?.length > 0 && (
+        {Array.isArray(data.tags) && data.tags.length > 0 && (
           <section className="detail-copy-card">
             <div className="detail-copy-card__label">
               <Folder size={15} />

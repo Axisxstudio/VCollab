@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Check, Edit2, ImagePlus, Loader2, MessageCircleMore, Reply, Send, Smile, Trash2, X } from "lucide-react";
+import { Check, Edit2, ImagePlus, Loader2, MessageSquare, Reply, Send, Smile, Trash2, X } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createComment, deleteComment, listComments, updateComment } from "../../services/comment.service";
 import { uploadMedia } from "../../services/media.service";
@@ -462,7 +462,13 @@ export default function CommentThread({
     enabled: Boolean(contentType && contentId)
   });
 
-  const totalComments = useMemo(() => countComments(data), [data]);
+  const commentsList = useMemo(() => {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.data)) return data.data;
+    return [];
+  }, [data]);
+
+  const totalComments = useMemo(() => countComments(commentsList), [commentsList]);
 
   const handleImageUpload = async (file) => {
     setImageUploading(true);
@@ -541,7 +547,7 @@ export default function CommentThread({
             <p>Replies stay structured and refresh live while the conversation evolves.</p>
           </div>
           <span className="collab-pill">
-            <MessageCircleMore size={14} />
+            <MessageSquare size={14} />
             {totalComments}
           </span>
         </div>
@@ -574,16 +580,16 @@ export default function CommentThread({
 
       {isLoading && <div className="collab-empty-panel slim">Loading comments...</div>}
 
-      {!isLoading && data.length === 0 && (
+      {!isLoading && commentsList.length === 0 && (
         <div className="collab-empty-panel slim">
           <h3>No comments yet</h3>
           <p>Start the discussion and make the first contribution.</p>
         </div>
       )}
 
-      {!isLoading && data.length > 0 && (
+      {!isLoading && commentsList.length > 0 && (
         <div className="comment-thread-upgrade__list">
-          {data.map((comment) => (
+          {commentsList.map((comment) => (
             <CommentItem
               key={comment.id}
               comment={comment}

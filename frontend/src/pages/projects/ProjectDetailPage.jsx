@@ -97,7 +97,7 @@ export default function ProjectDetailPage() {
       <SEO 
         title={data.title} 
         description={data.shortDesc || `Check out ${data.title} on VCollab.`} 
-        keywords={data.tags?.join(", ")}
+        keywords={Array.isArray(data.tags) ? data.tags.join(", ") : ""}
         image={galleryItems[0]?.url || "/VCollab_hero.png"}
       />
       <div className="stellar-content-shell">
@@ -187,7 +187,7 @@ export default function ProjectDetailPage() {
             <div className="stellar-section-flat">
                <h3 className="stellar-section-label"><Heart size={16} /> Tech Stack</h3>
                <div className="stellar-section-content">
-                  {data.techStack?.length > 0 ? (
+                  {Array.isArray(data.techStack) && data.techStack.length > 0 ? (
                     <div className="stellar-tag-group">
                       {data.techStack.map(tech => <span key={tech} className="stellar-tag-v2">{tech}</span>)}
                     </div>
@@ -197,7 +197,7 @@ export default function ProjectDetailPage() {
                </div>
             </div>
 
-            {data.tags?.length > 0 && (
+            {Array.isArray(data.tags) && data.tags.length > 0 && (
               <div className="stellar-section-flat">
                  <h3 className="stellar-section-label"><Folder size={16} /> Tags</h3>
                  <div className="stellar-section-content">

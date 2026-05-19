@@ -234,7 +234,7 @@ export default function ProjectListPage() {
                   </div>
                 </div>
 
-                {project.tags?.length > 0 && (
+                {Array.isArray(project.tags) && project.tags.length > 0 && (
                   <div className="tag-list" style={{ marginTop: '8px' }}>
                     {project.tags.slice(0, 5).map((tag) => (
                       <span key={tag} className="tag-hash">#{tag}</span>
@@ -242,7 +242,7 @@ export default function ProjectListPage() {
                   </div>
                 )}
 
-                {project.techStack?.length > 0 && (
+                {Array.isArray(project.techStack) && project.techStack.length > 0 && (
                   <div className="tag-list">
                     {project.techStack.slice(0, 4).map((item) => (
                       <span key={item} className="tag-chip">{item}</span>

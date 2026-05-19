@@ -77,9 +77,13 @@ function mapperFor(kind: ContentKind): (row: ContentRow) => unknown {
 }
 
 async function maybeUser(request: Request) {
-  const token = bearerTokenFromRequest(request);
-  if (!token) return null;
-  return meFromToken(token);
+  try {
+    const token = bearerTokenFromRequest(request);
+    if (!token) return null;
+    return await meFromToken(token);
+  } catch {
+    return null;
+  }
 }
 
 function applySort(query: QueryBuilder, sort: SearchInput["sort"]) {

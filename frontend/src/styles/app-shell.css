@@ -443,14 +443,15 @@
 .workspace-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   text-decoration: none;
 }
 
 .workspace-brand-logo {
-  width: 44px;
-  height: 44px;
+  width: 60px;
+  height: 60px;
   object-fit: contain;
+  flex-shrink: 0;
 }
 
 .workspace-brand-col {
@@ -1016,9 +1017,10 @@
 }
 
 .admin-brand-logo {
-  width: 44px;
-  height: 44px;
+  width: 60px;
+  height: 60px;
   object-fit: contain;
+  flex-shrink: 0;
 }
 
 .brand-text-pro {

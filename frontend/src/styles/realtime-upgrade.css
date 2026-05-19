@@ -43,7 +43,7 @@
     radial-gradient(circle at bottom left, rgba(255, 190, 92, 0.12), transparent 34%);
 }
 
-.collab-page__hero > * {
+.collab-page__hero>* {
   position: relative;
   z-index: 1;
 }
@@ -96,7 +96,8 @@
 
 .comment-thread-inline .comment-composer-card__topline div p {
   font-size: 0.82rem;
-  display: none; /* hide extra tip inline */
+  display: none;
+  /* hide extra tip inline */
 }
 
 .comment-thread-inline .comment-composer-card__avatar,
@@ -135,6 +136,7 @@
     max-height: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     max-height: 2000px;
@@ -210,7 +212,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Improved Comment Rail */
@@ -552,7 +556,8 @@
 .notification-toast-stack {
   position: fixed;
   right: 26px;
-  top: 80px; /* Below the topbar */
+  top: 80px;
+  /* Below the topbar */
   z-index: 2000;
   display: grid;
   gap: 12px;
@@ -565,6 +570,7 @@
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -705,7 +711,7 @@
   align-items: center;
   background: #ffffff;
   border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   z-index: 10;
 }
 
@@ -969,6 +975,7 @@
 }
 
 @keyframes messengerTypingPulse {
+
   0%,
   100% {
     transform: translateY(0);
@@ -1274,6 +1281,7 @@
 .comment-composer-card textarea::-webkit-scrollbar {
   width: 6px;
 }
+
 .messenger-composer textarea::-webkit-scrollbar-thumb,
 .comment-composer-card textarea::-webkit-scrollbar-thumb {
   background: #cbd5e1;
@@ -1325,9 +1333,17 @@
   color: #bcc0c4;
 }
 
-.messenger-composer__footer,
-.comment-composer-card__footer {
+.messenger-composer__footer {
   display: none;
+}
+
+.comment-composer-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  color: #64748b;
+  font-size: 0.85rem;
 }
 
 .request-upgrade-card__actions,
@@ -1633,7 +1649,8 @@
 }
 
 .comment-node__rail {
-  display: none; /* Using border-left on replies instead for better nesting lines */
+  display: none;
+  /* Using border-left on replies instead for better nesting lines */
 }
 
 .comment-node__body {
@@ -1924,6 +1941,7 @@
 }
 
 @media (max-width: 1080px) {
+
   .messenger-shell,
   .requests-board {
     grid-template-columns: 1fr;
@@ -1989,7 +2007,7 @@
     height: 14px;
   }
 
-  .collab-stat-card > div {
+  .collab-stat-card>div {
     display: flex;
     align-items: baseline;
     gap: 4px;
@@ -2129,7 +2147,7 @@
     min-width: 0;
   }
 
-  .warnings-page .warning-upgrade-card__identity > div:last-child {
+  .warnings-page .warning-upgrade-card__identity>div:last-child {
     min-width: 0;
   }
 
@@ -2340,7 +2358,7 @@
     gap: 10px;
   }
 
-  .messages-page .messenger-thread__identity > div:last-child {
+  .messages-page .messenger-thread__identity>div:last-child {
     min-width: 0;
   }
 

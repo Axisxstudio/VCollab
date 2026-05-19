@@ -1189,29 +1189,48 @@ html {
    FOOTER
    Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */
 .lp-footer {
-  background: #0f172a;
+  background: linear-gradient(135deg, #0a0f1e 0%, #0f172a 40%, #1a1040 70%, #0d1b3e 100%);
   color: #e2e8f0;
-  padding: 60px 0 0;
+  padding: 72px 0 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.lp-footer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 10% 20%, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 90% 80%, rgba(14, 165, 233, 0.14) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.lp-footer .container {
+  position: relative;
+  z-index: 1;
 }
 
 .lp-footer-grid {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
   gap: 48px;
-  padding-bottom: 50px;
+  padding-bottom: 56px;
 }
 
 .lp-footer-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 16px;
 }
 
 .lp-footer-logo img {
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
+  filter: brightness(1.1);
 }
 
 .lp-footer-logo span {
@@ -1219,6 +1238,7 @@ html {
   font-size: 1.5rem;
   font-weight: 800;
   color: #ffffff;
+  letter-spacing: -0.02em;
 }
 
 .lp-footer-brand p {
@@ -1229,10 +1249,25 @@ html {
 }
 
 .lp-footer h4 {
-  font-size: 0.875rem;
-  font-weight: 700;
-  margin-bottom: 16px;
-  color: #e2e8f0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.lp-footer h4::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 24px;
+  height: 2px;
+  background: linear-gradient(90deg, #6366f1, #0ea5e9);
+  border-radius: 2px;
 }
 
 .lp-footer ul {
@@ -1240,7 +1275,7 @@ html {
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .lp-footer ul li,
@@ -1248,11 +1283,14 @@ html {
   font-size: 0.86rem;
   color: #94a3b8;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color 0.2s, padding-left 0.2s;
+  text-decoration: none;
+  display: block;
 }
 
 .lp-footer ul a:hover {
   color: #e2e8f0;
+  padding-left: 4px;
 }
 
 .lp-footer>.container>div:last-child p {
@@ -1262,11 +1300,14 @@ html {
 }
 
 .lp-footer-bottom {
-  border-top: 1px solid #1e293b;
-  padding: 18px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 20px 0;
   font-size: 0.78rem;
-  color: #64748b;
+  color: #475569;
   text-align: center;
+  position: relative;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.2);
 }
 
 /* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
@@ -1312,6 +1353,10 @@ html {
   .lp-footer-grid {
     grid-template-columns: 1fr 1fr;
     gap: 32px;
+  }
+
+  .lp-footer-brand {
+    grid-column: 1 / -1;
   }
 }
 
@@ -1424,8 +1469,12 @@ html {
   .lp-content-grid,
   .lp-grid-4,
   .lp-footer-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .lp-footer {
+    padding: 48px 0 0;
   }
 
   .lp-dual-section {

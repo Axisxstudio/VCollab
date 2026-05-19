@@ -3627,3 +3627,9 @@ input[type="reset"] {
     width: 100%;
   }
 }
+
+@media (max-width: 768px) {
+  .contact-owner-details p {
+    display: none !important;
+  }
+}

@@ -14,9 +14,17 @@ body.public-nav-open {
   overflow: hidden;
 }
 
+/* Push content below fixed nav */
+.public-layout-nav ~ main,
+body > div > main {
+  padding-top: 72px;
+}
+
 .public-layout-nav {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 320;
   border-bottom: 1px solid var(--public-layout-nav-border);
   background: var(--public-layout-nav-bg);
@@ -41,16 +49,17 @@ body.public-nav-open {
 .public-layout-nav__brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   color: var(--public-layout-nav-text);
   text-decoration: none;
   flex-shrink: 0;
 }
 
 .public-layout-nav__brand-logo {
-  width: 34px;
-  height: 34px;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
+  flex-shrink: 0;
 }
 
 .public-layout-nav__brand-mark {
