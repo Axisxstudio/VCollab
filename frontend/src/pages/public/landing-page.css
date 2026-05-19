@@ -306,15 +306,13 @@ html {
   display: flex;
   align-items: center;
 
-  /* Clean non-image hero background */
+  /* Premium professional background with dot-grid pattern */
+  background-color: #ffffff;
   background-image:
-    radial-gradient(ellipse 70% 80% at 85% 50%, rgba(167, 139, 250, 0.4) 0%, transparent 65%),
-    radial-gradient(ellipse 50% 70% at 20% 90%, rgba(99, 102, 241, 0.15) 0%, transparent 55%),
-    linear-gradient(155deg, #f8fafc 0%, #f1f5f9 40%, #eef2ff 100%);
-
-  background-position: center, center, center;
-  background-repeat: no-repeat, no-repeat, no-repeat;
-  background-size: cover, cover, cover;
+    radial-gradient(ellipse 80% 80% at 80% -20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 80% at 20% 120%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+    radial-gradient(rgba(15, 23, 42, 0.06) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 24px 24px;
 
   padding: 100px 0;
 }
@@ -327,7 +325,30 @@ html {
 }
 
 .lp-hero-copy {
-  max-width: 540px;
+  max-width: 580px;
+}
+
+.lp-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  color: var(--lp-blue-dark);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+  backdrop-filter: blur(8px);
+}
+
+.lp-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--lp-blue);
+  box-shadow: 0 0 8px var(--lp-blue);
 }
 
 .lp-hero-copy h1 {

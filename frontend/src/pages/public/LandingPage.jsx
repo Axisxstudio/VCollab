@@ -367,6 +367,10 @@ export default function LandingPage() {
       <section className="lp-hero">
         <div className="container lp-hero-content">
           <div className="lp-hero-copy reveal-up">
+            <div className="lp-hero-badge">
+              <span className="lp-badge-dot"></span>
+              Introducing VCollab 2.0
+            </div>
             <h1 className="lp-hero-title">
               <span className="lp-hero-title-desktop">
                 Build, Collaborate, and<br />
