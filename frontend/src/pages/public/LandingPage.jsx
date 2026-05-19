@@ -120,7 +120,7 @@ function ProjectCard({ project, delay = "0ms" }) {
       <div className="lp-project-body">
         <h3>{project.title}</h3>
         <p className="lp-project-desc">{project.shortDesc || project.fullDesc || ""}</p>
-        
+
         {project.techStack && project.techStack.length > 0 && (
           <div className="lp-project-tech-stack">
             {project.techStack.slice(0, 3).map((tech, i) => (
@@ -179,7 +179,7 @@ function ContentCard({ item, type, delay = "0ms" }) {
 
         {!inactive && (
           <div className="lp-card-footer-icon">
-             <ChevronRight size={18} />
+            <ChevronRight size={18} />
           </div>
         )}
       </div>
@@ -316,11 +316,11 @@ export default function LandingPage() {
   // Auto-play logic
   useEffect(() => {
     if (!isAutoPlaying || featuredContributors.length <= contributorsPerPage) return;
-    
+
     const interval = setInterval(() => {
       nextContributorPage();
     }, 3000); // 3 seconds per slide
-    
+
     return () => clearInterval(interval);
   }, [isAutoPlaying, featuredContributors.length, contributorsPerPage, nextContributorPage]);
 
@@ -339,20 +339,20 @@ export default function LandingPage() {
       setIsAutoPlaying(true);
       return;
     }
-    
+
     const distance = touchStartX.current - touchEndX.current;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
-    
+
     if (isLeftSwipe) {
       nextContributorPage();
     } else if (isRightSwipe) {
       previousContributorPage();
     }
-    
+
     touchStartX.current = null;
     touchEndX.current = null;
-    
+
     // Resume auto-play after a delay
     setTimeout(() => setIsAutoPlaying(true), 5000);
   };
@@ -465,7 +465,7 @@ export default function LandingPage() {
           {isLoading ? (
             <div className="lp-empty">Loading contributors...</div>
           ) : featuredContributors.length > 0 ? (
-            <div 
+            <div
               className="lp-carousel-wrapper"
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
@@ -480,9 +480,9 @@ export default function LandingPage() {
               )}
 
               <div style={{ overflow: "hidden", width: "100%", padding: "10px 0" }}>
-                <div 
-                  style={{ 
-                    display: "flex", 
+                <div
+                  style={{
+                    display: "flex",
                     transition: "transform 0.5s ease-in-out",
                     transform: `translateX(-${contributorPage * 100}%)`
                   }}

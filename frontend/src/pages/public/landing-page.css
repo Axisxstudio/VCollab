@@ -105,6 +105,7 @@ html {
     height: 24px;
     margin-right: 6px;
   }
+
   .lp-brand-mark {
     font-size: 1.1rem !important;
   }
@@ -205,7 +206,7 @@ html {
   width: 38px;
   height: 38px;
   border-radius: 8px;
-  border: 1.5px solid var(--lp-border);
+  border: none;
   background: transparent;
   color: var(--lp-text);
   cursor: pointer;
@@ -1549,6 +1550,7 @@ html {
 }
 
 @keyframes lp-mobile-caret {
+
   0%,
   100% {
     border-right-color: rgba(29, 78, 216, 0.9);
