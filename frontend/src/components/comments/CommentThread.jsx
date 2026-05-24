@@ -465,10 +465,14 @@ export default function CommentThread({
   const commentsList = useMemo(() => {
     if (Array.isArray(data)) return data;
     if (data && Array.isArray(data.data)) return data.data;
+    if (data && Array.isArray(data.content)) return data.content;
     return [];
   }, [data]);
 
-  const totalComments = useMemo(() => countComments(commentsList), [commentsList]);
+  const totalComments = useMemo(() => {
+    if (data && typeof data.totalElements === "number") return data.totalElements;
+    return countComments(commentsList);
+  }, [data, commentsList]);
 
   const handleImageUpload = async (file) => {
     setImageUploading(true);

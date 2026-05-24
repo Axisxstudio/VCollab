@@ -815,10 +815,19 @@
 
 .workspace-topbar {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 32px 40px 0;
+  padding: 24px 40px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  transition: padding 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.workspace-topbar.scrolled {
+  padding: 12px 40px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
 }
 
 .workspace-eyebrow {
@@ -839,11 +848,16 @@
 }
 
 .workspace-topbar-copy h2 {
-  margin: 8px 0 8px;
+  margin: 0;
   font-size: 2rem;
   font-weight: 800;
   color: #050505;
   letter-spacing: -0.02em;
+  transition: font-size 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.workspace-topbar.scrolled .workspace-topbar-copy h2 {
+  font-size: 1.25rem;
 }
 
 .workspace-topbar-copy p {
@@ -854,6 +868,14 @@
   margin: 0;
 }
 
+.workspace-description-scroller {
+  max-width: 600px;
+  color: #65676b;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+}
+
 .workspace-top-actions {
   display: flex;
   align-items: center;
@@ -862,8 +884,12 @@
 }
 
 .workspace-content {
-  padding: 24px 40px 40px;
+  padding: 0 40px 40px;
   overflow-y: auto;
+}
+
+.workspace-content .section {
+  padding-top: 0;
 }
 
 .workspace-container {
@@ -871,6 +897,7 @@
   /* More focused layout */
   width: 100%;
   margin: 0 auto;
+  padding-top: 24px;
 }
 
 .admin-sidebar-pro {
@@ -1185,17 +1212,15 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
-/* Workspace Overrides for Top Actions */
 .workspace-top-actions .icon-btn-pro {
-  background: #f1f5f9;
-  border-color: rgba(15, 23, 42, 0.08);
+  background: transparent;
+  border: none;
   color: #64748b;
 }
 
 .workspace-top-actions .icon-btn-pro:hover {
-  background: #e2e8f0;
+  background: rgba(15, 23, 42, 0.05);
   color: #1877f2;
-  border-color: rgba(24, 119, 242, 0.2);
 }
 
 .admin-user-nav-card {
@@ -4124,8 +4149,8 @@
   display: flex;
   align-items: center;
   gap: 0;
-  background: #f1f5f9;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: transparent;
+  border: none;
   border-radius: 12px;
   height: 44px;
   width: 44px;
@@ -4137,12 +4162,16 @@
   cursor: pointer;
 }
 
+.workspace-search-expanded:hover {
+  background: rgba(15, 23, 42, 0.05);
+}
+
 .workspace-search-expanded.expanded {
   width: 280px;
   padding: 0 16px;
   gap: 12px;
   background: #ffffff;
-  border-color: rgba(24, 119, 242, 0.3);
+  border: 1px solid rgba(24, 119, 242, 0.3);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   overflow: visible;
   /* Allow the absolute dropdown to show */

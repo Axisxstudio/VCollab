@@ -36,6 +36,9 @@ import { publishTyping } from "../../websocket/stompClient";
 import useConversationTyping from "../../websocket/useConversationTyping";
 import useMessageUpdates from "../../websocket/useMessageUpdates";
 import usePresenceUpdates from "../../websocket/usePresenceUpdates";
+import { searchPublicProfiles } from "../../services/profile.service";
+import { followUser, unfollowUser, getFollowStatus } from "../../services/follow.service";
+import { buildDiscoveryParams } from "../../utils/discovery";
 
 const EMOJI_OPTIONS = [
   { label: "Smile", value: "\u{1F60A}" },
@@ -89,6 +92,161 @@ const buildMessagePreviewText = (message) => {
   }
   return content || "No messages yet.";
 };
+
+function ContributorSearchPanel() {
+  const navigate = useNavigate();
+  const [followStates, setFollowStates] = useState({});
+  const [busyIds, setBusyIds] = useState(new Set());
+
+  const { data: profiles, isLoading } = useQuery({
+    queryKey: ["suggested-profiles-messages"],
+    queryFn: () => searchPublicProfiles(buildDiscoveryParams({ sort: "NEWEST" }, 0, 8)),
+    staleTime: 60_000
+  });
+
+  const users = profiles?.content || profiles || [];
+
+  const handleFollow = async (user) => {
+    if (busyIds.has(user.id)) return;
+    setBusyIds(prev => new Set([...prev, user.id]));
+
+    const isCurrentlyFollowing = followStates[user.id] ?? user.isFollowing ?? false;
+    // Optimistic update
+    setFollowStates(prev => ({ ...prev, [user.id]: !isCurrentlyFollowing }));
+
+    try {
+      if (isCurrentlyFollowing) {
+        await unfollowUser(user.id);
+      } else {
+        await followUser(user.id);
+      }
+    } catch {
+      // Rollback on error
+      setFollowStates(prev => ({ ...prev, [user.id]: isCurrentlyFollowing }));
+    } finally {
+      setBusyIds(prev => {
+        const next = new Set(prev);
+        next.delete(user.id);
+        return next;
+      });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div style={{ padding: "8px 0" }}>
+        {[...Array(4)].map((_, i) => (
+          <div key={i} style={{
+            display: "flex", alignItems: "center", gap: "12px",
+            padding: "10px 0", borderBottom: "1px solid rgba(15,23,42,0.06)"
+          }}>
+            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(15,23,42,0.07)", flexShrink: 0 }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ height: 12, width: "55%", background: "rgba(15,23,42,0.07)", borderRadius: 6, marginBottom: 6 }} />
+              <div style={{ height: 10, width: "35%", background: "rgba(15,23,42,0.05)", borderRadius: 6 }} />
+            </div>
+            <div style={{ width: 72, height: 28, background: "rgba(15,23,42,0.07)", borderRadius: 20 }} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (!users.length) return null;
+
+  return (
+    <div>
+      <p style={{ fontSize: "0.78rem", fontWeight: 600, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "12px" }}>
+        People you may know
+      </p>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        {users.map((user) => {
+          const isFollowing = followStates[user.id] ?? user.isFollowing ?? false;
+          const isBusy = busyIds.has(user.id);
+          const profilePath = routes.profile.replace(":username", user.username);
+          const initial = (user.fullName || user.username || "V").charAt(0).toUpperCase();
+
+          return (
+            <div
+              key={user.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: "10px 0",
+                borderBottom: "1px solid rgba(15,23,42,0.06)"
+              }}
+            >
+              {/* Avatar */}
+              <button
+                type="button"
+                onClick={() => navigate(profilePath)}
+                style={{
+                  width: 40, height: 40, borderRadius: "50%",
+                  flexShrink: 0, overflow: "hidden", border: "none",
+                  background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                  cursor: "pointer", padding: 0
+                }}
+                title={user.fullName || user.username}
+              >
+                {user.profileImage ? (
+                  <img
+                    src={user.profileImage}
+                    alt={user.fullName || user.username}
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                ) : (
+                  <span style={{ color: "#fff", fontWeight: 700, fontSize: "0.9rem", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>
+                    {initial}
+                  </span>
+                )}
+              </button>
+
+              {/* Name & username */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <button
+                  type="button"
+                  onClick={() => navigate(profilePath)}
+                  style={{ background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left", width: "100%" }}
+                >
+                  <p style={{ margin: 0, fontWeight: 600, fontSize: "0.875rem", color: "#0f172a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {user.fullName || user.username}
+                  </p>
+                  <p style={{ margin: 0, fontSize: "0.775rem", color: "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    @{user.username}
+                  </p>
+                </button>
+              </div>
+
+              {/* Follow button */}
+              <button
+                type="button"
+                disabled={isBusy}
+                onClick={() => handleFollow(user)}
+                style={{
+                  flexShrink: 0,
+                  padding: "5px 14px",
+                  borderRadius: 20,
+                  fontSize: "0.775rem",
+                  fontWeight: 600,
+                  cursor: isBusy ? "not-allowed" : "pointer",
+                  border: isFollowing ? "1.5px solid rgba(99,102,241,0.35)" : "none",
+                  background: isFollowing ? "transparent" : "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                  color: isFollowing ? "#6366f1" : "#fff",
+                  transition: "all 0.18s ease",
+                  opacity: isBusy ? 0.6 : 1,
+                  whiteSpace: "nowrap"
+                }}
+              >
+                {isFollowing ? "Following" : "Follow"}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function MessagesPage() {
   const [searchParams] = useSearchParams();
@@ -558,6 +716,11 @@ export default function MessagesPage() {
               );
             })}
           </div>
+
+          {/* Suggested profiles — shown below inbox conversations */}
+          <div className="messenger-sidebar__suggestions">
+            <ContributorSearchPanel />
+          </div>
         </aside>
 
         <section className="messenger-thread">
@@ -835,9 +998,13 @@ export default function MessagesPage() {
               </div>
             </>
           ) : (
-            <div className="collab-empty-panel spacious">
-              <h3>Select a conversation</h3>
-              <p>Your active thread will appear here with realtime updates, unread sync, and quick replies.</p>
+            <div className="collab-empty-panel spacious" style={{ gap: "24px", padding: "40px", maxWidth: "900px", margin: "0 auto" }}>
+              <div style={{ textAlign: "center" }}>
+                <h3>Select a conversation</h3>
+                <p style={{ margin: "8px 0 0", color: "#64748b" }}>
+                  Your active thread will appear here with realtime updates, unread sync, and quick replies.
+                </p>
+              </div>
             </div>
           )}
         </section>

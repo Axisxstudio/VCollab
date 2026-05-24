@@ -85,7 +85,7 @@ async function getProfileRowByUserId(userId: number): Promise<UserProfileRow> {
   return data as unknown as UserProfileRow;
 }
 
-export async function discoverUsers(input: DiscoverInput) {
+export async function discoverUsers(input: DiscoverInput, excludeUserId?: number) {
   const admin = createSupabaseAdminClient();
   const bounds = pageBounds(input.page, input.size);
   const normalizedQuery = input.query?.trim();
@@ -96,8 +96,13 @@ export async function discoverUsers(input: DiscoverInput) {
     .eq("is_active", true)
     .eq("is_suspended", false)
     .is("deleted_at", null)
-    .order("created_at", { ascending: false })
-    .range(bounds.from, bounds.to);
+    .order("created_at", { ascending: false });
+
+  if (excludeUserId !== undefined) {
+    query = query.neq("id", excludeUserId);
+  }
+
+  query = query.range(bounds.from, bounds.to);
 
   if (input.role) {
     query = query.eq("role", input.role);

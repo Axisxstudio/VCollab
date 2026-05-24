@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { routes } from "../../config/routes";
+import { Facebook, Instagram, Linkedin, Globe } from "lucide-react";
 import logoImg from "../../assets/logo.png";
 
 export default function PublicFooter() {
@@ -37,6 +38,22 @@ export default function PublicFooter() {
           <h4>Contact</h4>
           <p><a href="mailto:info@axisxstudio.com" className="lp-footer-contact-link">info@axisxstudio.com</a></p>
           <p><a href="tel:0774534056" className="lp-footer-contact-link">077 453 4056</a></p>
+          <p><a href="https://axisxstudio.com/" target="_blank" rel="noreferrer" className="lp-footer-contact-link">axisxstudio.com</a></p>
+          
+          <div style={{ display: "flex", gap: "16px", marginTop: "16px" }}>
+            <a href="https://www.facebook.com/axisxstudio" target="_blank" rel="noreferrer" aria-label="Facebook" className="lp-footer-contact-link">
+              <Facebook size={20} />
+            </a>
+            <a href="https://www.instagram.com/axisxstudio/" target="_blank" rel="noreferrer" aria-label="Instagram" className="lp-footer-contact-link">
+              <Instagram size={20} />
+            </a>
+            <a href="https://www.linkedin.com/company/axisxstudio/" target="_blank" rel="noreferrer" aria-label="LinkedIn" className="lp-footer-contact-link">
+              <Linkedin size={20} />
+            </a>
+            <a href="https://axisxstudio.com/" target="_blank" rel="noreferrer" aria-label="Website" className="lp-footer-contact-link">
+              <Globe size={20} />
+            </a>
+          </div>
         </div>
       </div>
 

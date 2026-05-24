@@ -38,7 +38,6 @@ import "./edit-profile.css";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const SCHOOL_GRADES = [
-  "Grade 10",
   "OL", "AL"
 ];
 

@@ -3,12 +3,7 @@ export function isSchoolContent({ targetType, authorEducationType }) {
 }
 
 export function shouldShowContentForViewer({ viewerEducationType, showSchool, targetType, authorEducationType }) {
-  if (viewerEducationType !== "UNIVERSITY") {
-    return true;
-  }
-
-  const schoolContent = isSchoolContent({ targetType, authorEducationType });
-  return showSchool ? schoolContent : !schoolContent;
+  return true;
 }
 
 export function sortContentForViewerPriority(items, viewerEducationType, getContentMeta) {

@@ -674,6 +674,7 @@
   flex-direction: column;
   background: #ffffff;
   border-right: 1px solid #e2e8f0;
+  overflow-y: auto;
 }
 
 .messenger-sidebar__top {
@@ -693,8 +694,15 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 0 12px 12px;
-  overflow-y: auto;
+  padding: 0 12px 8px;
+  overflow-y: visible;
+}
+
+.messenger-sidebar__suggestions {
+  padding: 16px 16px 20px;
+  border-top: 1px solid rgba(15, 23, 42, 0.07);
+  margin-top: 4px;
+  flex-shrink: 0;
 }
 
 .messenger-thread {

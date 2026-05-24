@@ -20,7 +20,10 @@ import {
   Trash2,
   UserRound,
   UserRoundCog,
-  UsersRound
+  UsersRound,
+  Facebook,
+  Instagram,
+  Linkedin
 } from "lucide-react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { routes } from "../../config/routes";
@@ -295,6 +298,18 @@ export default function SettingsPage() {
             <a href={axisxContact.website} target="_blank" rel="noreferrer" aria-label="Open AxisX Studio website">
               <Globe size={16} />
               <span>Website</span>
+            </a>
+            <a href="https://www.facebook.com/axisxstudio" target="_blank" rel="noreferrer" aria-label="Facebook">
+              <Facebook size={16} />
+              <span>Facebook</span>
+            </a>
+            <a href="https://www.instagram.com/axisxstudio/" target="_blank" rel="noreferrer" aria-label="Instagram">
+              <Instagram size={16} />
+              <span>Instagram</span>
+            </a>
+            <a href="https://www.linkedin.com/company/axisxstudio/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+              <Linkedin size={16} />
+              <span>LinkedIn</span>
             </a>
           </div>
         </div>

@@ -88,11 +88,15 @@ function mapComment(row: any) {
 
 export async function createComment(request: Request, input: any) {
   const user = await requireUser(request);
+  const parsedParentId = (input.parentId && input.parentId !== "null" && input.parentId !== "undefined")
+    ? Number(input.parentId)
+    : null;
+
   const { data, error } = await createSupabaseAdminClient().from("comments").insert({
     author_id: user.id,
     content_type: input.contentType,
-    content_id: input.contentId,
-    parent_id: input.parentId ?? null,
+    content_id: Number(input.contentId),
+    parent_id: parsedParentId,
     content: input.content,
     image_url: input.imageUrl ?? null,
   }).select("*,author:users!comments_author_id_fkey(id,username,user_profiles!user_profiles_user_id_fkey(full_name,profile_image))").single();
@@ -130,7 +134,8 @@ export async function upsertInteraction(request: Request, table: "likes" | "save
   const user = await requireUser(request);
   const row = { user_id: user.id, content_type: input.contentType, content_id: input.contentId, share_type: input.shareType ?? "LINK", target_url: input.targetUrl ?? null };
   const payload = table === "shares" ? row : { user_id: row.user_id, content_type: row.content_type, content_id: row.content_id, deleted_at: null, deleted_by: null };
-  const { data, error } = await createSupabaseAdminClient().from(table).upsert(payload as any).select("*").single();
+  const onConflict = table === "shares" ? "user_id,content_type,content_id,share_type" : "user_id,content_type,content_id";
+  const { data, error } = await createSupabaseAdminClient().from(table).upsert(payload as any, { onConflict }).select("*").single();
   if (error || !data) throw badRequest(error?.message ?? `Could not save ${table}`);
   if (table !== "shares") await updateCounter(input.contentType, Number(input.contentId), table === "likes" ? "like_count" : "save_count", 1);
   if (table === "shares") await updateCounter(input.contentType, Number(input.contentId), "share_count", 1);
@@ -156,7 +161,7 @@ export async function listSaved(request: Request) {
 export async function follow(request: Request, targetId: number) {
   const user = await requireUser(request);
   if (user.id === targetId) throw badRequest("Cannot follow yourself");
-  const { data, error } = await createSupabaseAdminClient().from("follows").upsert({ follower_id: user.id, following_id: targetId, deleted_at: null, deleted_by: null }).select("*").single();
+  const { data, error } = await createSupabaseAdminClient().from("follows").upsert({ follower_id: user.id, following_id: targetId, deleted_at: null, deleted_by: null }, { onConflict: "follower_id,following_id" }).select("*").single();
   if (error || !data) throw badRequest(error?.message ?? "Could not follow user");
   return { following: true, ...data };
 }
@@ -493,7 +498,7 @@ export async function getTargeting(request: Request) {
 
 export async function upsertTargeting(request: Request, input: any) {
   const user = await requireUser(request);
-  const { data, error } = await createSupabaseAdminClient().from("content_targeting").upsert({ content_id: input.contentId, content_type: input.contentType, target_type: input.targetType ?? "ALL", grade: input.grade ?? null, academic_year: input.academicYear ?? null, semester: input.semester ?? null, faculty: input.faculty ?? null, institution_name: input.institutionName ?? null, deleted_by: null, updated_at: new Date().toISOString() }).select("*").single();
+  const { data, error } = await createSupabaseAdminClient().from("content_targeting").upsert({ content_id: input.contentId, content_type: input.contentType, target_type: input.targetType ?? "ALL", grade: input.grade ?? null, academic_year: input.academicYear ?? null, semester: input.semester ?? null, faculty: input.faculty ?? null, institution_name: input.institutionName ?? null, deleted_by: null, updated_at: new Date().toISOString() }, { onConflict: "content_id,content_type" }).select("*").single();
   if (error || !data) throw badRequest(error?.message ?? `Could not update targeting for user ${user.id}`);
   return data;
 }

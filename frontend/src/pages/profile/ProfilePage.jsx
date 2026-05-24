@@ -29,7 +29,7 @@ import {
   unfollowUser
 } from "../../services/follow.service";
 import { deletePost, listUserPosts } from "../../services/post.service";
-import { getMyProfile, getPublicProfile } from "../../services/profile.service";
+import { getMyProfile, getPublicProfile, searchPublicProfiles } from "../../services/profile.service";
 import { deleteProject, listUserProjects } from "../../services/project.service";
 import { listSavedContent } from "../../services/save.service";
 import { useAuthStore } from "../../store/authStore";
@@ -128,6 +128,78 @@ const EmptyState = ({ title, description }) => (
   </div>
 );
 
+function SuggestedPeoplePanel({ currentUserId }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["suggested-profiles-connections"],
+    queryFn: () => searchPublicProfiles({ page: 0, size: 20 }),
+    staleTime: 60_000
+  });
+
+  const users = (data?.content || data || []).filter(u => u.id !== currentUserId);
+
+  if (isLoading) {
+    return (
+      <div className="card connection-column">
+        <div>
+          <h3>Suggestions</h3>
+          <p className="profile-meta">People you might want to follow.</p>
+        </div>
+        <div className="connection-list">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="connection-card" style={{ opacity: 0.5 }}>
+              <div className="connection-identity">
+                <div className="connection-avatar" style={{ background: "#e2e8f0" }} />
+                <div className="connection-info">
+                  <div style={{ height: 12, width: 100, background: "#e2e8f0", borderRadius: 6, marginBottom: 6 }} />
+                  <div style={{ height: 10, width: 70, background: "#f1f5f9", borderRadius: 6 }} />
+                </div>
+              </div>
+              <div style={{ width: 72, height: 32, background: "#e2e8f0", borderRadius: 20 }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!users.length) {
+    return (
+      <div className="card connection-column">
+        <div>
+          <h3>Suggestions</h3>
+          <p className="profile-meta">People you might want to follow.</p>
+        </div>
+        <div style={{ padding: "24px", textAlign: "center", color: "#64748b" }}>
+          <p style={{ margin: 0, fontSize: "0.95rem" }}>No suggestions available right now.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card connection-column">
+      <div>
+        <h3>Suggestions</h3>
+        <p className="profile-meta">People you might want to follow.</p>
+      </div>
+      <div className="connection-list">
+        {users.map((person) => (
+          <div key={person.id} className="connection-card">
+            <Link to={getProfilePath(person)} className="connection-identity">
+              <div className="connection-avatar">{getAuthorAvatar(person)}</div>
+              <div className="connection-info">
+                <div className="connection-name">{getDisplayName(person)}</div>
+                <div className="connection-meta">@{person.username}</div>
+              </div>
+            </Link>
+            <FollowButton userId={person.id} username={person.username} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function ProfilePage() {
   const { username } = useParams();
   const navigate = useNavigate();
@@ -138,6 +210,7 @@ export default function ProfilePage() {
   const [messageBusy, setMessageBusy] = useState(false);
   const [activeTab, setActiveTab] = useState("activity");
   const [contentFilter, setContentFilter] = useState("All");
+  const [connectionSubTab, setConnectionSubTab] = useState("followers");
 
   useEffect(() => {
     setActiveTab("activity");
@@ -183,19 +256,19 @@ export default function ProfilePage() {
   const projectsQuery = useQuery({
     queryKey: ["profile-projects", profileUsername],
     queryFn: () => listUserProjects(profileUsername, { size: PAGE_SIZE }),
-    enabled: Boolean(profileUsername && (activeTab === "projects" || (activeTab === "activity" && (contentFilter === "All" || contentFilter === "Projects"))))
+    enabled: Boolean(profileUsername)
   });
 
   const postsQuery = useQuery({
     queryKey: ["profile-posts", profileUsername],
     queryFn: () => listUserPosts(profileUsername, { size: PAGE_SIZE }),
-    enabled: Boolean(profileUsername && (activeTab === "posts" || (activeTab === "activity" && (contentFilter === "All" || contentFilter === "Posts"))))
+    enabled: Boolean(profileUsername)
   });
 
   const blogsQuery = useQuery({
     queryKey: ["profile-blogs", profileUsername],
     queryFn: () => listUserBlogs(profileUsername, { size: PAGE_SIZE }),
-    enabled: Boolean(profileUsername && (activeTab === "blogs" || (activeTab === "activity" && (contentFilter === "All" || contentFilter === "Blogs"))))
+    enabled: Boolean(profileUsername)
   });
 
   const savedQuery = useQuery({
@@ -207,13 +280,13 @@ export default function ProfilePage() {
   const followersQuery = useQuery({
     queryKey: ["followers", profileUserId],
     queryFn: () => listFollowers(profileUserId),
-    enabled: Boolean(profileUserId && activeTab === "connections")
+    enabled: Boolean(profileUserId)
   });
 
   const followingQuery = useQuery({
     queryKey: ["following", profileUserId],
     queryFn: () => listFollowing(profileUserId),
-    enabled: Boolean(profileUserId && activeTab === "connections")
+    enabled: Boolean(profileUserId)
   });
 
   const handleFollow = async () => {
@@ -503,12 +576,53 @@ export default function ProfilePage() {
           </div>
 
           <div className="profile-summary-grid">
-            <div className="profile-summary-card"><strong>{data.projectCount || 0}</strong><span>Projects</span></div>
-            <div className="profile-summary-card"><strong>{data.postCount || 0}</strong><span>Posts</span></div>
-            <div className="profile-summary-card"><strong>{data.blogCount || 0}</strong><span>Blogs</span></div>
-            <div className="profile-summary-card"><strong>{data.followerCount || 0}</strong><span>Followers</span></div>
-            <div className="profile-summary-card"><strong>{data.followingCount || 0}</strong><span>Following</span></div>
+            <button
+              type="button"
+              className="profile-summary-card profile-summary-card--clickable"
+              onClick={() => { setActiveTab("activity"); setContentFilter("Projects"); }}
+              title="View projects"
+            >
+              <strong>{projectsQuery.data?.totalElements ?? data.projectCount ?? 0}</strong>
+              <span>Projects</span>
+            </button>
+            <button
+              type="button"
+              className="profile-summary-card profile-summary-card--clickable"
+              onClick={() => { setActiveTab("activity"); setContentFilter("Posts"); }}
+              title="View posts"
+            >
+              <strong>{postsQuery.data?.totalElements ?? data.postCount ?? 0}</strong>
+              <span>Posts</span>
+            </button>
+            <button
+              type="button"
+              className="profile-summary-card profile-summary-card--clickable"
+              onClick={() => { setActiveTab("activity"); setContentFilter("Blogs"); }}
+              title="View blogs"
+            >
+              <strong>{blogsQuery.data?.totalElements ?? data.blogCount ?? 0}</strong>
+              <span>Blogs</span>
+            </button>
+            <button
+              type="button"
+              className="profile-summary-card profile-summary-card--clickable"
+              onClick={() => { setActiveTab("connections"); setConnectionSubTab("followers"); }}
+              title="View followers"
+            >
+              <strong>{followersQuery.data ? followersQuery.data.length : (data.followerCount ?? 0)}</strong>
+              <span>Followers</span>
+            </button>
+            <button
+              type="button"
+              className="profile-summary-card profile-summary-card--clickable"
+              onClick={() => { setActiveTab("connections"); setConnectionSubTab("following"); }}
+              title="View following"
+            >
+              <strong>{followingQuery.data ? followingQuery.data.length : (data.followingCount ?? 0)}</strong>
+              <span>Following</span>
+            </button>
           </div>
+
         </div>
       </section>
 
@@ -785,64 +899,103 @@ export default function ProfilePage() {
       )}
       {activeTab === "connections" && (
         <section className="profile-pane">
-          {followersQuery.isLoading || followingQuery.isLoading ? (
-            <div className="card">Loading connections...</div>
-          ) : (
-            <div className="connection-grid">
-              <div className="card connection-column">
-                <div>
-                  <h3>Followers</h3>
-                  <p className="profile-meta">People who are keeping up with {isMe ? "your" : "this"} profile.</p>
-                </div>
-                {followers.length === 0 ? (
-                  <p>No followers yet.</p>
-                ) : (
-                  <div className="connection-list">
-                    {followers.map((follower) => {
-                      const followerProfile = follower.follower;
-                      return (
-                        <div key={follower.id} className="connection-card">
-                          <Link to={getProfilePath(followerProfile)} className="connection-identity">
-                            <div className="connection-avatar">{getAuthorAvatar(followerProfile)}</div>
-                            <div className="connection-info">
-                              <div className="connection-name">{getDisplayName(followerProfile)}</div>
-                              <div className="connection-meta">@{followerProfile.username}</div>
-                            </div>
-                          </Link>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+          {/* Sub-tab bar */}
+          <div style={{ display: "flex", gap: "8px", borderBottom: "2px solid #e2e8f0", paddingBottom: "0" }}>
+            {["followers", "following", "suggestions"].map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setConnectionSubTab(tab)}
+                style={{
+                  padding: "10px 20px",
+                  border: "none",
+                  background: "transparent",
+                  fontWeight: 700,
+                  fontSize: "0.9rem",
+                  cursor: "pointer",
+                  color: connectionSubTab === tab ? "#4f46e5" : "#64748b",
+                  borderBottom: connectionSubTab === tab ? "2px solid #4f46e5" : "2px solid transparent",
+                  marginBottom: "-2px",
+                  transition: "color 0.15s, border-color 0.15s",
+                  textTransform: "capitalize"
+                }}
+              >
+                {tab === "followers" && `Followers (${followers.length})`}
+                {tab === "following" && `Following (${following.length})`}
+                {tab === "suggestions" && "Suggestions"}
+              </button>
+            ))}
+          </div>
 
-              <div className="card connection-column">
-                <div>
-                  <h3>Following</h3>
-                  <p className="profile-meta">People {isMe ? "you are" : "this contributor is"} following.</p>
-                </div>
-                {following.length === 0 ? (
-                  <p>No connections yet.</p>
-                ) : (
-                  <div className="connection-list">
-                    {following.map((follow) => {
-                      const followingProfile = follow.following;
-                      return (
-                        <div key={follow.id} className="connection-card">
-                          <Link to={getProfilePath(followingProfile)} className="connection-identity">
-                            <div className="connection-avatar">{getAuthorAvatar(followingProfile)}</div>
+          {followersQuery.isLoading || followingQuery.isLoading ? (
+            <div className="card" style={{ padding: "32px", textAlign: "center", color: "#64748b" }}>Loading connections...</div>
+          ) : (
+            <>
+              {/* Followers sub-tab */}
+              {connectionSubTab === "followers" && (
+                <div className="card connection-column">
+                  <div>
+                    <h3>Followers</h3>
+                    <p className="profile-meta">People who are keeping up with {isMe ? "your" : "this"} profile.</p>
+                  </div>
+                  {followers.length === 0 ? (
+                    <div style={{ padding: "24px", textAlign: "center", color: "#64748b" }}>
+                      <p style={{ margin: 0, fontSize: "0.95rem" }}>No followers yet.</p>
+                    </div>
+                  ) : (
+                    <div className="connection-list">
+                      {followers.map((person) => (
+                        <div key={person.id} className="connection-card">
+                          <Link to={getProfilePath(person)} className="connection-identity">
+                            <div className="connection-avatar">{getAuthorAvatar(person)}</div>
                             <div className="connection-info">
-                              <div className="connection-name">{getDisplayName(followingProfile)}</div>
-                              <div className="connection-meta">@{followingProfile.username}</div>
+                              <div className="connection-name">{getDisplayName(person)}</div>
+                              <div className="connection-meta">@{person.username}</div>
                             </div>
                           </Link>
+                          <FollowButton userId={person.id} username={person.username} />
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Following sub-tab */}
+              {connectionSubTab === "following" && (
+                <div className="card connection-column">
+                  <div>
+                    <h3>Following</h3>
+                    <p className="profile-meta">People {isMe ? "you are" : "this contributor is"} following.</p>
                   </div>
-                )}
-              </div>
-            </div>
+                  {following.length === 0 ? (
+                    <div style={{ padding: "24px", textAlign: "center", color: "#64748b" }}>
+                      <p style={{ margin: 0, fontSize: "0.95rem" }}>Not following anyone yet.</p>
+                    </div>
+                  ) : (
+                    <div className="connection-list">
+                      {following.map((person) => (
+                        <div key={person.id} className="connection-card">
+                          <Link to={getProfilePath(person)} className="connection-identity">
+                            <div className="connection-avatar">{getAuthorAvatar(person)}</div>
+                            <div className="connection-info">
+                              <div className="connection-name">{getDisplayName(person)}</div>
+                              <div className="connection-meta">@{person.username}</div>
+                            </div>
+                          </Link>
+                          <FollowButton userId={person.id} username={person.username} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Suggestions sub-tab */}
+              {connectionSubTab === "suggestions" && (
+                <SuggestedPeoplePanel currentUserId={currentUser?.id} />
+              )}
+            </>
           )}
         </section>
       )}

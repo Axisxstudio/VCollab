@@ -19,6 +19,7 @@ import { shareContent } from "../../services/share.service";
 import { createReport } from "../../services/report.service";
 import { routes } from "../../config/routes";
 import { useAuthStore } from "../../store/authStore";
+import { toast } from "react-hot-toast";
 import CommentThread from "../comments/CommentThread";
 import CommentModal from "../comments/CommentModal";
 
@@ -110,48 +111,84 @@ export default function ContentActions({
     };
   }, [reportOpen, showSuccessPopup, moreMenuOpen]);
 
-  const handleLike = async () => {
+  const handleLike = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (disabled) return;
     if (busyStates.like) return;
     setBusyStates(prev => ({ ...prev, like: true }));
+    
+    const previousLikeStatus = likeStatus;
+    const nextLiked = !likeStatus?.liked;
+
     try {
-      if (likeStatus?.liked) {
+      // Optimistically update status instantly
+      queryClient.setQueryData(["like-status", contentType, contentId], { liked: nextLiked });
+
+      if (previousLikeStatus?.liked) {
         await unlikeContent(contentType, contentId);
       } else {
         await likeContent(contentType, contentId);
       }
 
-      await Promise.all([
-        ...queryKeys.map(key => queryClient.invalidateQueries({ queryKey: key })),
-        queryClient.invalidateQueries({ queryKey: ["like-status", contentType, contentId] })
-      ]);
+      // Invalidate in background (do not await)
+      queryKeys.forEach(key => {
+        queryClient.invalidateQueries({ queryKey: key });
+      });
+      queryClient.invalidateQueries({ queryKey: ["like-status", contentType, contentId] });
+    } catch (error) {
+      console.error("Like interaction error:", error);
+      // Rollback to previous state on error
+      queryClient.setQueryData(["like-status", contentType, contentId], previousLikeStatus);
     } finally {
       setBusyStates(prev => ({ ...prev, like: false }));
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (disabled) return;
     if (busyStates.save) return;
     setBusyStates(prev => ({ ...prev, save: true }));
+
+    const previousSaveStatus = saveStatus;
+    const nextSaved = !saveStatus?.saved;
+
     try {
-      if (saveStatus?.saved) {
+      // Optimistically update status instantly
+      queryClient.setQueryData(["save-status", contentType, contentId], { saved: nextSaved });
+
+      if (previousSaveStatus?.saved) {
         await unsaveContent(contentType, contentId);
       } else {
         await saveContent(contentType, contentId);
       }
 
-      await Promise.all([
-        ...queryKeys.map(key => queryClient.invalidateQueries({ queryKey: key })),
-        queryClient.invalidateQueries({ queryKey: ["save-status", contentType, contentId] })
-      ]);
+      // Invalidate in background (do not await)
+      queryKeys.forEach(key => {
+        queryClient.invalidateQueries({ queryKey: key });
+      });
+      queryClient.invalidateQueries({ queryKey: ["save-status", contentType, contentId] });
+    } catch (error) {
+      console.error("Save interaction error:", error);
+      // Rollback on error
+      queryClient.setQueryData(["save-status", contentType, contentId], previousSaveStatus);
     } finally {
       setBusyStates(prev => ({ ...prev, save: false }));
       setMoreMenuOpen(false);
     }
   };
     
-  const handleCommentClick = () => {
+  const handleCommentClick = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (disabled) return;
     const detailUrl = routes[`${contentType.toLowerCase()}Detail`]?.replace(":id", contentId);
     if (!detailUrl) return;
@@ -163,7 +200,11 @@ export default function ContentActions({
     }
   };
 
-  const handleShare = async () => {
+  const handleShare = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (disabled) return;
     if (busyStates.share) return;
     setBusyStates(prev => ({ ...prev, share: true }));
@@ -173,25 +214,64 @@ export default function ContentActions({
           ? window.location.href
           : "");
 
-      if (destination) {
+      let shareActionCompleted = false;
+      let userAborted = false;
+      
+      // Attempt native Web Share API (supports sharing to WhatsApp, Slack, Messages, etc.)
+      if (typeof navigator !== "undefined" && navigator.share) {
         try {
-          await navigator.clipboard?.writeText(destination);
-        } catch (error) {
-          // ignore
+          const shareTitle = title || `VCollab ${contentType}`;
+          const shareText = `Check out this ${contentType.toLowerCase()} on VCollab: "${shareTitle}"`;
+          
+          await navigator.share({
+            title: shareTitle,
+            text: shareText,
+            url: destination
+          });
+          shareActionCompleted = true;
+        } catch (shareError) {
+          if (shareError.name === "AbortError") {
+            userAborted = true;
+            console.log("User aborted native share.");
+          } else {
+            console.warn("Web Share API failed, falling back to clipboard:", shareError);
+          }
         }
       }
 
-      await shareContent(contentType, contentId);
+      // Fallback: Copy link to clipboard (only if native share was not completed and user didn't abort)
+      if (!shareActionCompleted && !userAborted && destination) {
+        try {
+          await navigator.clipboard?.writeText(destination);
+          shareActionCompleted = true;
+          toast.success("Link copied to clipboard!");
+        } catch (clipboardError) {
+          console.error("Clipboard copy failed:", clipboardError);
+          toast.error("Failed to copy link.");
+        }
+      }
 
-      await Promise.all(
-        queryKeys.map(key => queryClient.invalidateQueries({ queryKey: key }))
-      );
+      // Only increase the share count in the database if shared successfully or copied
+      if (shareActionCompleted) {
+        await shareContent(contentType, contentId);
+
+        // Invalidate in background (do not await)
+        queryKeys.forEach(key => {
+          queryClient.invalidateQueries({ queryKey: key });
+        });
+      }
+    } catch (error) {
+      console.error("Share interaction error:", error);
     } finally {
       setBusyStates(prev => ({ ...prev, share: false }));
     }
   };
 
-  const handleReport = async () => {
+  const handleReport = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (disabled) return;
     if (busyStates.report) return;
     setBusyStates(prev => ({ ...prev, report: true }));

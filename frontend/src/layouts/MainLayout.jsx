@@ -135,6 +135,27 @@ export default function MainLayout() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const contentRef = useRef(null);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (contentRef.current) {
+        setIsScrolled(contentRef.current.scrollTop > 20);
+      }
+    };
+
+    const container = contentRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll, { passive: true });
+    }
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, []);
+
   return (
     <div className={`workspace-shell ${isCollapsed ? "sidebar-collapsed" : ""}`}>
       <aside className={`workspace-sidebar ${isCollapsed ? "collapsed" : ""} ${isMobileOpen ? "mobile-open" : ""}`}>
@@ -146,7 +167,6 @@ export default function MainLayout() {
             {(!isCollapsed || isMobileOpen) && (
               <div className="sidebar-brand-copy">
                 <span className="workspace-brand-text">VCollab</span>
-                <span className="workspace-brand-tagline">Premium Workspace</span>
               </div>
             )}
           </Link>
@@ -254,7 +274,7 @@ export default function MainLayout() {
       )}
 
       <div className="workspace-main">
-        <header className="workspace-topbar">
+        <header className={`workspace-topbar ${isScrolled ? "scrolled" : ""}`}>
           <button 
             className="mobile-menu-btn" 
             onClick={() => setIsMobileOpen(prev => !prev)}
@@ -263,9 +283,7 @@ export default function MainLayout() {
             <Menu size={24} />
           </button>
           <div className="workspace-topbar-copy">
-            <span className="workspace-eyebrow">Signed-in workspace</span>
             <h2>Welcome back, <span className="user-name-gradient">{user?.fullName || user?.username || "collaborator"}</span></h2>
-            <p>Manage resources, projects, posts, blogs, requests, and conversations from one professional side navigation.</p>
           </div>
           <div className="workspace-top-actions">
             <div 
@@ -421,7 +439,7 @@ export default function MainLayout() {
           </div>
         </header>
 
-        <main className="workspace-content">
+        <main ref={contentRef} className="workspace-content">
           <div className="workspace-container">
             <Outlet />
           </div>
