@@ -1,6 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
+  motion,
+  useScroll,
+  useSpring,
+  useInView,
+  AnimatePresence,
+} from "framer-motion";
+import {
   ArrowRight,
   Heart,
   MessageCircle,
@@ -11,7 +18,7 @@ import {
   Users,
   FolderKanban,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import CommentModal from "../../components/comments/CommentModal";
 import PublicFooter from "../../components/public/PublicFooter";
@@ -22,6 +29,82 @@ import { useAuthStore } from "../../store/authStore";
 import { formatDate, truncateText } from "../../utils/discovery";
 import "./landing-page.css";
 
+/* ─── Shared animation variants ─────────────────────────────── */
+const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  visible: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1], delay },
+  }),
+};
+
+const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: (delay = 0) => ({
+    opacity: 1,
+    transition: { duration: 0.45, ease: "easeOut", delay },
+  }),
+};
+
+const cardVariant = {
+  hidden: { opacity: 0, y: 32, scale: 0.97 },
+  visible: (delay = 0) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1], delay },
+  }),
+};
+
+const staggerContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+
+/* ─── Scroll-aware section wrapper ──────────────────────────── */
+function RevealSection({ children, className, ...rest }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px 0px" });
+
+  return (
+    <motion.div
+      ref={ref}
+      variants={fadeUp}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      className={className}
+      {...rest}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* ─── Scroll progress bar ────────────────────────────────────── */
+function ScrollProgressBar() {
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 200, damping: 30 });
+
+  return (
+    <motion.div
+      style={{
+        scaleX,
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "3px",
+        background: "linear-gradient(90deg, #2563eb, #7c3aed)",
+        transformOrigin: "0%",
+        zIndex: 9999,
+        borderRadius: "0 2px 2px 0",
+      }}
+    />
+  );
+}
+
+/* ─── MediaSwiper (unchanged logic, animated track) ─────────── */
 function MediaSwiper({ media = [], fallbackIcon: FallbackIcon }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const items = Array.isArray(media) ? media : [];
@@ -48,16 +131,22 @@ function MediaSwiper({ media = [], fallbackIcon: FallbackIcon }) {
 
   return (
     <div className="lp-media-swiper">
-      <div className="lp-media-track" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
+      <motion.div
+        className="lp-media-track"
+        animate={{ x: `-${currentIndex * 100}%` }}
+        transition={{ type: "spring", stiffness: 300, damping: 35 }}
+        style={{ display: "flex" }}
+      >
         {items.map((item, index) => (
           <img
             key={`${typeof item === "string" ? item : item.url}-${index}`}
             src={typeof item === "string" ? item : item.url}
             alt={`Media ${index + 1}`}
             className="lp-media-img"
+            style={{ flexShrink: 0, width: "100%" }}
           />
         ))}
-      </div>
+      </motion.div>
 
       {items.length > 1 && (
         <>
@@ -69,7 +158,10 @@ function MediaSwiper({ media = [], fallbackIcon: FallbackIcon }) {
           </button>
           <div className="lp-swiper-dots">
             {items.map((_, index) => (
-              <span key={index} className={`lp-swiper-dot ${index === currentIndex ? "active" : ""}`} />
+              <span
+                key={index}
+                className={`lp-swiper-dot ${index === currentIndex ? "active" : ""}`}
+              />
             ))}
           </div>
           <div className="lp-swiper-counter">{currentIndex + 1}/{items.length}</div>
@@ -79,7 +171,8 @@ function MediaSwiper({ media = [], fallbackIcon: FallbackIcon }) {
   );
 }
 
-function ProjectCard({ project, delay = "0ms" }) {
+/* ─── Project card with hover animation ─────────────────────── */
+function ProjectCard({ project, index = 0 }) {
   const owner = project.owner || {};
   const inactive = project.active === false;
   const detailPath = routes.projectDetail.replace(":id", project.id);
@@ -89,8 +182,14 @@ function ProjectCard({ project, delay = "0ms" }) {
       owner.fullName || owner.username || "U"
     )}&background=dbeafe&color=1d4ed8&bold=true&size=80`;
 
-  return (
-    <article className={`lp-project-card reveal-up ${inactive ? "lp-project-card--inactive" : ""}`} style={{ "--delay": delay }}>
+  const card = (
+    <motion.article
+      variants={cardVariant}
+      custom={index * 0.06}
+      className={`lp-project-card ${inactive ? "lp-project-card--inactive" : ""}`}
+      whileHover={!inactive ? { y: -6, boxShadow: "0 20px 40px -12px rgba(37,99,235,0.18)" } : {}}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+    >
       <div className="lp-project-media-wrap">
         <MediaSwiper media={project.media || []} fallbackIcon={FolderKanban} />
       </div>
@@ -126,7 +225,9 @@ function ProjectCard({ project, delay = "0ms" }) {
             {project.techStack.slice(0, 3).map((tech, i) => (
               <span key={i} className="lp-tech-badge">{tech}</span>
             ))}
-            {project.techStack.length > 3 && <span className="lp-tech-badge">+{project.techStack.length - 3}</span>}
+            {project.techStack.length > 3 && (
+              <span className="lp-tech-badge">+{project.techStack.length - 3}</span>
+            )}
           </div>
         )}
 
@@ -137,11 +238,14 @@ function ProjectCard({ project, delay = "0ms" }) {
           </div>
         )}
       </div>
-    </article>
+    </motion.article>
   );
+
+  return inactive ? card : <Link to={detailPath}>{card}</Link>;
 }
 
-function ContentCard({ item, type, delay = "0ms" }) {
+/* ─── Content card (blog / post preview) ────────────────────── */
+function ContentCard({ item, type, index = 0 }) {
   const category = item.category?.name || (type === "blog" ? "Blog" : "Post");
   const inactive = item.active === false;
   const detailPath = (type === "blog" ? routes.blogDetail : routes.postDetail).replace(":id", item.id);
@@ -149,8 +253,14 @@ function ContentCard({ item, type, delay = "0ms" }) {
   const fallbackUrl = item.coverImage || item.thumbnail || null;
   const media = mediaFromArray || (fallbackUrl ? [{ url: fallbackUrl }] : []);
 
-  return (
-    <article className={`lp-content-card reveal-up ${inactive ? "lp-content-card--inactive" : ""}`} style={{ "--delay": delay }}>
+  const card = (
+    <motion.article
+      variants={cardVariant}
+      custom={index * 0.06}
+      className={`lp-content-card ${inactive ? "lp-content-card--inactive" : ""}`}
+      whileHover={!inactive ? { y: -5, boxShadow: "0 16px 32px -8px rgba(37,99,235,0.14)" } : {}}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+    >
       <div className="lp-content-thumb">
         <MediaSwiper media={media} fallbackIcon={type === "blog" ? BookOpenText : Sparkles} />
       </div>
@@ -183,11 +293,14 @@ function ContentCard({ item, type, delay = "0ms" }) {
           </div>
         )}
       </div>
-    </article>
+    </motion.article>
   );
+
+  return inactive ? card : <Link to={detailPath}>{card}</Link>;
 }
 
-function LandingPostCard({ post, delay = "0ms", onViewMore }) {
+/* ─── Instagram-style post card ─────────────────────────────── */
+function LandingPostCard({ post, index = 0, onViewMore }) {
   const author = post.author || post.owner || {};
   const inactive = post.active === false;
   const avatarUrl =
@@ -201,7 +314,13 @@ function LandingPostCard({ post, delay = "0ms", onViewMore }) {
   const media = mediaFromArray || (fallbackUrl ? [{ url: fallbackUrl }] : []);
 
   return (
-    <article className={`lp-insta-card reveal-up ${inactive ? "lp-insta-card--inactive" : ""}`} style={{ "--delay": delay }}>
+    <motion.article
+      variants={cardVariant}
+      custom={index * 0.06}
+      className={`lp-insta-card ${inactive ? "lp-insta-card--inactive" : ""}`}
+      whileHover={{ y: -5, boxShadow: "0 16px 32px -8px rgba(37,99,235,0.13)" }}
+      transition={{ type: "spring", stiffness: 300, damping: 25 }}
+    >
       <div className="lp-insta-header">
         <img src={avatarUrl} alt={author.fullName || author.username || "Post author"} className="lp-insta-avatar" />
         <div className="lp-insta-author-info">
@@ -245,11 +364,12 @@ function LandingPostCard({ post, delay = "0ms", onViewMore }) {
           </div>
         )}
       </div>
-    </article>
+    </motion.article>
   );
 }
 
-function ContributorCard({ user, ctaPath, ctaLabel, delay = "0ms" }) {
+/* ─── Contributor card with hover glow ──────────────────────── */
+function ContributorCard({ user, ctaPath, ctaLabel, index = 0 }) {
   const avatarUrl =
     user.profileImage ||
     `https://ui-avatars.com/api/?name=${encodeURIComponent(
@@ -260,9 +380,21 @@ function ContributorCard({ user, ctaPath, ctaLabel, delay = "0ms" }) {
   const role = user.title || (user.role === "ADMIN" ? "Platform Admin" : "Community Builder");
 
   return (
-    <div className="lp-cc-card reveal-up" style={{ "--delay": delay }}>
+    <motion.div
+      variants={cardVariant}
+      custom={index * 0.1}
+      className="lp-cc-card"
+      whileHover={{ y: -8, boxShadow: "0 24px 48px -12px rgba(37,99,235,0.22)" }}
+      transition={{ type: "spring", stiffness: 280, damping: 22 }}
+    >
       <div className="lp-cc-body">
-        <img src={avatarUrl} alt={user.fullName || user.username || "Contributor"} className="lp-cc-avatar" />
+        <motion.img
+          src={avatarUrl}
+          alt={user.fullName || user.username || "Contributor"}
+          className="lp-cc-avatar"
+          whileHover={{ scale: 1.07 }}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
+        />
 
         <h3 className="lp-cc-name">{user.fullName || user.username}</h3>
         {user.username && <span className="lp-cc-handle">@{user.username}</span>}
@@ -272,10 +404,49 @@ function ContributorCard({ user, ctaPath, ctaLabel, delay = "0ms" }) {
           {ctaLabel || "View Profile"}
         </Link>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
+/* ─── Animated grid wrapper ──────────────────────────────────── */
+function AnimatedGrid({ children, className }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-60px 0px" });
+
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      variants={staggerContainer}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* ─── Section header row with reveal ────────────────────────── */
+function SectionHeaderRow({ children }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-60px 0px" });
+
+  return (
+    <motion.div
+      ref={ref}
+      className="lp-section-header-row"
+      variants={fadeUp}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN LANDING PAGE
+   ═══════════════════════════════════════════════════════════════ */
 export default function LandingPage() {
   const token = useAuthStore((state) => state.token);
   const { data, isLoading } = useRealtimeLandingOverview();
@@ -313,20 +484,14 @@ export default function LandingPage() {
     setContributorPage((previous) => (previous - 1 + totalContributorPages) % totalContributorPages);
   }, [totalContributorPages]);
 
-  // Auto-play logic
   useEffect(() => {
     if (!isAutoPlaying || featuredContributors.length <= contributorsPerPage) return;
-
-    const interval = setInterval(() => {
-      nextContributorPage();
-    }, 3000); // 3 seconds per slide
-
+    const interval = setInterval(nextContributorPage, 3000);
     return () => clearInterval(interval);
   }, [isAutoPlaying, featuredContributors.length, contributorsPerPage, nextContributorPage]);
 
-  // Swipe logic
   const handleTouchStart = (e) => {
-    setIsAutoPlaying(false); // Pause auto-play on touch
+    setIsAutoPlaying(false);
     touchStartX.current = e.targetTouches[0].clientX;
   };
 
@@ -339,128 +504,159 @@ export default function LandingPage() {
       setIsAutoPlaying(true);
       return;
     }
-
     const distance = touchStartX.current - touchEndX.current;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-
-    if (isLeftSwipe) {
-      nextContributorPage();
-    } else if (isRightSwipe) {
-      previousContributorPage();
-    }
+    if (distance > 50) nextContributorPage();
+    else if (distance < -50) previousContributorPage();
 
     touchStartX.current = null;
     touchEndX.current = null;
-
-    // Resume auto-play after a delay
     setTimeout(() => setIsAutoPlaying(true), 5000);
   };
 
   return (
     <div className="lp">
+      {/* Scroll progress indicator */}
+      <ScrollProgressBar />
+
       <SEO
         title="Build, Collaborate, and Share With Confidence"
         description="VCollab is a real-time platform where students, developers, and creators can collaborate on projects, publish content, find trusted support, and grow in a professional community."
       />
 
+      {/* ── HERO ─────────────────────────────────────────── */}
       <section className="lp-hero">
         <div className="container lp-hero-content">
-          <div className="lp-hero-copy reveal-up">
-            <div className="lp-hero-badge">
-              <span className="lp-badge-dot"></span>
+          <div className="lp-hero-copy">
+            {/* Badge */}
+            <motion.div
+              className="lp-hero-badge"
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <motion.span
+                className="lp-badge-dot"
+                animate={{ scale: [1, 1.4, 1], opacity: [1, 0.6, 1] }}
+                transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+              />
               Introducing VCollab 2.0
-            </div>
-            <h1 className="lp-hero-title">
+            </motion.div>
+
+            {/* Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 32 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+            >
               <span className="lp-hero-title-desktop">
                 Build, Collaborate, and<br />
                 Share With <span className="lp-accent">Confidence</span>
               </span>
-              <span className="lp-hero-title-mobile" aria-label="Build Colabrate, and Share with confident">
+              <span className="lp-hero-title-mobile" aria-label="Build Collaborate, and Share with confidence">
                 <span className="lp-type-line lp-type-line-1">Build</span>
-                <span className="lp-type-line lp-type-line-2">Colabrate, and</span>
-                <span className="lp-type-line lp-type-line-3">Share with confident</span>
+                <span className="lp-type-line lp-type-line-2">Collaborate, and</span>
+                <span className="lp-type-line lp-type-line-3">Share with confidence</span>
               </span>
-            </h1>
-            <div className="lp-hero-actions">
-              <Link to={routes.register} className="lp-btn-filled">Get Started</Link>
-              <a href="#projects" className="lp-btn-outline-dark">Explore Projects</a>
-            </div>
+            </motion.h1>
+
+            {/* CTA buttons */}
+            <motion.div
+              className="lp-hero-actions"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
+            >
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                <Link to={routes.register} className="lp-btn-filled">Get Started</Link>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                <a href="#projects" className="lp-btn-outline-dark">Explore Projects</a>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </section>
 
+      {/* ── PROJECTS ──────────────────────────────────────── */}
       <section id="projects" className="lp-dual-section">
         <div className="container">
-          <div className="lp-section-header-row reveal-up" style={{ "--delay": "80ms" }}>
+          <SectionHeaderRow>
             <div className="lp-section-head">
               <h2>Active Work From the <span className="lp-accent">Community</span></h2>
               <p>Explore live projects shared by builders across campus work, side ideas, portfolio pieces, and public collaboration.</p>
             </div>
-            <Link to={routes.projects} className="lp-btn-outline">
-              View All Projects
-              <ArrowRight size={16} />
-            </Link>
-          </div>
+            <motion.div whileHover={{ x: 4 }} transition={{ type: "spring", stiffness: 400 }}>
+              <Link to={routes.projects} className="lp-btn-outline">
+                View All Projects
+                <ArrowRight size={16} />
+              </Link>
+            </motion.div>
+          </SectionHeaderRow>
 
           {isLoading ? (
             <div className="lp-empty">Loading projects...</div>
           ) : featuredProjects.length > 0 ? (
-            <div className="lp-grid-4">
+            <AnimatedGrid className="lp-grid-4">
               {featuredProjects.slice(0, 8).map((project, index) => (
-                <ProjectCard key={project.id} project={project} delay={`${index * 80}ms`} />
+                <ProjectCard key={project.id} project={project} index={index} />
               ))}
-            </div>
+            </AnimatedGrid>
           ) : (
             <div className="lp-empty">No featured projects yet.</div>
           )}
         </div>
       </section>
 
+      {/* ── POSTS ─────────────────────────────────────────── */}
       <section id="posts" className="lp-dual-section lp-dual-section--alt">
         <div className="container">
-          <div className="lp-section-header-row reveal-up" style={{ "--delay": "80ms" }}>
+          <SectionHeaderRow>
             <div className="lp-section-head">
               <h2>Live <span className="lp-accent">Discussions and Updates</span></h2>
               <p>Follow progress, questions, collaboration requests, and technical conversations happening across the platform.</p>
             </div>
-            <Link to={routes.posts} className="lp-btn-outline">
-              View All Posts
-              <ArrowRight size={16} />
-            </Link>
-          </div>
+            <motion.div whileHover={{ x: 4 }} transition={{ type: "spring", stiffness: 400 }}>
+              <Link to={routes.posts} className="lp-btn-outline">
+                View All Posts
+                <ArrowRight size={16} />
+              </Link>
+            </motion.div>
+          </SectionHeaderRow>
 
           {isLoading ? (
             <div className="lp-empty">Loading posts...</div>
           ) : latestPosts.length > 0 ? (
-            <div className="lp-grid-4">
+            <AnimatedGrid className="lp-grid-4">
               {latestPosts.slice(0, 8).map((post, index) => (
                 <LandingPostCard
                   key={post.id}
                   post={post}
-                  delay={`${index * 80}ms`}
+                  index={index}
                   onViewMore={setSelectedPostForModal}
                 />
               ))}
-            </div>
+            </AnimatedGrid>
           ) : (
             <div className="lp-empty">No posts yet.</div>
           )}
         </div>
       </section>
 
+      {/* ── CONTRIBUTORS ──────────────────────────────────── */}
       <section id="contributors" className="lp-dual-section">
         <div className="container">
-          <div className="lp-section-header-row reveal-up" style={{ "--delay": "80ms" }}>
+          <SectionHeaderRow>
             <div className="lp-section-head">
               <h2>Trusted <span className="lp-accent">Builders and Contributors</span></h2>
               <p>Meet active members who are sharing work, helping others, and growing through meaningful collaboration.</p>
             </div>
-            <Link to={discoverMembersPath} className="lp-btn-outline">
-              {token ? "Discover More Members" : "Join to Connect"}
-              <ArrowRight size={16} />
-            </Link>
-          </div>
+            <motion.div whileHover={{ x: 4 }} transition={{ type: "spring", stiffness: 400 }}>
+              <Link to={discoverMembersPath} className="lp-btn-outline">
+                {token ? "Discover More Members" : "Join to Connect"}
+                <ArrowRight size={16} />
+              </Link>
+            </motion.div>
+          </SectionHeaderRow>
 
           {isLoading ? (
             <div className="lp-empty">Loading contributors...</div>
@@ -474,43 +670,54 @@ export default function LandingPage() {
               onMouseLeave={() => setIsAutoPlaying(true)}
             >
               {featuredContributors.length > contributorsPerPage && (
-                <button className="lp-carousel-btn lp-carousel-btn--prev" onClick={previousContributorPage}>
+                <motion.button
+                  className="lp-carousel-btn lp-carousel-btn--prev"
+                  onClick={previousContributorPage}
+                  whileHover={{ scale: 1.12, backgroundColor: "#eff6ff" }}
+                  whileTap={{ scale: 0.93 }}
+                >
                   <ChevronLeft size={24} />
-                </button>
+                </motion.button>
               )}
 
               <div style={{ overflow: "hidden", width: "100%", padding: "10px 0" }}>
-                <div
-                  style={{
-                    display: "flex",
-                    transition: "transform 0.5s ease-in-out",
-                    transform: `translateX(-${contributorPage * 100}%)`
-                  }}
-                >
-                  {Array.from({ length: totalContributorPages }).map((_, pageIndex) => (
-                    <div key={pageIndex} style={{ minWidth: "100%", flexShrink: 0 }}>
-                      <div className="lp-grid-3 lp-carousel-grid">
-                        {featuredContributors
-                          .slice(pageIndex * contributorsPerPage, (pageIndex + 1) * contributorsPerPage)
-                          .map((user, index) => (
-                            <ContributorCard
-                              key={user.id}
-                              user={user}
-                              ctaPath={contributorCtaPath}
-                              ctaLabel={contributorCtaLabel}
-                              delay={`${index * 80}ms`}
-                            />
-                          ))}
-                      </div>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={contributorPage}
+                    initial={{ opacity: 0, x: 40 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -40 }}
+                    transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <div className="lp-grid-3 lp-carousel-grid">
+                      {featuredContributors
+                        .slice(
+                          contributorPage * contributorsPerPage,
+                          (contributorPage + 1) * contributorsPerPage
+                        )
+                        .map((user, index) => (
+                          <ContributorCard
+                            key={user.id}
+                            user={user}
+                            ctaPath={contributorCtaPath}
+                            ctaLabel={contributorCtaLabel}
+                            index={index}
+                          />
+                        ))}
                     </div>
-                  ))}
-                </div>
+                  </motion.div>
+                </AnimatePresence>
               </div>
 
               {featuredContributors.length > contributorsPerPage && (
-                <button className="lp-carousel-btn lp-carousel-btn--next" onClick={nextContributorPage}>
+                <motion.button
+                  className="lp-carousel-btn lp-carousel-btn--next"
+                  onClick={nextContributorPage}
+                  whileHover={{ scale: 1.12, backgroundColor: "#eff6ff" }}
+                  whileTap={{ scale: 0.93 }}
+                >
                   <ChevronRight size={24} />
-                </button>
+                </motion.button>
               )}
             </div>
           ) : (
@@ -519,66 +726,100 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── BLOGS ─────────────────────────────────────────── */}
       <section id="blogs" className="lp-dual-section lp-dual-section--alt">
         <div className="container">
-          <div className="lp-section-header-row reveal-up" style={{ "--delay": "80ms" }}>
+          <SectionHeaderRow>
             <div className="lp-section-head">
               <h2>Insights, Tutorials, and <span className="lp-accent">Ideas</span></h2>
               <p>Read blogs, guides, and lessons from people documenting what they build and what they learn.</p>
             </div>
-            <Link to={routes.blogs} className="lp-btn-outline">
-              View All Blogs
-              <ArrowRight size={16} />
-            </Link>
-          </div>
+            <motion.div whileHover={{ x: 4 }} transition={{ type: "spring", stiffness: 400 }}>
+              <Link to={routes.blogs} className="lp-btn-outline">
+                View All Blogs
+                <ArrowRight size={16} />
+              </Link>
+            </motion.div>
+          </SectionHeaderRow>
 
           {isLoading ? (
             <div className="lp-empty">Loading blogs...</div>
           ) : latestBlogs.length > 0 ? (
-            <div className="lp-grid-4">
+            <AnimatedGrid className="lp-grid-4">
               {latestBlogs.slice(0, 8).map((blog, index) => (
-                <ContentCard key={blog.id} item={blog} type="blog" delay={`${index * 80}ms`} />
+                <ContentCard key={blog.id} item={blog} type="blog" index={index} />
               ))}
-            </div>
+            </AnimatedGrid>
           ) : (
             <div className="lp-empty">No blogs yet.</div>
           )}
         </div>
       </section>
 
-      <section className="lp-cta-banner">
-        <div className="container lp-cta-inner reveal-up" style={{ "--delay": "120ms" }}>
+      {/* ── CTA BANNER ────────────────────────────────────── */}
+      <motion.section
+        className="lp-cta-banner"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-80px 0px" }}
+        transition={{ duration: 0.6 }}
+      >
+        <motion.div
+          className="container lp-cta-inner"
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px 0px" }}
+          transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+        >
           <div>
             <h2>Start Building With the Right Community</h2>
             <p>Join VCollab to collaborate on projects, share your work, and connect with people who help you move forward.</p>
           </div>
           <div className="lp-cta-actions">
-            <Link to={routes.register} className="lp-btn-filled">Create Account</Link>
-            <Link to={routes.login} className="lp-btn-outline-white">Sign In</Link>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
+              <Link to={routes.register} className="lp-btn-filled">Create Account</Link>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
+              <Link to={routes.login} className="lp-btn-outline-white">Sign In</Link>
+            </motion.div>
           </div>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
       <PublicFooter />
 
-      {selectedPostForModal && (
-        <CommentModal
-          contentType="POST"
-          contentId={selectedPostForModal.id}
-          title={selectedPostForModal.title}
-          author={selectedPostForModal.author || selectedPostForModal.owner}
-          mediaUrl={selectedPostForModal.media?.[0]?.url || selectedPostForModal.coverImage || selectedPostForModal.thumbnail}
-          counts={{
-            likeCount: selectedPostForModal.likeCount,
-            commentCount: selectedPostForModal.commentCount,
-            shareCount: selectedPostForModal.shareCount
-          }}
-          initialLikeStatus={false}
-          onLikeToggle={() => { }}
-          onShareChange={() => { }}
-          onClose={() => setSelectedPostForModal(null)}
-        />
-      )}
+      {/* ── Comment modal ─────────────────────────────────── */}
+      <AnimatePresence>
+        {selectedPostForModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            <CommentModal
+              contentType="POST"
+              contentId={selectedPostForModal.id}
+              title={selectedPostForModal.title}
+              author={selectedPostForModal.author || selectedPostForModal.owner}
+              mediaUrl={
+                selectedPostForModal.media?.[0]?.url ||
+                selectedPostForModal.coverImage ||
+                selectedPostForModal.thumbnail
+              }
+              counts={{
+                likeCount: selectedPostForModal.likeCount,
+                commentCount: selectedPostForModal.commentCount,
+                shareCount: selectedPostForModal.shareCount,
+              }}
+              initialLikeStatus={false}
+              onLikeToggle={() => {}}
+              onShareChange={() => {}}
+              onClose={() => setSelectedPostForModal(null)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
