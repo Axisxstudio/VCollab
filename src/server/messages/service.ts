@@ -7,6 +7,7 @@ import {
   publishConversationStatus,
   publishUserMessage,
 } from "@/server/realtime/publisher";
+import { createNotification } from "@/server/social-admin/service";
 import { mapMessage, userSummary } from "./mapper";
 import type {
   ConversationResponse,
@@ -455,10 +456,27 @@ export async function sendMessage(
 
   const response = mapMessage(message);
   await publishConversationMessage(input.conversationId, response);
+  
+  const userIds = await conversationUserIds(input.conversationId);
+  const senderSummary = await getUserSummary(senderId);
+  const senderName = Array.isArray(senderSummary.user_profiles) ? senderSummary.user_profiles[0]?.full_name : senderSummary.user_profiles?.full_name;
+  const displayName = senderName || senderSummary.username;
+  
   await Promise.all(
-    (await conversationUserIds(input.conversationId)).map((userId) =>
-      publishUserMessage(userId, response),
-    ),
+    userIds.map((userId) => publishUserMessage(userId, response))
+  );
+
+  await Promise.all(
+    userIds.filter(id => id !== senderId).map(id =>
+      createNotification(
+        id,
+        senderId,
+        "MESSAGE",
+        "conversation",
+        input.conversationId,
+        `New message from ${displayName}`
+      )
+    )
   );
 
   return response;

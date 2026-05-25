@@ -9,7 +9,7 @@ import {
 export default function AdminProjectsPage() {
   return (
     <AdminContentManager
-      title="Project moderation"
+      title="Projects"
       contentType="PROJECT"
       queryKeyPrefix={["admin", "projects"]}
       listFn={listAdminProjects}

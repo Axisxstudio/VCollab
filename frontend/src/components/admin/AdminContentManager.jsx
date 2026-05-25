@@ -121,7 +121,7 @@ export default function AdminContentManager({
   useFeedUpdates({ queryKeys: [queryKeyPrefix, ["admin", "summary"]] });
 
   const params = useMemo(() => {
-    const next = { page, size: PAGE_SIZE, sort: "createdAt,desc", deleted: deletedMode };
+    const next = { page, size: PAGE_SIZE, sort: "NEWEST", deleted: deletedMode };
     if (filters.search.trim()) next.search = filters.search.trim();
     if (filters.owner.trim()) next.owner = filters.owner.trim();
     if (filters.categoryId) next.categoryId = filters.categoryId;
@@ -266,13 +266,7 @@ export default function AdminContentManager({
 
   return (
     <div className="admin-pro-stack admin-page-stack">
-      <div className="live-status-badge">Live content administration</div>
-
-      <div className="command-center-header admin-page-heading">
-        <div>
-          <h1>{title}</h1>
-          {description && <p className="admin-page-description">{description}</p>}
-        </div>
+      <div className="command-center-header admin-page-heading" style={{ justifyContent: "flex-end" }}>
         <div className="header-btn-group">
           <button 
             type="button" 
@@ -299,27 +293,16 @@ export default function AdminContentManager({
       {/* Filters */}
       {isFiltersVisible && (
         <section className="card admin-filter-panel">
-        <div className="admin-filter-grid">
-          <div style={{ position: "relative", gridColumn: "span 2" }}>
+        <div className="admin-filter-grid" style={{ gridTemplateColumns: "2.5fr 1fr 1fr 1fr" }}>
+          <div style={{ position: "relative" }}>
             <Search className="admin-search-icon" size={18} style={{ left: "12px" }} />
             <input
               type="text"
               className="admin-search-input"
               style={{ paddingLeft: "40px" }}
               value={filters.search}
-              placeholder="Search by title, caption, or keywords"
+              placeholder="Search by title, caption, keywords, or creator username"
               onChange={(event) => handleFilterChange("search", event.target.value)}
-            />
-          </div>
-          <div style={{ position: "relative" }}>
-            <User className="admin-search-icon" size={18} style={{ left: "12px" }} />
-            <input
-              type="text"
-              className="admin-search-input"
-              style={{ paddingLeft: "40px" }}
-              value={filters.owner}
-              placeholder="Filter by creator username"
-              onChange={(event) => handleFilterChange("owner", event.target.value)}
             />
           </div>
           <select value={filters.categoryId} onChange={(event) => handleFilterChange("categoryId", event.target.value)}>

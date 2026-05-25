@@ -69,14 +69,6 @@ export default function AdminWarningsPage() {
 
   return (
     <div className="admin-pro-stack admin-page-stack">
-      <div className="live-status-badge">Professional Conduct History</div>
-
-      <div className="command-center-header admin-page-heading">
-        <div>
-          <h1>Warnings Log</h1>
-          <p className="admin-page-description">Track all warnings issued to users, their acknowledgement status, and related content references.</p>
-        </div>
-      </div>
 
       {/* Filter */}
       <section className="card admin-filter-panel">

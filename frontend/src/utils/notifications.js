@@ -6,6 +6,9 @@ export function getNotificationPath(item) {
   if (item.type === "WARNING") return routes.warnings;
   if (item.type === "MESSAGE") return routes.messages;
   if (item.type === "PROJECT_REQUEST") return routes.requests;
+  if (item.type === "REPORT" && item.message?.includes("New report")) {
+    return routes.adminReports;
+  }
   if (item.type?.startsWith("V_HUB_")) {
     return item.contentId ? `${routes.vHub}?thread=${item.contentId}` : routes.vHub;
   }
@@ -44,6 +47,7 @@ export function getNotificationActionLabel(item) {
   if (item.type === "WARNING") return "Review warning";
   if (item.type === "MESSAGE") return "Open chat";
   if (item.type === "PROJECT_REQUEST") return "Open requests";
+  if (item.type === "REPORT") return "Review report";
   if (item.type?.startsWith("V_HUB_")) return "Open V Hub";
   if (item.contentId) return "View item";
   if (item.actor?.username) return "Open profile";

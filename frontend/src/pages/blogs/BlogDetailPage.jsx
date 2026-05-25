@@ -63,7 +63,7 @@ export default function BlogDetailPage() {
     return <div className="card">Blog not found.</div>;
   }
 
-  const isOwner = currentUser?.id && data.author?.id === currentUser.id;
+  const isOwner = currentUser?.id && (data.author?.id === currentUser.id || currentUser.role === "SUPER_ADMIN");
   const galleryItems = buildBlogGalleryItems(data);
   const detailPath = getContentDetailPath("BLOG", id);
   const profilePath = data.author?.username ? routes.profile.replace(":username", data.author.username) : routes.home;

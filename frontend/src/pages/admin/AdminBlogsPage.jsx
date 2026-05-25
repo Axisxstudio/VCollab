@@ -9,7 +9,7 @@ import {
 export default function AdminBlogsPage() {
   return (
     <AdminContentManager
-      title="Blog moderation"
+      title="Blogs"
       contentType="BLOG"
       queryKeyPrefix={["admin", "blogs"]}
       listFn={listAdminBlogs}

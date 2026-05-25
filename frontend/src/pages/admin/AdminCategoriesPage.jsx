@@ -42,10 +42,7 @@ export default function AdminCategoriesPage() {
 
   return (
     <div className="admin-pro-stack">
-      <div className="live-status-badge">Taxonomy & Meta Governance</div>
-      
-      <div className="command-center-header">
-        <h1>Internal Categories</h1>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
         <div className="discovery-results-meta">
           <span className="trend-percent" style={{ background: 'rgba(52, 211, 153, 0.1)', color: '#34d399' }}>
             {data.length} Global Classes

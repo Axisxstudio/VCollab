@@ -236,24 +236,6 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="admin-dashboard-v2 admin-pro-stack admin-page-stack">
-      <section className="admin-dashboard-masthead">
-        <div className="admin-dashboard-masthead__copy">
-          <span className="admin-dashboard-kicker">Compact command center</span>
-          <h1>Operational snapshot</h1>
-        </div>
-
-        <div className="admin-dashboard-masthead__signals">
-          <span className="admin-dashboard-signal-pill">
-            <Activity size={14} />
-            Auto refresh every 15s
-          </span>
-          <span className="admin-dashboard-signal-pill">
-            <ShieldAlert size={14} />
-            Moderation queues in view
-          </span>
-        </div>
-      </section>
-
       <section className="admin-dashboard-stat-grid">
         {summaryCards.map((card) => {
           const Icon = card.icon;

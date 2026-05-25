@@ -75,7 +75,7 @@ export default function ProjectDetailPage() {
     return <div className="card">Project not found.</div>;
   }
 
-  const isOwner = currentUser?.id && data.owner?.id === currentUser.id;
+  const isOwner = currentUser?.id && (data.owner?.id === currentUser.id || currentUser.role === "SUPER_ADMIN");
   const galleryItems = buildProjectGalleryItems(data);
   const detailPath = getContentDetailPath("PROJECT", id);
   const interactionsDisabled = !isAuthenticated || data.active === false;

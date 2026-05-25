@@ -33,6 +33,9 @@ export function conflict(message: string) {
 }
 
 export function toErrorResponse(cause: unknown) {
+  const err = cause as any;
+  require("fs").appendFileSync("debug-error.log", JSON.stringify({ name: err?.name, message: err?.message, stack: err?.stack, cause }, null, 2) + "\n");
+
   if (cause instanceof ZodError) {
     const message = cause.issues
       .map((issue) => `${issue.path.join(".") || "request"} ${issue.message}`)

@@ -153,14 +153,6 @@ export default function AdminReportsPage() {
 
   return (
     <div className="admin-pro-stack admin-page-stack">
-      <div className="live-status-badge">Moderation Feedback Loop</div>
-
-      <div className="command-center-header admin-page-heading">
-        <div>
-          <h1>Reports Queue</h1>
-          <p className="admin-page-description">Review, resolve, and archive community-submitted content reports.</p>
-        </div>
-      </div>
 
       {/* Filter */}
       <section className="card admin-filter-panel">

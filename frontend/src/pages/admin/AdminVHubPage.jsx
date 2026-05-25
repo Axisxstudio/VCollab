@@ -125,16 +125,6 @@ export default function AdminVHubPage() {
 
   return (
     <div className="admin-pro-stack admin-page-stack">
-      <div className="live-status-badge">V Hub control center</div>
-
-      <div className="command-center-header admin-page-heading">
-        <div>
-          <h1>V Hub social messaging</h1>
-          <p className="admin-page-description">
-            Control the public landing-page V Hub, review thread health, and moderate visitor conversations from one screen.
-          </p>
-        </div>
-      </div>
 
       <section className="vhub-admin-summary-grid">
         <article className="vhub-admin-stat-card">

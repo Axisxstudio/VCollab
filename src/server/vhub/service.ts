@@ -5,6 +5,7 @@ import { bearerTokenFromRequest, meFromToken } from "@/server/auth/service";
 import { badRequest, forbidden, notFound } from "@/server/http/errors";
 import { pageBounds, toPageResponse } from "@/server/pagination/page";
 import { publishVHubFeed, publishVHubThread } from "@/server/realtime/publisher";
+import { createNotification } from "@/server/social-admin/service";
 import { mapReply, mapSettings, mapThread } from "./mapper";
 
 function authorSelect() {
@@ -151,6 +152,19 @@ export async function createReply(request: Request, threadId: number, input: any
   const response = mapReply(data, viewer?.id, viewer?.role === "SUPER_ADMIN");
   await publishVHubThread(threadId, { eventType: "vhub.reply.created", threadId, reply: response });
   await publishVHubFeed({ eventType: "vhub.reply.created", threadId, replyId: response.id });
+
+  if (thread.author_id && thread.author_id !== viewer?.id) {
+    const actorName = viewer ? (viewer.fullName || viewer.username) : (input.guestName || "A guest");
+    await createNotification(
+      thread.author_id,
+      viewer?.id ?? null,
+      "COMMENT",
+      "v_hub_thread",
+      threadId,
+      `${actorName} replied to your V Hub thread`
+    );
+  }
+
   return response;
 }
 

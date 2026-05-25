@@ -95,10 +95,7 @@ export default function AdminRecycleBinPage() {
 
   return (
     <div className="admin-pro-stack">
-      <div className="live-status-badge">Asset Decommissioning Registry</div>
-      
-      <div className="command-center-header">
-        <h1>Recycle Bin</h1>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
         <div className="discovery-results-meta">
           <span className="trend-percent" style={{ background: 'rgba(255, 59, 92, 0.1)', color: '#ff3b5c' }}>
             Retention Storage

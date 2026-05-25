@@ -95,8 +95,15 @@ export default function AdminLayout() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const createRef = useRef(null);
   const userDropdownRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const searchContainerRef = useRef(null);
+
+  const handleMainScroll = (event) => {
+    setIsScrolled(event.target.scrollTop > 10);
+  };
 
   const toggleSidebar = () => {
     const newState = !isCollapsed;
@@ -165,27 +172,28 @@ export default function AdminLayout() {
   return (
     <div className={`workspace-shell admin-shell ${isCollapsed ? "sidebar-collapsed" : ""}`}>
       <aside className={`admin-sidebar-pro ${isCollapsed ? "collapsed" : ""} ${isMobileOpen ? "mobile-open" : ""}`}>
-        <div className="sidebar-toggle-wrapper desktop-toggle-btn" style={{ marginBottom: "20px" }}>
-          <button
-            type="button"
-            className="sidebar-toggle-btn admin-toggle-btn"
-            onClick={toggleSidebar}
-            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-          >
-            {isCollapsed ? <ChevronRight size={24} /> : <ChevronLeft size={24} />}
-          </button>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <Link to={routes.adminDashboard} className="workspace-brand-pro" style={{ marginBottom: 0 }}>
             <img src={logoImg} alt="VCollab" className="admin-brand-logo" />
             {(!isCollapsed || isMobileOpen) && (
               <div className="brand-text-pro">
                 <strong>VCollab Admin</strong>
-                <span>Operations Console</span>
               </div>
             )}
           </Link>
+
+          {!isMobileOpen && (
+            <div className="desktop-toggle-btn">
+              <button
+                type="button"
+                className="sidebar-toggle-btn admin-toggle-btn"
+                onClick={toggleSidebar}
+                title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+              >
+                {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+              </button>
+            </div>
+          )}
 
           {isMobileOpen && (
             <button
@@ -207,14 +215,22 @@ export default function AdminLayout() {
             )}
           </div>
           {(!isCollapsed || isMobileOpen) && (
-            <>
-              <div className="admin-sidebar-profile-copy">
-                <strong>{user?.fullName || user?.username || "Admin User"}</strong>
-                <span>@{user?.username || "admin"}</span>
-                <small>Super administrator access</small>
-              </div>
-              <ChevronDown size={16} />
-            </>
+            <div className="admin-sidebar-profile-copy">
+              <strong>{user?.username || user?.fullName || "Admin"}</strong>
+              <span style={{ 
+                display: "inline-block", 
+                padding: "2px 8px", 
+                background: "rgba(255,255,255,0.2)", 
+                borderRadius: "6px", 
+                fontSize: "0.65rem", 
+                fontWeight: "700", 
+                textTransform: "uppercase", 
+                letterSpacing: "0.05em",
+                marginTop: "4px",
+                width: "fit-content",
+                color: "#ffffff"
+              }}>Admin</span>
+            </div>
           )}
         </Link>
 
@@ -261,7 +277,7 @@ export default function AdminLayout() {
       )}
 
       <div className="workspace-main admin-main-panel">
-        <header className="admin-topbar-pro">
+        <header className={`admin-topbar-pro ${isScrolled ? "scrolled" : ""}`}>
           <div className="admin-topbar-inner">
             <button 
               className="mobile-menu-btn" 
@@ -276,39 +292,62 @@ export default function AdminLayout() {
             </div>
 
             <div className="admin-topbar-toolbar">
-              <div className="admin-search-container" style={{ display: "flex", alignItems: "center" }}>
-                {!isSearchOpen ? (
-                  <button type="button" className="icon-btn-pro" onClick={() => setIsSearchOpen(true)} aria-label="Open search">
-                    <Search size={18} />
-                  </button>
-                ) : (
-                  <form 
-                    className="admin-search-wrapper" 
-                    onSubmit={handleSearchSubmit}
-                    style={{ display: "flex", alignItems: "center", position: "absolute", right: "24px", left: "24px", top: "50%", transform: "translateY(-50%)", zIndex: 10, background: "#ffffff", padding: "10px", borderRadius: "18px", boxShadow: "0 10px 40px rgba(0,0,0,0.1)" }}
-                  >
-                    <Search className="admin-search-icon" size={18} style={{ position: "absolute", left: "22px", zIndex: 2 }} />
-                    <input
-                      type="text"
-                      className="admin-search-input"
-                      placeholder="Search VCollab..."
-                      value={searchTerm}
-                      onChange={(event) => setSearchTerm(event.target.value)}
-                      aria-label="Search VCollab"
-                      autoFocus
-                      onBlur={() => {
-                        if (!searchTerm.trim()) setIsSearchOpen(false);
+              <div className="admin-header-actions">
+                <div 
+                  ref={searchContainerRef}
+                  className={`workspace-search-expanded ${isSearchOpen ? "expanded" : ""}`}
+                  onMouseEnter={() => setIsSearchOpen(true)}
+                  onMouseLeave={() => {
+                    const isFocused = document.activeElement === searchInputRef.current;
+                    if (!searchTerm && !isFocused) {
+                      setIsSearchOpen(false);
+                    }
+                  }}
+                >
+                  <Search size={20} className="search-icon-trigger" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search admin console..."
+                    className="search-input-box"
+                    value={searchTerm}
+                    onFocus={() => setIsSearchOpen(true)}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && searchTerm.trim()) {
+                        handleSearchSubmit(e);
+                      }
+                    }}
+                  />
+
+                  {isSearchOpen && !searchTerm && (
+                    <button 
+                      type="button"
+                      className="search-close-trigger"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSearchTerm("");
+                        setIsSearchOpen(false);
                       }}
-                      style={{ paddingLeft: "40px", flex: 1, width: "100%", margin: 0 }}
-                    />
-                    <button type="button" className="admin-icon-btn" style={{ marginLeft: "8px", border: "none", background: "transparent", boxShadow: "none" }} onClick={() => setIsSearchOpen(false)}>
+                    >
                       <X size={18} />
                     </button>
-                  </form>
-                )}
-              </div>
+                  )}
 
-              <div className="admin-header-actions">
+                  {searchTerm && (
+                    <button 
+                      className="search-clear-btn" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSearchTerm("");
+                        searchInputRef.current?.focus();
+                      }}
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
+
                 <div
                   ref={createRef}
                   className={`admin-topbar-create-dock ${createOpen ? "is-open" : ""}`}
@@ -399,7 +438,7 @@ export default function AdminLayout() {
           </div>
         </header>
 
-        <main className="admin-pro-container">
+        <main className="admin-pro-container" onScroll={handleMainScroll}>
           <Outlet />
         </main>
       </div>

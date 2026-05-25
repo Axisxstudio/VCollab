@@ -68,7 +68,7 @@ export default function PostDetailPage() {
     return <div className="card">Post not found.</div>;
   }
 
-  const isOwner = currentUser?.id && data.author?.id === currentUser.id;
+  const isOwner = currentUser?.id && (data.author?.id === currentUser.id || currentUser.role === "SUPER_ADMIN");
   const galleryItems = buildPostGalleryItems(data);
   const detailPath = getContentDetailPath("POST", id);
   const profilePath = data.author?.username ? routes.profile.replace(":username", data.author.username) : routes.home;

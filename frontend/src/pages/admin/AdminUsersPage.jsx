@@ -196,15 +196,7 @@ export default function AdminUsersPage() {
 
   return (
     <div className="admin-pro-stack admin-page-stack">
-      <div className="live-status-badge">Live user administration</div>
-
-      <div className="command-center-header admin-page-heading">
-        <div>
-          <h1>User management</h1>
-          <p className="admin-page-description">
-            Create user accounts, review activity counts, open public profiles, export records, and moderate access from one screen.
-          </p>
-        </div>
+      <div className="command-center-header admin-page-heading" style={{ justifyContent: "flex-end" }}>
         <div className="header-btn-group">
           <button type="button" className="btn-glass" onClick={() => setShowCreateForm((previous) => !previous)}>
             <UserPlus size={16} />

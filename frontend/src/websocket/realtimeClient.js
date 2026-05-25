@@ -58,3 +58,9 @@ export async function publishBroadcast(channelName, eventName, payload) {
 export function currentUserId() {
   return useAuthStore.getState().user?.id;
 }
+
+export function subscribeToNotifications(handler) {
+  const userId = currentUserId();
+  if (!userId) return () => {};
+  return subscribeBroadcast(`vcollab:user:${userId}`, "user.notification", handler);
+}

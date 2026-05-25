@@ -150,16 +150,6 @@ export default function AdminResourcesPage() {
 
   return (
     <div className="admin-pro-stack admin-page-stack">
-      <div className="live-status-badge">Resource governance console</div>
-
-      <div className="command-center-header admin-page-heading">
-        <div>
-          <h1>Resources</h1>
-          <p className="admin-page-description">
-            Moderate public resource files, maintain academic structure folders, and manage default resource categories.
-          </p>
-        </div>
-      </div>
 
       <section className="card admin-filter-panel">
         <div className="admin-filter-grid">

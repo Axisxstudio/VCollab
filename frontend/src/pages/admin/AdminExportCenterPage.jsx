@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { 
   FileDown, 
   Users, 
@@ -73,10 +73,7 @@ export default function AdminExportCenterPage() {
 
   return (
     <div className="admin-pro-stack">
-      <div className="live-status-badge">Data Extraction & Intelligence Reporting</div>
-      
-      <div className="command-center-header">
-        <h1>Export Center</h1>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
         <div className="discovery-results-meta">
           <span className="trend-percent" style={{ background: 'rgba(52, 211, 153, 0.1)', color: '#34d399' }}>
             System Integrity Validated

@@ -160,11 +160,8 @@ export default function AdminCmsBlocksPage() {
   };
 
   return (
-    <div className="admin-pro-stack">
-      <div className="live-status-badge">Content Engine & CMS Architecture</div>
-      
-      <div className="command-center-header">
-        <h1>Page Builder</h1>
+    <div className="admin-page-stack">
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
         <div className="discovery-results-meta">
           <span className="trend-percent" style={{ background: editingId ? 'rgba(255, 59, 92, 0.1)' : 'rgba(0, 209, 255, 0.1)', color: editingId ? '#ff3b5c' : '#00d1ff' }}>
             {editingId ? "MODIFICATION MODE" : "CREATION MODE"}
@@ -173,7 +170,7 @@ export default function AdminCmsBlocksPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '32px', alignItems: 'start' }}>
-        <div className="admin-pro-stack" style={{ gap: '32px' }}>
+        <div className="admin-page-stack" style={{ gap: '32px' }}>
           <section className="card" style={{ padding: '32px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
               <div className="card-icon-box" style={{ width: '40px', height: '40px' }}>
@@ -193,7 +190,7 @@ export default function AdminCmsBlocksPage() {
                     <Database className="admin-search-icon" size={16} />
                     <input
                       type="text"
-                      style={{ paddingLeft: '40px' }}
+                      className="admin-input-with-icon"
                       value={form.sectionKey}
                       placeholder="e.g. LANDING_HERO"
                       onChange={(event) => handleFormChange("sectionKey", event.target.value)}
@@ -207,7 +204,7 @@ export default function AdminCmsBlocksPage() {
                     <Layers className="admin-search-icon" size={16} />
                     <input
                       type="text"
-                      style={{ paddingLeft: '40px' }}
+                      className="admin-input-with-icon"
                       value={form.badge}
                       placeholder="e.g. New / Hot"
                       onChange={(event) => handleFormChange("badge", event.target.value)}
@@ -222,7 +219,7 @@ export default function AdminCmsBlocksPage() {
                   <Type className="admin-search-icon" size={16} />
                   <input
                     type="text"
-                    style={{ paddingLeft: '40px' }}
+                    className="admin-input-with-icon"
                     value={form.title}
                     placeholder="Enter main heading..."
                     onChange={(event) => handleFormChange("title", event.target.value)}
@@ -339,11 +336,11 @@ export default function AdminCmsBlocksPage() {
                   <Search className="admin-search-icon" size={16} />
                   <input
                     type="text"
-                    className="admin-search-input"
+                    className="admin-search-input admin-input-with-icon"
                     value={filters.search}
                     placeholder="Query ID/Title..."
                     onChange={(event) => handleFilterChange("search", event.target.value)}
-                    style={{ width: '180px', paddingLeft: '40px' }}
+                    style={{ width: '180px' }}
                   />
                 </div>
               </div>
@@ -419,7 +416,7 @@ export default function AdminCmsBlocksPage() {
           </section>
         </div>
 
-        <aside className="admin-pro-stack" style={{ gap: '24px' }}>
+        <aside className="admin-page-stack" style={{ gap: '24px' }}>
           <section className="card" style={{ padding: '24px' }}>
             <h4 style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Monitor size={18} color="#00d1ff" />

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { subscribeToNotifications } from "./stompClient";
+import { subscribeToNotifications } from "./realtimeClient";
 
 export default function useNotificationUpdates() {
   const queryClient = useQueryClient();

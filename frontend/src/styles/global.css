@@ -2538,17 +2538,16 @@ input[type="reset"] {
   align-items: center;
   justify-content: center;
   border-radius: 14px;
-  border: 1px solid var(--color-border);
+  border: none;
   background: var(--color-surface);
   color: var(--color-text-primary);
   cursor: pointer;
   box-shadow: var(--shadow-xs);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .admin-icon-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  border-color: rgba(37, 99, 235, 0.25);
   box-shadow: var(--shadow-sm);
 }
 
@@ -2559,13 +2558,11 @@ input[type="reset"] {
 
 .admin-icon-btn--danger {
   color: #dc2626;
-  border-color: rgba(220, 38, 38, 0.18);
   background: rgba(254, 242, 242, 0.9);
 }
 
 .admin-icon-btn--primary {
   color: #2563eb;
-  border-color: rgba(37, 99, 235, 0.2);
   background: rgba(239, 246, 255, 0.95);
 }
 

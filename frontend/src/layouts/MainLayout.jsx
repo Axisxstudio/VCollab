@@ -43,6 +43,7 @@ const APP_LINKS = [
   { to: routes.requests, label: "Requests", icon: Bell },
   { to: routes.messages, label: "Messages", icon: MessageSquare },
   { to: routes.warnings, label: "Warnings", icon: AlertTriangle },
+  { to: routes.adminDashboard, label: "Admin Console", icon: LayoutDashboard },
   { to: routes.settings, label: "Settings", icon: Settings }
 ];
 
@@ -68,7 +69,6 @@ export default function MainLayout() {
   });
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [searchExpanded, setSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const debouncedSearch = useDebounce(searchQuery, 300);
@@ -94,7 +94,6 @@ export default function MainLayout() {
   const handleSearchSubmit = (e) => {
     if (e.key === "Enter" && searchQuery.trim()) {
       navigate(`${routes.search}?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchExpanded(false);
       setSearchQuery("");
     }
   };
@@ -105,24 +104,6 @@ export default function MainLayout() {
     (searchResults.blogs && searchResults.blogs.length > 0) || 
     (searchResults.posts && searchResults.posts.length > 0)
   );
-
-  useEffect(() => {
-    if (searchExpanded && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [searchExpanded]);
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
-        if (!searchQuery) {
-          setSearchExpanded(false);
-        }
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [searchQuery]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -216,23 +197,7 @@ export default function MainLayout() {
             );
           })}
           
-          {isAdmin && (
-            <NavLink 
-              to={routes.adminDashboard} 
-              className={({ isActive }) => `workspace-nav-link ${isActive ? "active" : ""}`}
-              title={isCollapsed ? "Admin Console" : ""}
-              onClick={() => setIsMobileOpen(false)}
-            >
-              {({ isActive }) => (
-                <>
-                  <div className="nav-icon-wrapper">
-                    <LayoutDashboard size={24} strokeWidth={isActive ? 2.5 : 2} />
-                  </div>
-                  {(!isCollapsed || isMobileOpen) && <span className="nav-label">Admin Console</span>}
-                </>
-              )}
-            </NavLink>
-          )}
+
         </nav>
 
         <div className="workspace-sidebar-footer">
@@ -286,43 +251,17 @@ export default function MainLayout() {
             <h2>Welcome back, <span className="user-name-gradient">{user?.fullName || user?.username || "collaborator"}</span></h2>
           </div>
           <div className="workspace-top-actions">
-            <div 
-              ref={searchContainerRef}
-              className={`workspace-search-expanded ${searchExpanded ? "expanded" : ""}`}
-              onMouseEnter={() => setSearchExpanded(true)}
-              onMouseLeave={() => {
-                const isFocused = document.activeElement === searchInputRef.current;
-                if (!searchQuery && !isFocused) {
-                  setSearchExpanded(false);
-                }
-              }}
-            >
-              <Search size={20} className="search-icon-trigger" />
+            <div className="workspace-top-search">
+              <Search size={18} className="workspace-top-search-icon" />
               <input
                 ref={searchInputRef}
                 type="text"
                 placeholder="Search everything..."
-                className="search-input-box"
+                className="workspace-top-search-input"
                 value={searchQuery}
-                onFocus={() => setSearchExpanded(true)}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearchSubmit}
               />
-
-              {searchExpanded && (
-                <button 
-                  type="button"
-                  className="search-close-trigger"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSearchQuery("");
-                    setSearchExpanded(false);
-                  }}
-                >
-                  <X size={18} />
-                </button>
-              )}
-
               {searchQuery && (
                 <button 
                   className="search-clear-btn" 
@@ -336,7 +275,7 @@ export default function MainLayout() {
                 </button>
               )}
 
-              {searchExpanded && debouncedSearch.length > 1 && (
+              {debouncedSearch.length > 1 && (
                 <div className="search-live-dropdown">
                   {isSearching && <div className="search-live-item disabled">Searching...</div>}
                   
@@ -348,7 +287,7 @@ export default function MainLayout() {
                     <div className="search-live-group">
                       <div className="search-live-label">Users</div>
                       {searchResults.users.map(u => (
-                        <Link key={u.id} to={routes.profile.replace(":username", u.username)} className="search-live-item" onClick={() => { setSearchQuery(""); setSearchExpanded(false); }}>
+                        <Link key={u.id} to={routes.profile.replace(":username", u.username)} className="search-live-item" onClick={() => { setSearchQuery(""); }}>
                           <User size={14} /> {u.fullName || u.username}
                         </Link>
                       ))}
@@ -359,7 +298,7 @@ export default function MainLayout() {
                     <div className="search-live-group">
                       <div className="search-live-label">Projects</div>
                       {searchResults.projects.map(p => (
-                        <Link key={p.id} to={routes.projectDetail.replace(":id", p.id)} className="search-live-item" onClick={() => { setSearchQuery(""); setSearchExpanded(false); }}>
+                        <Link key={p.id} to={routes.projectDetail.replace(":id", p.id)} className="search-live-item" onClick={() => { setSearchQuery(""); }}>
                           <Folder size={14} /> {p.title || "Untitled Project"}
                         </Link>
                       ))}
@@ -370,7 +309,7 @@ export default function MainLayout() {
                     <div className="search-live-group">
                       <div className="search-live-label">Posts</div>
                       {searchResults.posts.map(po => (
-                        <Link key={po.id} to={routes.postDetail.replace(":id", po.id)} className="search-live-item" onClick={() => { setSearchQuery(""); setSearchExpanded(false); }}>
+                        <Link key={po.id} to={routes.postDetail.replace(":id", po.id)} className="search-live-item" onClick={() => { setSearchQuery(""); }}>
                           <FileText size={14} /> {po.title || "Untitled Post"}
                         </Link>
                       ))}
@@ -381,7 +320,7 @@ export default function MainLayout() {
                   <Link 
                     to={`${routes.search}?q=${encodeURIComponent(debouncedSearch)}`} 
                     className="search-live-item view-all"
-                    onClick={() => { setSearchQuery(""); setSearchExpanded(false); }}
+                    onClick={() => { setSearchQuery(""); }}
                   >
                     View all results for "{debouncedSearch}"
                   </Link>

@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Bell, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { routes } from "../../config/routes";
-import { markNotificationRead } from "../../services/notification.service";
+import { listNotifications, markNotificationRead } from "../../services/notification.service";
 import { formatTimeAgo } from "../../utils/date";
 import {
   getNotificationActorInitials,
   getNotificationPath,
   getNotificationTypeLabel
 } from "../../utils/notifications";
-import { subscribeToNotifications } from "../../websocket/stompClient";
+import { subscribeToNotifications } from "../../websocket/realtimeClient";
 
 const MAX_TOASTS = 3;
 const TOAST_LIFETIME_MS = 6500;
@@ -28,6 +28,27 @@ export default function RealtimeNotificationToaster() {
   };
 
   useEffect(() => {
+    // Fetch unread notifications on login / mount and show as toasts
+    listNotifications({ unread: true, size: MAX_TOASTS }).then((page) => {
+      const items = Array.isArray(page) ? page : (page?.content ?? []);
+      items.slice(0, MAX_TOASTS).forEach((notification, index) => {
+        if (!notification?.id || seenIds.current.has(notification.id)) return;
+        seenIds.current.add(notification.id);
+        // stagger entry so toasts slide in one-by-one
+        const staggerDelay = index * 400;
+        const entryTimer = window.setTimeout(() => {
+          setToasts((current) => [...current, notification].slice(0, MAX_TOASTS));
+          const dismissTimer = window.setTimeout(() => {
+            setToasts((current) => current.filter((item) => item.id !== notification.id));
+            timersRef.current.delete(notification.id);
+          }, TOAST_LIFETIME_MS);
+          timersRef.current.set(notification.id, dismissTimer);
+        }, staggerDelay);
+        // track entry timer so it's cleared on unmount
+        timersRef.current.set(`entry-${notification.id}`, entryTimer);
+      });
+    }).catch(console.error);
+
     const unsubscribe = subscribeToNotifications((notification) => {
       if (!notification?.id || seenIds.current.has(notification.id)) {
         return;
@@ -113,15 +134,16 @@ export default function RealtimeNotificationToaster() {
                 </span>
                 <span className="notification-toast-card__time">{formatTimeAgo(notification.createdAt)}</span>
               </div>
-              <strong className="notification-toast-card__title">
-                {notification.actor?.fullName || notification.actor?.username || "VCollab update"}
-              </strong>
-              <p className="notification-toast-card__message">{notification.message}</p>
-              {(notification.type === 'COMMENT' || notification.type === 'COMMENT_REPLY' || notification.type === 'MENTION') && notification.metadata && (
-                <div className="notification-comment-preview" style={{ background: 'rgba(255,255,255,0.08)', color: '#cbd5e1', borderLeftColor: '#3b82f6', marginTop: '8px' }}>
-                   "{truncateText(notification.metadata)}"
-                </div>
+              {notification.actor?.username && (
+                <Link
+                  to={routes.profile.replace(":username", notification.actor.username)}
+                  className="notification-toast-card__actor"
+                  onClick={(e) => { e.stopPropagation(); dismissToast(notification.id); }}
+                >
+                  {notification.actor.fullName || notification.actor.username}
+                </Link>
               )}
+              <p className="notification-toast-card__message">{notification.message}</p>
             </div>
           </button>
           <button
