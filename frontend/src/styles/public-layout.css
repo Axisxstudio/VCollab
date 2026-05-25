@@ -18,6 +18,9 @@ body.public-nav-open {
 .public-layout-nav ~ main,
 body > div > main {
   padding-top: 72px;
+  /* Sandbox all Framer Motion GPU-promoted layers inside main so they
+     never escape and bleed over fixed nav/drawer elements */
+  isolation: isolate;
 }
 
 .public-layout-nav {
@@ -25,12 +28,13 @@ body > div > main {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 320;
+  z-index: 8999;
   border-bottom: 1px solid var(--public-layout-nav-border);
   background: var(--public-layout-nav-bg);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   transition: box-shadow 0.2s ease, background 0.2s ease;
+  isolation: isolate;
 }
 
 .public-layout-nav--scrolled {
@@ -177,12 +181,15 @@ body > div > main {
 .public-layout-nav__overlay {
   position: fixed;
   inset: 0;
-  z-index: 398;
+  /* High enough to be above any Framer Motion GPU-promoted layer */
+  z-index: 9000;
   border: 0;
   background: rgba(15, 23, 42, 0.38);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.22s ease;
+  /* Isolate so no child transform escapes */
+  isolation: isolate;
 }
 
 .public-layout-nav__overlay--open {
@@ -194,7 +201,8 @@ body > div > main {
   position: fixed;
   top: 0;
   right: 0;
-  z-index: 399;
+  /* Above the overlay and all Framer Motion layers */
+  z-index: 9001;
   width: min(100vw, 380px);
   height: 100vh;
   display: flex;
@@ -203,6 +211,11 @@ body > div > main {
   box-shadow: var(--public-layout-nav-shadow);
   transform: translateX(100%);
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Create an isolated stacking context — Framer Motion GPU layers
+     promoted via will-change:transform cannot bleed into this element */
+  isolation: isolate;
+  /* Belt-and-suspenders: also a paint containment boundary */
+  contain: layout style;
 }
 
 .public-layout-nav__drawer--open {

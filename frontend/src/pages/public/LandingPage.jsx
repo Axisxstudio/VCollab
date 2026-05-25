@@ -85,6 +85,18 @@ function RevealSection({ children, className, ...rest }) {
 function ScrollProgressBar() {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 200, damping: 30 });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
+    const handler = (e) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // Hide on mobile — the bar glitches through the drawer on small screens
+  if (isMobile) return null;
 
   return (
     <motion.div
@@ -97,8 +109,10 @@ function ScrollProgressBar() {
         height: "3px",
         background: "linear-gradient(90deg, #2563eb, #7c3aed)",
         transformOrigin: "0%",
-        zIndex: 9999,
+        /* Must stay below the nav header (z-index 320) and drawer (z-index 399) */
+        zIndex: 310,
         borderRadius: "0 2px 2px 0",
+        pointerEvents: "none",
       }}
     />
   );
