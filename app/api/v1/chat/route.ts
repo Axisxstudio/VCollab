@@ -2,9 +2,7 @@ import { createGroq } from "@ai-sdk/groq";
 import { streamText } from "ai";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
-const groq = createGroq({
-  apiKey: process.env.GROQ_API_KEY!,
-});
+export const dynamic = 'force-dynamic';
 
 const PLATFORM_SYSTEM_PROMPT = `You are the official AI Assistant for VCollab. Your role is to provide highly precise, direct, and professional support regarding the VCollab platform.
 
@@ -118,41 +116,23 @@ async function fetchLivePlatformData(userMessage: string) {
 
 export async function POST(request: Request) {
   try {
+    const groq = createGroq({
+      apiKey: process.env.GROQ_API_KEY!,
+    });
+
     const { messages } = await request.json();
 
     const lastUserMsg = [...messages].reverse().find((m: any) => m.role === "user");
     const liveData = lastUserMsg ? await fetchLivePlatformData(lastUserMsg.content) : "";
     const systemPrompt = PLATFORM_SYSTEM_PROMPT + (liveData ? liveData : "");
 
-    const result = streamText({
+    const result = await streamText({
       model: groq("llama-3.3-70b-versatile"),
       system: systemPrompt,
       messages,
     });
 
-    // Manually pump the async iterable into a ReadableStream<Uint8Array>
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          for await (const chunk of result.textStream) {
-            controller.enqueue(encoder.encode(chunk));
-          }
-        } catch (err) {
-          console.error("Stream error:", err);
-          controller.enqueue(encoder.encode("⚠️ I'm temporarily unavailable. Please try again in a moment."));
-        } finally {
-          controller.close();
-        }
-      },
-    });
-
-    return new Response(stream, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-cache",
-      },
-    });
+    return result.toTextStreamResponse();
   } catch (error: any) {
     console.error("Chat API error:", error);
     const msg = "Sorry, I couldn't process your request. Please try again.";
