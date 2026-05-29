@@ -32,5 +32,5 @@ export async function loginAction(formData: FormData) {
   }
 
   // Redirect on success
-  redirect('/dashboard')
+  redirect('/dashboard' as any)
 }
