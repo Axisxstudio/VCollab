@@ -51,6 +51,11 @@ export async function deleteAdminUser(id) {
   return response.data.data;
 }
 
+export async function adminChangeUserPassword(id, payload) {
+  const response = await api.post(`/admin/users/${id}/password`, payload);
+  return response.data.data;
+}
+
 export async function listAdminReports(params) {
   const response = await api.get("/admin/reports", {
     params: normalizeParams(params)

@@ -99,9 +99,9 @@ export default function MainLayout() {
   };
 
   const hasResults = searchResults && (
-    (searchResults.users && searchResults.users.length > 0) || 
-    (searchResults.projects && searchResults.projects.length > 0) || 
-    (searchResults.blogs && searchResults.blogs.length > 0) || 
+    (searchResults.users && searchResults.users.length > 0) ||
+    (searchResults.projects && searchResults.projects.length > 0) ||
+    (searchResults.blogs && searchResults.blogs.length > 0) ||
     (searchResults.posts && searchResults.posts.length > 0)
   );
 
@@ -151,18 +151,18 @@ export default function MainLayout() {
               </div>
             )}
           </Link>
-          <button 
-            type="button" 
-            className="sidebar-toggle-btn desktop-toggle-btn" 
+          <button
+            type="button"
+            className="sidebar-toggle-btn desktop-toggle-btn"
             onClick={toggleSidebar}
             title={isCollapsed ? "Expand" : "Collapse"}
           >
             {isCollapsed ? <ChevronRight size={16} strokeWidth={2.5} /> : <ChevronLeft size={16} strokeWidth={2.5} />}
           </button>
           {isMobileOpen && (
-            <button 
-              type="button" 
-              className="sidebar-toggle-btn mobile-close-btn" 
+            <button
+              type="button"
+              className="sidebar-toggle-btn mobile-close-btn"
               onClick={() => setIsMobileOpen(false)}
               style={{ display: 'flex', marginLeft: 'auto' }}
             >
@@ -196,7 +196,7 @@ export default function MainLayout() {
               </NavLink>
             );
           })}
-          
+
 
         </nav>
 
@@ -216,8 +216,8 @@ export default function MainLayout() {
               </div>
             </Link>
           ) : (
-            <NavLink 
-              to={profilePath} 
+            <NavLink
+              to={profilePath}
               className={({ isActive }) => `workspace-nav-link more-link ${isActive ? "active" : ""}`}
               title="Profile"
               onClick={() => setIsMobileOpen(false)}
@@ -240,8 +240,8 @@ export default function MainLayout() {
 
       <div className="workspace-main">
         <header className={`workspace-topbar ${isScrolled ? "scrolled" : ""}`}>
-          <button 
-            className="mobile-menu-btn" 
+          <button
+            className="mobile-menu-btn"
             onClick={() => setIsMobileOpen(prev => !prev)}
             aria-label="Toggle menu"
           >
@@ -263,8 +263,8 @@ export default function MainLayout() {
                 onKeyDown={handleSearchSubmit}
               />
               {searchQuery && (
-                <button 
-                  className="search-clear-btn" 
+                <button
+                  className="search-clear-btn"
                   onClick={(e) => {
                     e.stopPropagation();
                     setSearchQuery("");
@@ -278,7 +278,7 @@ export default function MainLayout() {
               {debouncedSearch.length > 1 && (
                 <div className="search-live-dropdown">
                   {isSearching && <div className="search-live-item disabled">Searching...</div>}
-                  
+
                   {!isSearching && !hasResults && (
                     <div className="search-live-item disabled">No results for "{debouncedSearch}"</div>
                   )}
@@ -315,10 +315,10 @@ export default function MainLayout() {
                       ))}
                     </div>
                   )}
-                  
+
                   <div className="dropdown-divider"></div>
-                  <Link 
-                    to={`${routes.search}?q=${encodeURIComponent(debouncedSearch)}`} 
+                  <Link
+                    to={`${routes.search}?q=${encodeURIComponent(debouncedSearch)}`}
                     className="search-live-item view-all"
                     onClick={() => { setSearchQuery(""); }}
                   >
@@ -327,10 +327,10 @@ export default function MainLayout() {
                 </div>
               )}
             </div>
-            
+
             <NotificationBell size={18} />
-            
-            <div 
+
+            <div
               ref={userDropdownRef}
               className="user-nav-container"
               style={{ position: 'relative' }}
@@ -387,9 +387,9 @@ export default function MainLayout() {
 
       <AnimatePresence>
         {isSettingsOpen && (
-          <SettingsPopup 
-            isCollapsed={isCollapsed} 
-            onClose={() => setIsSettingsOpen(false)} 
+          <SettingsPopup
+            isCollapsed={isCollapsed}
+            onClose={() => setIsSettingsOpen(false)}
           />
         )}
       </AnimatePresence>

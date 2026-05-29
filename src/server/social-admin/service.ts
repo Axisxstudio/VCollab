@@ -632,6 +632,34 @@ export async function updateAdminUser(request: Request, id: number, input: any) 
   return mapAdminUser(data);
 }
 
+export async function adminChangeUserPassword(request: Request, id: number, newPassword?: string) {
+  await requireSuperAdmin(request);
+  const admin = createSupabaseAdminClient();
+  
+  if (!newPassword || newPassword.length < 6) {
+    throw badRequest("A valid new password (at least 6 characters) is required");
+  }
+
+  const { data: existing, error: existingError } = await admin
+    .from("users")
+    .select("auth_user_id")
+    .eq("id", id)
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (existingError || !existing?.auth_user_id) {
+    throw badRequest(existingError?.message ?? "User not found");
+  }
+
+  const { error } = await admin.auth.admin.updateUserById(existing.auth_user_id, {
+    password: newPassword
+  });
+
+  if (error) {
+    throw badRequest(error.message);
+  }
+}
+
 function mapAdminUser(row: any) {
   const profile = Array.isArray(row.user_profiles) ? row.user_profiles[0] : row.user_profiles;
   return {

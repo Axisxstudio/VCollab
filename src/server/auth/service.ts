@@ -260,3 +260,30 @@ export function bearerTokenFromRequest(request: Request): string {
 
   return match[1].trim();
 }
+
+export async function changePassword(request: Request, oldPassword?: string, newPassword?: string): Promise<void> {
+  const token = bearerTokenFromRequest(request);
+  const user = await meFromToken(token);
+  
+  if (!oldPassword || !newPassword) {
+    throw badRequest("Old password and new password are required");
+  }
+
+  const client = createSupabasePasswordClient();
+  const { data: signInData, error: signInError } = await client.auth.signInWithPassword({
+    email: user.email,
+    password: oldPassword,
+  });
+
+  if (signInError || !signInData.session?.access_token) {
+    throw unauthorized("Invalid old password");
+  }
+
+  const { error: updateError } = await client.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (updateError) {
+    throw badRequest(updateError.message);
+  }
+}

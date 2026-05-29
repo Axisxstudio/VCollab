@@ -10,10 +10,12 @@
     "test": "node --experimental-specifier-resolution=node --test src/**/*.test.js"
   },
   "dependencies": {
+    "@ai-sdk/react": "^3.0.193",
     "@hookform/resolvers": "^3.3.4",
     "@stomp/stompjs": "^7.0.0",
     "@supabase/supabase-js": "^2.105.3",
     "@tanstack/react-query": "^5.51.1",
+    "ai": "^6.0.191",
     "antd": "^5.17.0",
     "axios": "^1.7.2",
     "framer-motion": "^11.2.10",
@@ -23,6 +25,7 @@
     "react-helmet-async": "^3.0.0",
     "react-hook-form": "^7.51.2",
     "react-hot-toast": "^2.6.0",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^6.23.1",
     "recharts": "^3.8.0",
     "sockjs-client": "^1.6.1",

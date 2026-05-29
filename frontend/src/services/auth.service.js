@@ -29,3 +29,8 @@ export async function checkUsernameAvailability(username) {
   const response = await api.get(`/auth/check-username?username=${username}`);
   return response.data.data;
 }
+
+export async function changePassword(payload) {
+  const response = await api.post("/auth/change-password", payload);
+  return response.data.data;
+}

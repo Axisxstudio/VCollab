@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Menu, X } from "lucide-react";
 import VHubLauncher from "../components/vhub/VHubLauncher";
+import ChatBot from "../components/common/ChatBot";
 import { routes } from "../config/routes";
 import { getVHubSettings } from "../services/vhub.service";
 import { useAuthStore } from "../store/authStore";
@@ -11,20 +12,20 @@ import "../styles/app-shell.css";
 import "../styles/public-layout.css";
 
 const NAV_LINKS = [
-  { label: "Home",     path: routes.landing },
+  { label: "Home", path: routes.landing },
   { label: "Resources", path: routes.resources },
   { label: "Projects", path: routes.projects },
-  { label: "Posts",    path: routes.posts },
-  { label: "Blogs",    path: routes.blogs },
-  { label: "About",    path: routes.about },
+  { label: "Posts", path: routes.posts },
+  { label: "Blogs", path: routes.blogs },
+  { label: "About", path: routes.about },
 ];
 
 export default function PublicLayout() {
   const token = useAuthStore((state) => state.token);
-  const [scrolled, setScrolled]     = useState(false);
-  const [activeSection, setActive]  = useState("");
+  const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActive] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const location  = useLocation();
+  const location = useLocation();
   const { data: vHubSettings } = useQuery({
     queryKey: ["v-hub", "settings"],
     queryFn: getVHubSettings,
@@ -322,6 +323,7 @@ export default function PublicLayout() {
 
       <main className={isFullBleedPage ? "" : "public-page-wrap"}><Outlet /></main>
       {showVHubLauncher && <VHubLauncher mode={vHubSettings?.mode} />}
+      <ChatBot position="left" />
     </div>
   );
 }
