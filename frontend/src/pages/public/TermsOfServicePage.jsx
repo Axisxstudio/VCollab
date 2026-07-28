@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { CalendarDays, FileCheck2, HelpCircle, Scale } from "lucide-react";
 import SEO from "../../components/seo/SEO";
 import PublicFooter from "../../components/public/PublicFooter";
@@ -37,8 +37,8 @@ const sections = [
   {
     title: "Liability and Contact",
     paragraphs: [
-      "VCollab is provided on an as-available basis. To the fullest extent permitted by law, AxisX Studio disclaims warranties not expressly stated here and is not liable for indirect, incidental, or consequential damages arising from platform use.",
-      "Questions about these terms can be sent to info@axisxstudio.com or 077 453 4056."
+      "VCollab is provided on an as-available basis. To the fullest extent permitted by law, VCollab disclaims warranties not expressly stated here and is not liable for indirect, incidental, or consequential damages arising from platform use.",
+      "Questions about these terms can be sent to info@VCollabstudio.com or 077 453 4056."
     ]
   }
 ];
@@ -79,7 +79,7 @@ export default function TermsOfServicePage() {
               <Scale size={18} />
               <div>
                 <span className="legal-sidebar-label">Operator</span>
-                <strong>AxisX Studio</strong>
+                <strong>VCollab</strong>
               </div>
             </div>
             <div className="legal-sidebar-card reveal-up" style={{ "--delay": "200ms" }}>
@@ -141,3 +141,4 @@ export default function TermsOfServicePage() {
     </div>
   );
 }
+

@@ -41,6 +41,11 @@ export async function listAdminUsers(params) {
   return response.data.data;
 }
 
+export async function updateAdminUser(id, payload) {
+  const response = await api.put(`/admin/users/${id}`, payload);
+  return response.data.data;
+}
+
 export async function updateAdminUserStatus(id, payload) {
   const response = await api.patch(`/admin/users/${id}/status`, payload);
   return response.data.data;

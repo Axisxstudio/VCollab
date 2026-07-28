@@ -605,7 +605,7 @@ export async function updateAdminUser(request: Request, id: number, input: any) 
   const admin = createSupabaseAdminClient();
   const { data: existing, error: existingError } = await admin
     .from("users")
-    .select("id,role")
+    .select("id,role,auth_user_id")
     .eq("id", id)
     .is("deleted_at", null)
     .maybeSingle();
@@ -619,16 +619,59 @@ export async function updateAdminUser(request: Request, id: number, input: any) 
   if (input.active !== undefined) patch.is_active = input.active;
   if (input.suspended !== undefined) patch.is_suspended = input.suspended;
   if (input.role !== undefined) {
-    if (input.role === "SUPER_ADMIN") {
-      throw forbidden("Super admin can only be provisioned by the server seed script");
-    }
+    if (input.role === "SUPER_ADMIN") throw forbidden("Super admin can only be provisioned by the server seed script");
     patch.role = input.role;
   }
+  if (input.username !== undefined) patch.username = input.username;
+  if (input.email !== undefined) patch.email = input.email;
+
   if (id === actor.id && (patch.is_active === false || patch.is_suspended === true)) {
     throw forbidden("You cannot disable your own super admin account");
   }
+
+  // Update Auth System if email or password changed
+  if (existing.auth_user_id) {
+    const authPatch: any = {};
+    if (input.email !== undefined) authPatch.email = input.email;
+    if (input.password) {
+      if (input.password.length < 6) throw badRequest("A valid new password (at least 6 characters) is required");
+      authPatch.password = input.password;
+    }
+    if (Object.keys(authPatch).length > 0) {
+      const { error: authError } = await admin.auth.admin.updateUserById(existing.auth_user_id, authPatch);
+      if (authError) throw badRequest(authError.message);
+    }
+  } else if (input.password) {
+    throw badRequest("User does not have an auth account to change password for");
+  }
+
+  // Update main user record
   const { data, error } = await admin.from("users").update(patch).eq("id", id).select("id,username,email,role,is_active,is_suspended,created_at,user_profiles!user_profiles_user_id_fkey(full_name,profile_image,follower_count,following_count,project_count,post_count,blog_count)").single();
   if (error || !data) throw badRequest(error?.message ?? "Could not update user");
+
+  // Update profile if full_name or profile_image provided
+  const profilePatch: any = {};
+  if (input.fullName !== undefined) profilePatch.full_name = input.fullName;
+  if (input.profileImage !== undefined) profilePatch.profile_image = input.profileImage;
+  
+  if (Object.keys(profilePatch).length > 0) {
+    const { error: profileError } = await admin.from("user_profiles").update(profilePatch).eq("user_id", id);
+    if (profileError) throw badRequest(profileError.message);
+    
+    // patch returned data manually
+    if (data.user_profiles) {
+      if (Array.isArray(data.user_profiles)) {
+        if (data.user_profiles[0]) {
+           if (input.fullName !== undefined) data.user_profiles[0].full_name = input.fullName;
+           if (input.profileImage !== undefined) data.user_profiles[0].profile_image = input.profileImage;
+        }
+      } else {
+         if (input.fullName !== undefined) (data.user_profiles as any).full_name = input.fullName;
+         if (input.profileImage !== undefined) (data.user_profiles as any).profile_image = input.profileImage;
+      }
+    }
+  }
+
   return mapAdminUser(data);
 }
 

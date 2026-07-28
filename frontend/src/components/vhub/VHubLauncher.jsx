@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { routes } from "../../config/routes";
 import { createVHubThread, getVHubThread, listVHubReplies, listVHubThreads, createVHubReply } from "../../services/vhub.service";
+import logoImg from "../../assets/logo.png";
 import { formatTimeAgo } from "../../utils/date";
 import "../../styles/vhub.css";
 
@@ -179,7 +180,7 @@ export default function VHubLauncher({ mode }) {
         onClick={() => setIsOpen((current) => !current)}
         title={mode === "READ_ONLY" ? "Open V Hub in read-only mode" : "Open V Hub"}
       >
-        <span className="vhub-launcher__letter">V</span>
+        <img src={logoImg} alt="V Hub" className="vhub-launcher__logo" />
       </button>
 
       {isOpen && <div className="vhub-launcher__backdrop" onClick={() => setIsOpen(false)} />}

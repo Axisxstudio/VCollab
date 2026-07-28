@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -44,11 +44,11 @@ function getSavedLabel(item) {
   return String(item.content_type || item.contentType || "Content").replaceAll("_", " ").toLowerCase();
 }
 
-const axisxContact = {
-  email: "info@axisxstudio.com",
+const VCollabContact = {
+  email: "info@VCollabstudio.com",
   phone: "077 453 4056",
   phoneHref: "tel:0774534056",
-  website: "https://axisxstudio.com"
+  website: "https://VCollabstudio.com"
 };
 
 const settingsPanels = {
@@ -77,7 +77,7 @@ const settingsPanels = {
       },
       {
         title: "Need support?",
-        body: `For platform questions or account support, contact AxisX Studio at ${axisxContact.email} or ${axisxContact.phone}.`
+        body: `For platform questions or account support, contact VCollab at ${VCollabContact.email} or ${VCollabContact.phone}.`
       }
     ]
   },
@@ -113,7 +113,7 @@ const settingsPanels = {
       },
       {
         title: "Privacy support",
-        body: `For privacy questions, data requests, or account concerns, contact AxisX Studio at ${axisxContact.email} or ${axisxContact.phone}.`
+        body: `For privacy questions, data requests, or account concerns, contact VCollab at ${VCollabContact.email} or ${VCollabContact.phone}.`
       }
     ]
   },
@@ -124,7 +124,7 @@ const settingsPanels = {
     intro: "These terms define how VCollab can be used across public discovery, publishing, messaging, and real-time collaboration.",
     meta: [
       ["Effective date", "March 23, 2026"],
-      ["Operator", "AxisX Studio"]
+      ["Operator", "VCollab"]
     ],
     sections: [
       {
@@ -149,7 +149,7 @@ const settingsPanels = {
       },
       {
         title: "Questions about these terms",
-        body: `Questions about these terms can be sent to AxisX Studio at ${axisxContact.email} or ${axisxContact.phone}.`
+        body: `Questions about these terms can be sent to VCollab at ${VCollabContact.email} or ${VCollabContact.phone}.`
       }
     ]
   }
@@ -283,31 +283,31 @@ export default function SettingsPage() {
 
         <div className="settings-contact-card">
           <div>
-            <span>Contact AxisX Studio</span>
+            <span>Contact VCollab</span>
             <strong>Support for VCollab users</strong>
           </div>
           <div className="settings-contact-card__actions">
-            <a href={`mailto:${axisxContact.email}`} aria-label="Email AxisX Studio">
+            <a href={`mailto:${VCollabContact.email}`} aria-label="Email VCollab">
               <Mail size={16} />
               <span>Email</span>
             </a>
-            <a href={axisxContact.phoneHref} aria-label="Call AxisX Studio">
+            <a href={VCollabContact.phoneHref} aria-label="Call VCollab">
               <Phone size={16} />
               <span>Call</span>
             </a>
-            <a href={axisxContact.website} target="_blank" rel="noreferrer" aria-label="Open AxisX Studio website">
+            <a href={VCollabContact.website} target="_blank" rel="noreferrer" aria-label="Open VCollab website">
               <Globe size={16} />
               <span>Website</span>
             </a>
-            <a href="https://www.facebook.com/axisxstudio" target="_blank" rel="noreferrer" aria-label="Facebook">
+            <a href="https://www.facebook.com/VCollabstudio" target="_blank" rel="noreferrer" aria-label="Facebook">
               <Facebook size={16} />
               <span>Facebook</span>
             </a>
-            <a href="https://www.instagram.com/axisxstudio/" target="_blank" rel="noreferrer" aria-label="Instagram">
+            <a href="https://www.instagram.com/VCollabstudio/" target="_blank" rel="noreferrer" aria-label="Instagram">
               <Instagram size={16} />
               <span>Instagram</span>
             </a>
-            <a href="https://www.linkedin.com/company/axisxstudio/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+            <a href="https://www.linkedin.com/company/VCollabstudio/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
               <Linkedin size={16} />
               <span>LinkedIn</span>
             </a>
@@ -436,3 +436,4 @@ export default function SettingsPage() {
     </div>
   );
 }
+

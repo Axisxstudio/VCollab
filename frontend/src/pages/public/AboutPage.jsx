@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { Target, Globe, Code, Users, Rocket, ChevronDown } from "lucide-react";
 import PublicFooter from "../../components/public/PublicFooter";
 import SEO from "../../components/seo/SEO";
@@ -101,7 +101,7 @@ export default function AboutPage() {
             </div>
             <div className="ap-story-body">
               <p>
-                Developed by <strong>AxisX Studio</strong>, VCollab was designed to make project collaboration more trusted, visible, and practical for people building real work.
+                Developed by <strong>VCollab</strong>, VCollab was designed to make project collaboration more trusted, visible, and practical for people building real work.
               </p>
               <p>
                 Instead of leaving projects, ideas, and useful content scattered across chats, drives, and short-lived submissions, VCollab brings collaboration, publishing, and discovery into one professional platform.
@@ -201,3 +201,4 @@ export default function AboutPage() {
     </div>
   );
 }
+

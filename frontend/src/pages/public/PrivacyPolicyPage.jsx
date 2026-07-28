@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { CalendarDays, HelpCircle, LockKeyhole, ShieldCheck } from "lucide-react";
 import SEO from "../../components/seo/SEO";
 import PublicFooter from "../../components/public/PublicFooter";
@@ -38,7 +38,7 @@ const sections = [
     title: "Your Choices",
     paragraphs: [
       "You can manage profile information, edit or remove content you own, and contact us to request support related to account access or data concerns.",
-      "For privacy questions or requests, contact us at info@axisxstudio.com or 077 453 4056."
+      "For privacy questions or requests, contact us at info@VCollabstudio.com or 077 453 4056."
     ]
   }
 ];
@@ -86,7 +86,7 @@ export default function PrivacyPolicyPage() {
               <HelpCircle size={18} />
               <div>
                 <span className="legal-sidebar-label">Need Help?</span>
-                <a href="mailto:info@axisxstudio.com">info@axisxstudio.com</a>
+                <a href="mailto:info@VCollabstudio.com">info@VCollabstudio.com</a>
               </div>
             </div>
 
@@ -112,7 +112,7 @@ export default function PrivacyPolicyPage() {
 
             <div className="legal-card__intro">
               <p>
-                VCollab is operated by AxisX Studio to support student collaboration, public discovery, and professional portfolio building. By using the platform, you acknowledge the practices described in this Privacy Policy.
+                VCollab is operated by VCollab to support student collaboration, public discovery, and professional portfolio building. By using the platform, you acknowledge the practices described in this Privacy Policy.
               </p>
             </div>
 
@@ -141,3 +141,4 @@ export default function PrivacyPolicyPage() {
     </div>
   );
 }
+

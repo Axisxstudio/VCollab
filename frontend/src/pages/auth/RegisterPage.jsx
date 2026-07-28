@@ -114,7 +114,7 @@ export default function RegisterPage() {
                 <div className="icon-circle">
                   <User size={16} className="input-icon-ref" />
                 </div>
-                <input id="fullName" type="text" {...register("fullName")} placeholder="John Doe" />
+                <input id="fullName" type="text" {...register("fullName")} placeholder="Enter your full name" />
               </div>
               {errors.fullName && <span className="error-msg">{errors.fullName.message}</span>}
             </div>
@@ -125,7 +125,7 @@ export default function RegisterPage() {
                 <div className="icon-circle">
                   {usernameStatus === "checking" ? <Loader2 size={16} className="input-icon-ref spin" /> : <User size={16} className="input-icon-ref" />}
                 </div>
-                <input id="username" type="text" {...register("username")} placeholder="unique_id" />
+                <input id="username" type="text" {...register("username")} placeholder="Choose a username" />
                 {usernameStatus === "available" && <CheckCircle2 size={18} className="status-icon-ref success-icon" />}
                 {usernameStatus === "taken" && <XCircle size={18} className="status-icon-ref error-icon" />}
               </div>
@@ -141,7 +141,7 @@ export default function RegisterPage() {
                 <div className="icon-circle">
                   <Mail size={16} className="input-icon-ref" />
                 </div>
-                <input id="email" type="email" {...register("email")} placeholder="you@example.com" />
+                <input id="email" type="email" {...register("email")} placeholder="name@company.com" />
               </div>
               {errors.email && <span className="error-msg">{errors.email.message}</span>}
             </div>

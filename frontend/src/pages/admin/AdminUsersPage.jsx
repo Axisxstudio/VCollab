@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import AdminEntryDetailModal from "../../components/admin/AdminEntryDetailModal";
+import AdminUserEditModal from "../../components/admin/AdminUserEditModal";
 import { roles } from "../../config/constants";
 import { routes } from "../../config/routes";
 import {
@@ -81,6 +82,7 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(0);
   const [busyAction, setBusyAction] = useState("");
   const [detailUser, setDetailUser] = useState(null);
+  const [editUser, setEditUser] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [createFeedback, setCreateFeedback] = useState("");
@@ -391,6 +393,9 @@ export default function AdminUsersPage() {
                           <button type="button" className="admin-icon-btn" onClick={() => setDetailUser(user)} title="View Entry" aria-label="View Entry">
                             <Eye size={14} />
                           </button>
+                          <button type="button" className="admin-icon-btn" onClick={() => setEditUser(user)} title="Edit User" aria-label="Edit User">
+                            <NotebookTabs size={14} />
+                          </button>
                           <button type="button" className="admin-icon-btn" onClick={() => handleExportUser(user)} disabled={busyAction === `export-${user.id}`} title="Export PDF" aria-label="Export PDF">
                             {busyAction === `export-${user.id}` ? <RotateCcw size={14} className="spin" /> : <FileDown size={14} />}
                           </button>
@@ -450,6 +455,13 @@ export default function AdminUsersPage() {
       )}
 
       {detailUser && <AdminEntryDetailModal entryType="USER" item={detailUser} onClose={() => setDetailUser(null)} />}
+      {editUser && (
+        <AdminUserEditModal
+          user={editUser}
+          onClose={() => setEditUser(null)}
+          onUpdated={() => queryClient.invalidateQueries({ queryKey: ["admin", "users"] })}
+        />
+      )}
     </div>
   );
 }

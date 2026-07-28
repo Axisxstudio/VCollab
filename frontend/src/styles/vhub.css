@@ -29,7 +29,7 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--vhub-blue-700), var(--vhub-blue-900));
+  background: transparent;
   border: none;
   color: white;
   font-size: 1.5rem;
@@ -38,18 +38,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(18, 48, 87, 0.3);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease, background 0.2s;
+  z-index: 2;
+}
+
+.vhub-launcher__logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .vhub-launcher__button:hover {
   transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 12px 32px rgba(18, 48, 87, 0.4);
 }
 
 .vhub-launcher.is-open .vhub-launcher__button {
   transform: rotate(180deg);
-  background: var(--vhub-orange-600);
+  background: transparent;
 }
 
 .vhub-launcher__menu {

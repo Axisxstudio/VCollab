@@ -29,25 +29,31 @@ export default function RealtimeNotificationToaster() {
 
   useEffect(() => {
     // Fetch unread notifications on login / mount and show as toasts
-    listNotifications({ unread: true, size: MAX_TOASTS }).then((page) => {
-      const items = Array.isArray(page) ? page : (page?.content ?? []);
-      items.slice(0, MAX_TOASTS).forEach((notification, index) => {
-        if (!notification?.id || seenIds.current.has(notification.id)) return;
-        seenIds.current.add(notification.id);
-        // stagger entry so toasts slide in one-by-one
-        const staggerDelay = index * 400;
-        const entryTimer = window.setTimeout(() => {
-          setToasts((current) => [...current, notification].slice(0, MAX_TOASTS));
-          const dismissTimer = window.setTimeout(() => {
-            setToasts((current) => current.filter((item) => item.id !== notification.id));
-            timersRef.current.delete(notification.id);
-          }, TOAST_LIFETIME_MS);
-          timersRef.current.set(notification.id, dismissTimer);
-        }, staggerDelay);
-        // track entry timer so it's cleared on unmount
-        timersRef.current.set(`entry-${notification.id}`, entryTimer);
-      });
-    }).catch(console.error);
+    // Only show them once per session to avoid popups on every page refresh
+    const hasSeenInitial = sessionStorage.getItem("vcollab_notifications_shown");
+    
+    if (!hasSeenInitial) {
+      sessionStorage.setItem("vcollab_notifications_shown", "true");
+      listNotifications({ unread: true, size: MAX_TOASTS }).then((page) => {
+        const items = Array.isArray(page) ? page : (page?.content ?? []);
+        items.slice(0, MAX_TOASTS).forEach((notification, index) => {
+          if (!notification?.id || seenIds.current.has(notification.id)) return;
+          seenIds.current.add(notification.id);
+          // stagger entry so toasts slide in one-by-one
+          const staggerDelay = index * 400;
+          const entryTimer = window.setTimeout(() => {
+            setToasts((current) => [...current, notification].slice(0, MAX_TOASTS));
+            const dismissTimer = window.setTimeout(() => {
+              setToasts((current) => current.filter((item) => item.id !== notification.id));
+              timersRef.current.delete(notification.id);
+            }, TOAST_LIFETIME_MS);
+            timersRef.current.set(notification.id, dismissTimer);
+          }, staggerDelay);
+          // track entry timer so it's cleared on unmount
+          timersRef.current.set(`entry-${notification.id}`, entryTimer);
+        });
+      }).catch(console.error);
+    }
 
     const unsubscribe = subscribeToNotifications((notification) => {
       if (!notification?.id || seenIds.current.has(notification.id)) {
