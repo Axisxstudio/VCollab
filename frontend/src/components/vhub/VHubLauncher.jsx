@@ -178,6 +178,46 @@ export default function VHubLauncher({ mode }) {
         aria-expanded={isOpen}
         aria-haspopup="dialog"
         onClick={() => setIsOpen((current) => !current)}
+        title="Open V Hub"
+      >
+        <img src={logoImg} alt="V Hub" className="vhub-launcher__logo" />
+      </button>
+
+      {isOpen && <div className="vhub-launcher__backdrop" onClick={() => setIsOpen(false)} />}
+
+      {isOpen && (
+        <section className="vhub-launcher__menu" role="dialog" aria-label="V Hub launcher content">
+          <div className="vhub-launcher__menu-header">
+            <div>
+              <span className="vhub-launcher__eyebrow">Coming Soon</span>
+              <h3 className="vhub-launcher__title">V Hub is in development</h3>
+            </div>
+            <button
+              type="button"
+              className="vhub-launcher__action"
+              onClick={() => setIsOpen(false)}
+            >
+              <X size={14} />
+              Close
+            </button>
+          </div>
+          <div className="vhub-launcher__menu-copy" style={{ padding: "32px 16px", textAlign: "center", color: "var(--vhub-muted)" }}>
+            We're working hard to bring you this feature. Stay tuned!
+          </div>
+        </section>
+      )}
+    </div>
+  );
+
+  return (
+    <div ref={launcherRef} className={`vhub-launcher ${isOpen ? "is-open" : ""}`}>
+      <button
+        type="button"
+        className="vhub-launcher__button"
+        aria-label="Open V Hub"
+        aria-expanded={isOpen}
+        aria-haspopup="dialog"
+        onClick={() => setIsOpen((current) => !current)}
         title={mode === "READ_ONLY" ? "Open V Hub in read-only mode" : "Open V Hub"}
       >
         <img src={logoImg} alt="V Hub" className="vhub-launcher__logo" />

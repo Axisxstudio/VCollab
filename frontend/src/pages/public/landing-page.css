@@ -1990,6 +1990,11 @@ html {
   overflow: hidden;
 }
 
+.lp-project-media-wrap .lp-media-img {
+  object-fit: contain;
+  background-color: var(--lp-surface, #f8fafc);
+}
+
 @media (max-width: 768px) {
 
   /* Landing page grids force 2 columns */

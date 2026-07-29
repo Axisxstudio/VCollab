@@ -57,6 +57,20 @@ function getAuthorMeta(author) {
 }
 
 export default function VHubPage() {
+  return (
+    <div className="vhub-public-shell">
+      <div className="vhub-page-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <section className="vhub-hero-card" style={{ textAlign: 'center', margin: '0 auto' }}>
+          <div>
+            <span className="vhub-eyebrow">Coming Soon</span>
+            <h1>V Hub is still in development</h1>
+            <p>We're working hard to bring you this feature. Stay tuned!</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+
   const queryClient = useQueryClient();
   const currentUser = useAuthStore((state) => state.user);
   const [searchParams, setSearchParams] = useSearchParams();

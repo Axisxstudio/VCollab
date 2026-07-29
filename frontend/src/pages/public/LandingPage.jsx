@@ -27,6 +27,7 @@ import useRealtimeLandingOverview from "../../hooks/useRealtimeLandingOverview";
 import { routes } from "../../config/routes";
 import { useAuthStore } from "../../store/authStore";
 import { formatDate, truncateText } from "../../utils/discovery";
+import { stripRichText, truncateRichText } from "../../utils/richText";
 import "./landing-page.css";
 
 /* ─── Shared animation variants ─────────────────────────────── */
@@ -123,6 +124,9 @@ function MediaSwiper({ media = [], fallbackIcon: FallbackIcon }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const items = Array.isArray(media) ? media : [];
 
+  const touchStartX = useRef(null);
+  const touchEndX = useRef(null);
+
   if (items.length === 0) {
     return (
       <div className="lp-media-placeholder">
@@ -132,19 +136,45 @@ function MediaSwiper({ media = [], fallbackIcon: FallbackIcon }) {
   }
 
   const next = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     setCurrentIndex((previous) => (previous + 1) % items.length);
   };
 
   const previous = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     setCurrentIndex((current) => (current - 1 + items.length) % items.length);
   };
 
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    const distance = touchStartX.current - touchEndX.current;
+    if (distance > 50) next();
+    else if (distance < -50) previous();
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+
   return (
-    <div className="lp-media-swiper">
+    <div 
+      className="lp-media-swiper"
+      onTouchStart={items.length > 1 ? handleTouchStart : undefined}
+      onTouchMove={items.length > 1 ? handleTouchMove : undefined}
+      onTouchEnd={items.length > 1 ? handleTouchEnd : undefined}
+    >
       <motion.div
         className="lp-media-track"
         animate={{ x: `-${currentIndex * 100}%` }}
@@ -196,6 +226,10 @@ function ProjectCard({ project, index = 0 }) {
       owner.fullName || owner.username || "U"
     )}&background=dbeafe&color=1d4ed8&bold=true&size=80`;
 
+  const mediaFromArray = Array.isArray(project.media) && project.media.length > 0 ? project.media : null;
+  const fallbackUrl = project.thumbnail || null;
+  const media = mediaFromArray || (fallbackUrl ? [{ url: fallbackUrl }] : []);
+
   const card = (
     <motion.article
       variants={cardVariant}
@@ -205,7 +239,7 @@ function ProjectCard({ project, index = 0 }) {
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
     >
       <div className="lp-project-media-wrap">
-        <MediaSwiper media={project.media || []} fallbackIcon={FolderKanban} />
+        <MediaSwiper media={media} fallbackIcon={FolderKanban} />
       </div>
 
       <div className="lp-project-header">
@@ -290,8 +324,8 @@ function ContentCard({ item, type, index = 0 }) {
           )}
         </div>
 
-        <h4>{truncateText(item.title || item.content || "", 55)}</h4>
-        <p>{truncateText(item.content || "", 80)}</p>
+        <h4>{truncateText(item.title || stripRichText(item.content || ""), 55)}</h4>
+        <p>{truncateRichText(item.content || "", 80)}</p>
 
         {inactive && <span className="lp-disabled-note">Preview only. Only the owner or admin can open this content.</span>}
 
@@ -359,7 +393,7 @@ function LandingPostCard({ post, index = 0, onViewMore }) {
 
         <div className="lp-insta-caption">
           <p className="lp-insta-caption-text">
-            <strong>{author.username}</strong> {truncateText(post.content || post.title || "", 150)}
+            <strong>{author.username}</strong> {truncateRichText(post.content || post.title || "", 150)}
           </p>
           <button
             className="lp-insta-more-link"
@@ -480,7 +514,6 @@ export default function LandingPage() {
   });
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const touchStartX = useRef(null);
   const touchEndX = useRef(null);
 
@@ -505,14 +538,7 @@ export default function LandingPage() {
     setContributorPage((previous) => (previous - 1 + totalContributorPages) % totalContributorPages);
   }, [totalContributorPages]);
 
-  useEffect(() => {
-    if (!isAutoPlaying || featuredContributors.length <= contributorsPerPage) return;
-    const interval = setInterval(nextContributorPage, 3000);
-    return () => clearInterval(interval);
-  }, [isAutoPlaying, featuredContributors.length, contributorsPerPage, nextContributorPage]);
-
   const handleTouchStart = (e) => {
-    setIsAutoPlaying(false);
     touchStartX.current = e.targetTouches[0].clientX;
   };
 
@@ -522,7 +548,6 @@ export default function LandingPage() {
 
   const handleTouchEnd = () => {
     if (!touchStartX.current || !touchEndX.current) {
-      setIsAutoPlaying(true);
       return;
     }
     const distance = touchStartX.current - touchEndX.current;
@@ -531,7 +556,6 @@ export default function LandingPage() {
 
     touchStartX.current = null;
     touchEndX.current = null;
-    setTimeout(() => setIsAutoPlaying(true), 5000);
   };
 
   return (
@@ -687,8 +711,6 @@ export default function LandingPage() {
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
-              onMouseEnter={() => setIsAutoPlaying(false)}
-              onMouseLeave={() => setIsAutoPlaying(true)}
             >
               {featuredContributors.length > contributorsPerPage && (
                 <motion.button
