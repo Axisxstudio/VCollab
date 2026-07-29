@@ -1,10 +1,12 @@
-﻿import { Link } from "react-router-dom";
-import { Target, Globe, Code, Users, Rocket, ChevronDown } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Target, Globe, Code, Users, Rocket, ChevronDown, Mail, ExternalLink, ArrowRight } from "lucide-react";
+import { FaGithub, FaLinkedin } from "react-icons/fa";
 import PublicFooter from "../../components/public/PublicFooter";
 import SEO from "../../components/seo/SEO";
 import useRealtimeLandingOverview from "../../hooks/useRealtimeLandingOverview";
 import { routes } from "../../config/routes";
 import heroImg from "../../assets/VCollab_hero.png";
+import developerImg from "../../assets/vithusan_profile.jpg";
 import "./landing-page.css";
 import "./about-page.css";
 
@@ -162,6 +164,51 @@ export default function AboutPage() {
         </div>
       </section>
 
+      <section className="ap-team-section">
+        <div className="container">
+          <div className="ap-team-header reveal-up" style={{ "--delay": "80ms" }}>
+            <h2>Meet the <span className="ap-accent">Developer</span></h2>
+            <p>The vision and engineering behind VCollab.</p>
+          </div>
+          
+          <div className="ap-team-content reveal-up" style={{ "--delay": "120ms" }}>
+            <div className="ap-team-card">
+              <div className="ap-team-image">
+                <img src={developerImg} alt="Vithusan V" />
+              </div>
+              <div className="ap-team-info">
+                <h3>Vithusan V</h3>
+                <h4 className="ap-accent">Admin & Lead Developer | VTECH AI SOLUTIONS</h4>
+                <p>
+                  I am the architect and lead developer of VCollab. Passionate about empowering students and creators, I built this platform to bridge the gap between academic projects and professional discovery.
+                </p>
+                <p>
+                  With expertise in Full-Stack Web Development, modern JavaScript frameworks, and seamless AI integrations, my focus is on building scalable, high-performance applications that deliver real-world impact and foster community growth.
+                </p>
+                
+
+                <div className="ap-team-contact">
+                  <a href="mailto:vijayakumarvithusan@gmail.com" className="ap-team-btn outline">
+                    <Mail size={18} />
+                    Email
+                  </a>
+                  <a href="https://vtnport.vercel.app/" target="_blank" rel="noopener noreferrer" className="ap-team-btn primary">
+                    <ExternalLink size={18} />
+                    Portfolio
+                  </a>
+                  <a href="#" aria-label="GitHub" target="_blank" rel="noopener noreferrer" className="ap-team-btn icon-only">
+                    <FaGithub size={18} />
+                  </a>
+                  <a href="#" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer" className="ap-team-btn icon-only">
+                    <FaLinkedin size={18} />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="ap-faq-section">
         <div className="container">
           <div className="ap-faq-header reveal-up" style={{ "--delay": "80ms" }}>
@@ -193,7 +240,10 @@ export default function AboutPage() {
         <div className="container ap-cta-box reveal-up" style={{ "--delay": "120ms" }}>
           <h2>Build, Share, and Grow With Confidence</h2>
           <p>VCollab is built for people who want more than just posting content. It is designed for meaningful work, real collaboration, and visible progress.</p>
-          <Link to={routes.register} className="ap-btn-cta">Create Your Free Account</Link>
+          <Link to={routes.register} className="ap-btn-cta">
+            Create Your Free Account
+            <ArrowRight size={20} />
+          </Link>
         </div>
       </section>
 

@@ -55,6 +55,8 @@
   justify-content: space-between;
   align-items: flex-end;
   margin-top: -40px;
+  position: relative;
+  z-index: 2;
 }
 
 .profile-identity-block {
@@ -161,7 +163,7 @@
 
 .profile-summary-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 16px;
 }
 

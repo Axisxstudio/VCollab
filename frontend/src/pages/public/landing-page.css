@@ -1314,6 +1314,48 @@ html {
   padding-left: 4px;
 }
 
+.lp-footer-contact-link {
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.86rem;
+  transition: color 0.2s;
+}
+
+.lp-footer-contact-link:hover,
+.admin-link:hover {
+  color: #e2e8f0;
+}
+
+.admin-link {
+  color: #38bdf8;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.lp-social-icons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.lp-social-icons a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.lp-social-icons a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
 .lp-footer>.container>div:last-child p {
   color: #94a3b8;
   font-size: 0.86rem;

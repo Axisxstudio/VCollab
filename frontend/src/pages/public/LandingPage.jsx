@@ -470,7 +470,14 @@ export default function LandingPage() {
   const featuredProjects = data?.featuredProjects || [];
   const latestPosts = data?.latestPosts || [];
   const latestBlogs = data?.latestBlogs || [];
-  const featuredContributors = data?.featuredContributors || [];
+  const featuredContributors = [...(data?.featuredContributors || [])].sort((a, b) => {
+    const getRank = (user) => {
+      if (user.role === "ADMIN" || user.username === "vtnv") return 1;
+      if (user.username === "Sassh" || user.username === "sassh") return 2;
+      return 3;
+    };
+    return getRank(a) - getRank(b);
+  });
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);

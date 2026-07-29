@@ -1,8 +1,8 @@
 .feedback-widget {
   position: fixed;
-  left: 28px;
-  bottom: 28px;
-  z-index: 9998; /* just under the VHub launcher */
+  right: 28px;
+  top: 100px;
+  z-index: 9998;
   font-family: "Sora", "Outfit", "Inter", sans-serif;
 }
 
@@ -33,16 +33,16 @@
 
 .feedback-widget__popover {
   position: absolute;
-  bottom: 60px;
-  left: 0;
+  top: 60px;
+  right: 0;
   width: 320px;
   background: var(--surface, #ffffff);
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   padding: 20px;
   border: 1px solid var(--border, #e2e8f0);
-  animation: slideUpFade 0.3s ease forwards;
-  transform-origin: bottom left;
+  animation: slideDownFade 0.3s ease forwards;
+  transform-origin: top right;
 }
 
 .feedback-widget__header {
@@ -144,10 +144,10 @@
   cursor: not-allowed;
 }
 
-@keyframes slideUpFade {
+@keyframes slideDownFade {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.95);
+    transform: translateY(-10px) scale(0.95);
   }
   to {
     opacity: 1;

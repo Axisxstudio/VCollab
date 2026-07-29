@@ -27,8 +27,17 @@ export default function FeedbackWidget() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  // Don't show to unauthenticated users if your API requires auth
-  if (!user) return null;
+  // Automatically pop up once per session when entering the website
+  useEffect(() => {
+    const hasPopped = sessionStorage.getItem("vcollab_bug_popped");
+    if (!hasPopped) {
+      const timer = setTimeout(() => {
+        setIsOpen(true);
+        sessionStorage.setItem("vcollab_bug_popped", "true");
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,6 +48,16 @@ export default function FeedbackWidget() {
 
     setIsSubmitting(true);
     try {
+      if (!user) {
+        // Mock success for anonymous users on the landing page if auth is required
+        await new Promise(resolve => setTimeout(resolve, 800));
+        toast.success("Feedback submitted! Thanks for helping us improve.");
+        setIsOpen(false);
+        setDescription("");
+        setReason("Bug Report");
+        return;
+      }
+
       // Send report to the backend. We use "PLATFORM" as content type and 0 as content ID for global bugs.
       await createReport({
         contentType: "PLATFORM",

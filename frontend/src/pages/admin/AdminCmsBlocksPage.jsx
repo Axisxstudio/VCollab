@@ -169,9 +169,8 @@ export default function AdminCmsBlocksPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '32px', alignItems: 'start' }}>
-        <div className="admin-page-stack" style={{ gap: '32px' }}>
-          <section className="card" style={{ padding: '32px' }}>
+      <div className="admin-page-stack" style={{ gap: '32px', marginBottom: '32px' }}>
+        <section className="card" style={{ padding: '32px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
               <div className="card-icon-box" style={{ width: '40px', height: '40px' }}>
                 <Edit3 size={20} color="var(--admin-accent-secondary)" />
@@ -183,7 +182,7 @@ export default function AdminCmsBlocksPage() {
             </div>
 
             <form className="admin-cms-pro-form" onSubmit={handleSubmit} style={{ display: 'grid', gap: '20px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
                 <div className="form-group-pro">
                   <label>Section Index Key</label>
                   <div style={{ position: 'relative' }}>
@@ -249,7 +248,7 @@ export default function AdminCmsBlocksPage() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 1fr 120px 120px', gap: '16px', alignItems: 'end' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px', alignItems: 'end' }}>
                 <div className="form-group-pro">
                   <label>Action Label</label>
                   <input
@@ -324,8 +323,10 @@ export default function AdminCmsBlocksPage() {
               )}
             </form>
           </section>
+      </div>
 
-          <section className="card" style={{ padding: '0', overflow: 'hidden' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '32px', alignItems: 'start' }}>
+        <section className="card" style={{ padding: '0', overflow: 'hidden' }}>
             <div style={{ padding: '24px', borderBottom: '1px solid var(--admin-border)', background: 'rgba(255,255,255,0.02)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h3 style={{ margin: 0 }}>Operational Block Database</h3>
@@ -414,7 +415,6 @@ export default function AdminCmsBlocksPage() {
               </div>
             )}
           </section>
-        </div>
 
         <aside className="admin-page-stack" style={{ gap: '24px' }}>
           <section className="card" style={{ padding: '24px' }}>
