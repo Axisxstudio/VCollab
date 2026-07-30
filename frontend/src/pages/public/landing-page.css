@@ -365,10 +365,6 @@ html {
   line-height: 1.15;
 }
 
-.lp-hero-title-mobile {
-  display: none;
-}
-
 .lp-hero-copy p {
   font-size: 1.05rem;
   line-height: 1.75;
@@ -1547,18 +1543,6 @@ html {
   .lp-hero-copy h1 {
     font-size: clamp(2.15rem, 8.2vw, 2.6rem);
     margin-bottom: 12px;
-  }
-
-  .lp-hero-title-desktop {
-    display: none;
-  }
-
-  .lp-hero-title-mobile {
-    display: block;
-  }
-
-  .lp-type-line {
-    display: block;
   }
 }
 
