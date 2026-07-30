@@ -612,8 +612,13 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
             >
-              <span>
+              <span className="lp-hero-title-desktop">
                 Build, Collaborate, and<br />
+                Share With <span className="lp-accent">Confidence</span>
+              </span>
+              <span className="lp-hero-title-mobile">
+                Build<br />
+                Collaborate, and<br />
                 Share With <span className="lp-accent">Confidence</span>
               </span>
             </motion.h1>

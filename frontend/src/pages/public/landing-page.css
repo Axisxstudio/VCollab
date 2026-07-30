@@ -21,6 +21,19 @@ html {
   --lp-radius-lg: 24px;
 }
 
+.lp-hero-title-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .lp-hero-title-desktop {
+    display: none;
+  }
+  .lp-hero-title-mobile {
+    display: inline;
+  }
+}
+
 /* Ã¢â€â‚¬Ã¢â€â‚¬ Base Ã¢â€â‚¬Ã¢â€â‚¬ */
 .lp {
   background: var(--lp-white);
