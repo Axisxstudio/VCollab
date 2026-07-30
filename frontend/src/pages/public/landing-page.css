@@ -25,12 +25,25 @@ html {
   display: none;
 }
 
+.lp-tech-badge-more-mobile {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .lp-hero-title-desktop {
     display: none;
   }
   .lp-hero-title-mobile {
     display: inline;
+  }
+  .lp-tech-badge-2 {
+    display: none !important;
+  }
+  .lp-tech-badge-more-desktop {
+    display: none !important;
+  }
+  .lp-tech-badge-more-mobile {
+    display: inline-flex !important;
   }
 }
 

@@ -288,10 +288,13 @@ function ProjectCard({ project, index = 0 }) {
         {project.techStack && project.techStack.length > 0 && (
           <div className="lp-project-tech-stack">
             {project.techStack.slice(0, 3).map((tech, i) => (
-              <span key={i} className="lp-tech-badge">{tech}</span>
+              <span key={`${tech}-${i}`} className={`lp-tech-badge lp-tech-badge-${i}`}>{tech}</span>
             ))}
+            {project.techStack.length > 2 && (
+              <span className="lp-tech-badge lp-tech-badge-more-mobile">+{project.techStack.length - 2}</span>
+            )}
             {project.techStack.length > 3 && (
-              <span className="lp-tech-badge">+{project.techStack.length - 3}</span>
+              <span className="lp-tech-badge lp-tech-badge-more-desktop">+{project.techStack.length - 3}</span>
             )}
           </div>
         )}
