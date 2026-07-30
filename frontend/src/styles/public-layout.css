@@ -148,7 +148,14 @@ body > div > main {
   box-shadow: 0 14px 28px rgba(29, 78, 216, 0.24);
 }
 
+.public-layout-nav__mobile-icons {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
 .public-layout-nav__hamburger,
+.public-layout-nav__bug,
 .public-layout-nav__close {
   display: none;
   align-items: center;
@@ -159,7 +166,8 @@ body > div > main {
   transition: background 0.16s ease, color 0.16s ease;
 }
 
-.public-layout-nav__hamburger {
+.public-layout-nav__hamburger,
+.public-layout-nav__bug {
   width: 42px;
   height: 42px;
   border-radius: 14px;
@@ -172,6 +180,7 @@ body > div > main {
 }
 
 .public-layout-nav__hamburger:hover,
+.public-layout-nav__bug:hover,
 .public-layout-nav__close:hover {
   border-color: rgba(37, 99, 235, 0.22);
   background: rgba(37, 99, 235, 0.08);
@@ -275,7 +284,12 @@ body > div > main {
     display: none;
   }
 
+  .public-layout-nav__mobile-icons {
+    display: flex;
+  }
+
   .public-layout-nav__hamburger,
+  .public-layout-nav__bug,
   .public-layout-nav__close {
     display: inline-flex;
   }

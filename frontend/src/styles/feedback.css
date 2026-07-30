@@ -154,3 +154,16 @@
     transform: translateY(0) scale(1);
   }
 }
+
+@media (max-width: 768px) {
+  .feedback-widget {
+    right: 16px;
+  }
+  .feedback-widget__button {
+    display: none;
+  }
+  .feedback-widget__popover {
+    width: calc(100vw - 40px);
+    right: 0;
+  }
+}

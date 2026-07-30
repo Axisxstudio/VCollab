@@ -3629,4 +3629,13 @@ input[type="reset"] {
   .contact-owner-details p {
     display: none !important;
   }
+  
+  .btn-contact-owner .contact-owner-text {
+    display: none;
+  }
+
+  .btn-contact-owner {
+    padding: 12px;
+    justify-content: center;
+  }
 }

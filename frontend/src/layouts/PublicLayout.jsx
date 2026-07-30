@@ -1,7 +1,7 @@
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Bug } from "lucide-react";
 import VHubLauncher from "../components/vhub/VHubLauncher";
 import ChatBot from "../components/common/ChatBot";
 import { routes } from "../config/routes";
@@ -218,17 +218,27 @@ export default function PublicLayout() {
             )}
           </div>
 
-          {/* Mobile hamburger */}
-          <button
-            type="button"
-            className="public-layout-nav__hamburger"
-            aria-label="Toggle menu"
-            aria-expanded={mobileOpen}
-            aria-controls="public-layout-mobile-nav"
-            onClick={() => setMobileOpen((previous) => !previous)}
-          >
-            <Menu size={22} />
-          </button>
+          {/* Mobile icons */}
+          <div className="public-layout-nav__mobile-icons">
+            <button
+              type="button"
+              className="public-layout-nav__bug"
+              onClick={() => window.dispatchEvent(new Event("open-feedback"))}
+              aria-label="Report Bug"
+            >
+              <Bug size={20} />
+            </button>
+            <button
+              type="button"
+              className="public-layout-nav__hamburger"
+              aria-label="Toggle menu"
+              aria-expanded={mobileOpen}
+              aria-controls="public-layout-mobile-nav"
+              onClick={() => setMobileOpen((previous) => !previous)}
+            >
+              <Menu size={22} />
+            </button>
+          </div>
         </div>
 
         <button

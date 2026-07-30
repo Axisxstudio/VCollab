@@ -233,18 +233,16 @@ export async function requestPasswordReset(email: string): Promise<void> {
 }
 
 export async function resetPassword(accessToken: string, password: string): Promise<void> {
-  const client = createSupabasePasswordClient();
+  const admin = createSupabaseAdminClient();
 
-  const { error: sessionError } = await client.auth.setSession({
-    access_token: accessToken,
-    refresh_token: "",
-  });
+  const { data, error: userError } = await admin.auth.getUser(accessToken);
 
-  if (sessionError) {
+  if (userError || !data.user) {
     throw unauthorized("Invalid or expired reset token");
   }
 
-  const { error } = await client.auth.updateUser({ password });
+  const { error } = await admin.auth.admin.updateUserById(data.user.id, { password });
+  
   if (error) {
     throw unauthorized(error.message);
   }

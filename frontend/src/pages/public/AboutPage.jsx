@@ -29,12 +29,24 @@ const faqItems = [
     answer: "Create an account, complete your profile, publish your first project or post, and explore active contributors, updates, and discussions to begin collaborating in the community."
   },
   {
+    question: "Is VCollab free to use?",
+    answer: "Yes, VCollab is completely free to use. Our goal is to provide accessible collaboration and networking tools for students, developers, and creators everywhere."
+  },
+  {
+    question: "Can I collaborate with others in real-time?",
+    answer: "Absolutely! VCollab is built for active collaboration. You can discover peers, connect with project owners, and engage in discussions to bring your ideas to life seamlessly."
+  },
+  {
     question: "What kind of content can I publish on VCollab?",
     answer: "Users can publish projects, updates, blogs, technical insights, creative work, and other professional or educational content that supports discovery, collaboration, and learning."
   },
   {
     question: "Who can view the content I share?",
     answer: "Content published to public areas of VCollab can be visible to other users and, in some cases, public visitors. It is best to share only material you are comfortable presenting professionally."
+  },
+  {
+    question: "How do I report inappropriate content or behavior?",
+    answer: "If you encounter content or behavior that violates our community standards, you can use the built-in reporting tools on projects, posts, and profiles to notify our admin team immediately."
   },
   {
     question: "How does VCollab handle my data?",
@@ -47,7 +59,7 @@ const faqItems = [
   },
   {
     question: "Does VCollab own the content I publish?",
-    answer: "You remain responsible for the content you publish. By posting on the platform, you allow VCollab to display and distribute that content within the service according to platform policies and applicable terms."
+    answer: "No, you retain full ownership of and responsibility for your work. By posting on the platform, you simply grant VCollab the license to display and distribute that content within the service."
   },
   {
     question: "Where can I read the platform rules and policies?",
@@ -103,10 +115,10 @@ export default function AboutPage() {
             </div>
             <div className="ap-story-body">
               <p>
-                Developed by <strong>VCollab</strong>, VCollab was designed to make project collaboration more trusted, visible, and practical for people building real work.
+                Developed by <strong>Vithusan V</strong>, VCollab was born out of a desire to solve the fragmented nature of student and professional project collaboration. Too often, brilliant ideas and hard work are lost in the chaos of scattered chats, disconnected drives, and short-lived academic submissions.
               </p>
               <p>
-                Instead of leaving projects, ideas, and useful content scattered across chats, drives, and short-lived submissions, VCollab brings collaboration, publishing, and discovery into one professional platform.
+                VCollab was meticulously designed to centralize this process, transforming how creators build and share. By bringing real-time collaboration, intuitive content publishing, and seamless discovery into one unified professional platform, VCollab ensures that your work is not only visible but also trusted and impactful. It empowers teams to connect, innovate, and bring their ideas to life with unprecedented clarity and ease.
               </p>
             </div>
           </div>
@@ -196,10 +208,10 @@ export default function AboutPage() {
                     <ExternalLink size={18} />
                     Portfolio
                   </a>
-                  <a href="#" aria-label="GitHub" target="_blank" rel="noopener noreferrer" className="ap-team-btn icon-only">
+                  <a href="https://github.com/VTN02" aria-label="GitHub" target="_blank" rel="noopener noreferrer" className="ap-team-btn icon-only">
                     <FaGithub size={18} />
                   </a>
-                  <a href="#" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer" className="ap-team-btn icon-only">
+                  <a href="https://www.linkedin.com/in/vithusan-vijayakumar/" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer" className="ap-team-btn icon-only">
                     <FaLinkedin size={18} />
                   </a>
                 </div>

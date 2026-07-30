@@ -14,17 +14,28 @@ export default function FeedbackWidget() {
   
   const { user } = useAuthStore();
 
-  // Close when clicking outside
+  // Close when clicking outside and listen for custom open events
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (widgetRef.current && !widgetRef.current.contains(e.target)) {
         setIsOpen(false);
       }
     };
+    
+    const handleOpenFeedback = () => {
+      setIsOpen(true);
+    };
+
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    
+    window.addEventListener("open-feedback", handleOpenFeedback);
+    
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("open-feedback", handleOpenFeedback);
+    };
   }, [isOpen]);
 
   // Automatically pop up once per session when entering the website

@@ -1559,46 +1559,6 @@ html {
 
   .lp-type-line {
     display: block;
-    width: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    padding-right: 0.22em;
-    border-right: 2px solid rgba(29, 78, 216, 0.9);
-    animation: lp-mobile-type 0.8s steps(24, end) forwards, lp-mobile-caret 0.7s step-end infinite;
-  }
-
-  .lp-type-line-1 {
-    animation-delay: 0.2s;
-  }
-
-  .lp-type-line-2 {
-    animation-delay: 1.1s;
-  }
-
-  .lp-type-line-3 {
-    animation-delay: 2s;
-  }
-}
-
-@keyframes lp-mobile-type {
-  from {
-    width: 0;
-  }
-
-  to {
-    width: calc(100% + 0.22em);
-  }
-}
-
-@keyframes lp-mobile-caret {
-
-  0%,
-  100% {
-    border-right-color: rgba(29, 78, 216, 0.9);
-  }
-
-  50% {
-    border-right-color: transparent;
   }
 }
 
@@ -2145,13 +2105,13 @@ html {
 @media (max-width: 480px) {
 
   /* Extreme small phones: switch dense card grids to single-column for readability */
-  .lp-stats-grid,
-  .lp-content-grid,
-  .lp-grid-4 {
+  .lp-stats-grid {
     gap: 8px !important;
   }
 
-  .lp-grid-3 {
+  .lp-grid-4,
+  .lp-grid-3,
+  .lp-content-grid {
     grid-template-columns: 1fr !important;
     gap: 10px !important;
   }

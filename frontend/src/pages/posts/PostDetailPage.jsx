@@ -193,7 +193,7 @@ export default function PostDetailPage() {
               setIsContactOpen(true);
             }}
           >
-            <Mail size={18} /> Contact Owner
+            <Mail size={18} /> <span className="contact-owner-text">Contact Owner</span>
           </button>
         </div>
 

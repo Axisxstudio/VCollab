@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { routes } from "../../config/routes";
 import { Globe } from "lucide-react";
-import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { FaGithub, FaLinkedin } from "react-icons/fa";
 import logoImg from "../../assets/logo.png";
 
 export default function PublicFooter() {
@@ -38,19 +38,17 @@ export default function PublicFooter() {
         <div>
           <h4>Contact</h4>
           <p><a href="mailto:vijayakumarvithusan@gmail.com" className="lp-footer-contact-link">vijayakumarvithusan@gmail.com</a></p>
+          <p><a href="tel:+94774534056" className="lp-footer-contact-link">+94 77 453 4056</a></p>
           <p style={{ marginTop: '8px', color: '#94a3b8', fontSize: '0.86rem', whiteSpace: 'nowrap' }}>
             Admin and Developer <a href="https://vtnport.vercel.app/" target="_blank" rel="noopener noreferrer" className="admin-link">Vithusan V</a>
           </p>
           
           <div className="lp-social-icons">
-            <a href="#" aria-label="Facebook">
-              <FaFacebook size={18} color="#1877F2" />
-            </a>
-            <a href="#" aria-label="Instagram">
-              <FaInstagram size={18} color="#E1306C" />
-            </a>
-            <a href="#" aria-label="LinkedIn">
+            <a href="https://www.linkedin.com/in/vithusan-vijayakumar/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
               <FaLinkedin size={18} color="#0A66C2" />
+            </a>
+            <a href="https://github.com/VTN02" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+              <FaGithub size={18} color="#333" />
             </a>
             <a href="https://vtnport.vercel.app/" target="_blank" rel="noopener noreferrer" aria-label="Website">
               <Globe size={18} color="#94a3b8" />

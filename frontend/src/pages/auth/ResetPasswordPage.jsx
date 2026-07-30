@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { resetPasswordSchema } from "../../validation/auth.schema";
@@ -16,8 +16,22 @@ export default function ResetPasswordPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting }
   } = useForm({ resolver: zodResolver(resetPasswordSchema) });
+
+  useEffect(() => {
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const hashToken = hashParams.get("access_token");
+    
+    const queryParams = new URLSearchParams(window.location.search);
+    const queryToken = queryParams.get("token") || queryParams.get("access_token");
+
+    const finalToken = hashToken || queryToken;
+    if (finalToken) {
+      setValue("token", finalToken);
+    }
+  }, [setValue]);
 
   const onSubmit = async (values) => {
     setError(null);

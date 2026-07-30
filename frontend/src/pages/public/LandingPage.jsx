@@ -309,9 +309,11 @@ function ContentCard({ item, type, index = 0 }) {
       whileHover={!inactive ? { y: -5, boxShadow: "0 16px 32px -8px rgba(37,99,235,0.14)" } : {}}
       transition={{ type: "spring", stiffness: 300, damping: 25 }}
     >
-      <div className="lp-content-thumb">
-        <MediaSwiper media={media} fallbackIcon={type === "blog" ? BookOpenText : Sparkles} />
-      </div>
+      {(media.length > 0 || type !== "blog") && (
+        <div className="lp-content-thumb">
+          <MediaSwiper media={media} fallbackIcon={type === "blog" ? BookOpenText : Sparkles} />
+        </div>
+      )}
 
       <div className="lp-content-body">
         <div className="lp-landing-card-badges">
@@ -788,7 +790,7 @@ export default function LandingPage() {
           {isLoading ? (
             <div className="lp-empty">Loading blogs...</div>
           ) : latestBlogs.length > 0 ? (
-            <AnimatedGrid className="lp-grid-4">
+            <AnimatedGrid className="lp-grid-3">
               {latestBlogs.slice(0, 8).map((blog, index) => (
                 <ContentCard key={blog.id} item={blog} type="blog" index={index} />
               ))}
