@@ -23,6 +23,7 @@ import {
 import CommentModal from "../../components/comments/CommentModal";
 import PublicFooter from "../../components/public/PublicFooter";
 import SEO from "../../components/seo/SEO";
+import ImageLightbox from "../../components/common/ImageLightbox";
 import useRealtimeLandingOverview from "../../hooks/useRealtimeLandingOverview";
 import { routes } from "../../config/routes";
 import { useAuthStore } from "../../store/authStore";
@@ -127,6 +128,8 @@ function MediaSwiper({ media = [], fallbackIcon: FallbackIcon }) {
   const touchStartX = useRef(null);
   const touchEndX = useRef(null);
 
+  const [lightboxUrl, setLightboxUrl] = useState(null);
+
   if (items.length === 0) {
     return (
       <div className="lp-media-placeholder">
@@ -169,28 +172,37 @@ function MediaSwiper({ media = [], fallbackIcon: FallbackIcon }) {
   };
 
   return (
-    <div 
-      className="lp-media-swiper"
-      onTouchStart={items.length > 1 ? handleTouchStart : undefined}
-      onTouchMove={items.length > 1 ? handleTouchMove : undefined}
-      onTouchEnd={items.length > 1 ? handleTouchEnd : undefined}
-    >
-      <motion.div
-        className="lp-media-track"
-        animate={{ x: `-${currentIndex * 100}%` }}
-        transition={{ type: "spring", stiffness: 300, damping: 35 }}
-        style={{ display: "flex" }}
+    <>
+      <div 
+        className="lp-media-swiper"
+        onTouchStart={items.length > 1 ? handleTouchStart : undefined}
+        onTouchMove={items.length > 1 ? handleTouchMove : undefined}
+        onTouchEnd={items.length > 1 ? handleTouchEnd : undefined}
       >
-        {items.map((item, index) => (
-          <img
-            key={`${typeof item === "string" ? item : item.url}-${index}`}
-            src={typeof item === "string" ? item : item.url}
-            alt={`Media ${index + 1}`}
-            className="lp-media-img"
-            style={{ flexShrink: 0, width: "100%" }}
-          />
-        ))}
-      </motion.div>
+        <motion.div
+          className="lp-media-track"
+          animate={{ x: `-${currentIndex * 100}%` }}
+          transition={{ type: "spring", stiffness: 300, damping: 35 }}
+          style={{ display: "flex" }}
+        >
+          {items.map((item, index) => {
+            const src = typeof item === "string" ? item : item.url;
+            return (
+              <img
+                key={`${src}-${index}`}
+                src={src}
+                alt={`Media ${index + 1}`}
+                className="lp-media-img"
+                style={{ flexShrink: 0, width: "100%", cursor: "pointer" }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setLightboxUrl(src);
+                }}
+              />
+            );
+          })}
+        </motion.div>
 
       {items.length > 1 && (
         <>
@@ -212,6 +224,11 @@ function MediaSwiper({ media = [], fallbackIcon: FallbackIcon }) {
         </>
       )}
     </div>
+
+      {lightboxUrl && (
+        <ImageLightbox url={lightboxUrl} onClose={() => setLightboxUrl(null)} />
+      )}
+    </>
   );
 }
 

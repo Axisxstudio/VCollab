@@ -1976,9 +1976,25 @@ html {
     opacity: 1;
   }
 
-
   .lp-project-card h3,
-  .lp-insta-author-info strong,
+  .lp-content-card h3 {
+    font-size: 0.95rem;
+    margin-top: 10px;
+    margin-bottom: 6px;
+  }
+
+  .lp-project-meta strong,
+  .lp-content-meta strong,
+  .lp-insta-author-info strong {
+    font-size: 0.75rem !important;
+  }
+
+  .lp-insta-media {
+    width: 75% !important;
+    margin: 0 auto;
+    border-radius: 8px;
+  }
+
   .lp-content-card h3 {
     font-size: 0.9rem !important;
   }
