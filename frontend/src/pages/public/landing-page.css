@@ -45,6 +45,12 @@ html {
   .lp-tech-badge-more-mobile {
     display: inline-flex !important;
   }
+  .lp-tech-badge {
+    max-width: 110px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 /* Ã¢â€â‚¬Ã¢â€â‚¬ Base Ã¢â€â‚¬Ã¢â€â‚¬ */
