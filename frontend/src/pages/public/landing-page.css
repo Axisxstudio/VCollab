@@ -2109,18 +2109,6 @@ html {
     gap: 8px !important;
   }
 
-  .lp-grid-4,
-  .lp-grid-3,
-  .lp-content-grid {
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
-  }
-
-  .lp-carousel-grid {
-    grid-template-columns: 1fr !important;
-    gap: 14px !important;
-  }
-
   .lp-cc-card {
     max-width: 280px;
     min-height: 176px !important;
