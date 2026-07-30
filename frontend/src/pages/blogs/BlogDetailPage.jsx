@@ -1,6 +1,7 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, BookOpenText, CalendarDays, Folder, UserRound } from "lucide-react";
+import { ArrowLeft, BookOpenText, CalendarDays, Folder, UserRound, Mail, User } from "lucide-react";
+import ContactOwnerModal from "../../components/messaging/ContactOwnerModal";
 import MediaGallery from "../../components/media/MediaGallery";
 import ContentActions from "../../components/interactions/ContentActions";
 import CommentThread from "../../components/comments/CommentThread";
@@ -14,10 +15,12 @@ import { useAuthStore } from "../../store/authStore";
 import useFeedUpdates from "../../websocket/useFeedUpdates";
 import { formatTimeAgo } from "../../utils/date";
 import SEO from "../../components/seo/SEO";
+import { toast } from "react-hot-toast";
+import ImageLightbox from "../../components/common/ImageLightbox";
 
-const getAvatarContent = (author) => {
+const getAvatarContent = (author, onAvatarClick) => {
   if (author?.profileImage) {
-    return <img src={author.profileImage} alt={author.fullName || author.username} className="detail-page-avatar" />;
+    return <img src={author.profileImage} alt={author.fullName || author.username} className="detail-page-avatar" style={{ cursor: 'pointer' }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAvatarClick?.(author.profileImage); }} />;
   }
   return <div className="detail-page-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'var(--color-primary)', fontWeight: 'bold' }}>{(author?.fullName || author?.username || "V").charAt(0).toUpperCase()}</div>;
 };
@@ -30,6 +33,8 @@ export default function BlogDetailPage() {
   const token = useAuthStore((state) => state.token);
   const currentUser = useAuthStore((state) => state.user);
   const isAuthenticated = Boolean(token);
+  const [isContactOpen, setIsContactOpen] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState(null);
   const { data, isLoading } = useQuery({
     queryKey: ["blog", id],
     queryFn: () => getBlog(id)
@@ -68,9 +73,10 @@ export default function BlogDetailPage() {
   const detailPath = getContentDetailPath("BLOG", id);
   const profilePath = data.author?.username ? routes.profile.replace(":username", data.author.username) : routes.home;
   const landingBlogsHref = `${routes.landing}#blogs`;
+  const contactContext = `Blog: ${data.title}`;
   const authorLabel = (
     <>
-      {getAvatarContent(data.author)}
+      {getAvatarContent(data.author, setLightboxUrl)}
       <span>{data.author?.fullName || data.author?.username || "Anonymous"}</span>
     </>
   );
@@ -150,6 +156,54 @@ export default function BlogDetailPage() {
           </section>
         )}
 
+        {/* Contact Owner Section */}
+        <div className="contact-owner-card">
+          <div className="contact-owner-info">
+            {data.author?.profileImage ? (
+              <img src={data.author.profileImage} alt="Owner" className="contact-owner-avatar" onClick={() => setLightboxUrl(data.author.profileImage)} style={{ cursor: 'pointer' }} />
+            ) : (
+              <div className="contact-owner-avatar" style={{ background: 'var(--color-primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <User size={24} />
+              </div>
+            )}
+            <div className="contact-owner-details">
+              <h4>{data.author?.fullName || data.author?.username}</h4>
+              <p>Talk to author about blog details</p>
+            </div>
+          </div>
+          <button 
+            className="btn-contact-owner"
+            onClick={() => {
+              if (!isAuthenticated) {
+                toast("Please sign in to contact the author.", { icon: "🔒" });
+                const params = new URLSearchParams({
+                  userId: String(data.author?.id || ""),
+                  context: contactContext
+                });
+                navigate(routes.login, {
+                  state: {
+                    from: {
+                      pathname: routes.messages,
+                      search: `?${params.toString()}`
+                    }
+                  }
+                });
+                return;
+              }
+              setIsContactOpen(true);
+            }}
+          >
+            <Mail size={18} /> <span className="contact-owner-text">Contact Author</span>
+          </button>
+        </div>
+
+        <ContactOwnerModal
+          isOpen={isContactOpen}
+          onClose={() => setIsContactOpen(false)}
+          owner={data.author}
+          context={contactContext}
+        />
+
         <ContentActions
           contentType="BLOG"
           contentId={id}
@@ -172,6 +226,10 @@ export default function BlogDetailPage() {
         loginPath={routes.login}
         lockedMessage="Sign in to comment or reply on this blog."
       />
+      
+      {lightboxUrl && (
+        <ImageLightbox url={lightboxUrl} onClose={() => setLightboxUrl(null)} />
+      )}
     </div>
   );
 }

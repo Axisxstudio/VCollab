@@ -2,6 +2,7 @@ import { createPortal } from "react-dom";
 import { useEffect, useRef } from "react";
 import { X, Heart, MessageCircle, Share2, MoreHorizontal } from "lucide-react";
 import CommentThread from "./CommentThread";
+import { useAuthStore } from "../../store/authStore";
 import "../../styles/comment-modal.css";
 
 /**
@@ -21,6 +22,7 @@ export default function CommentModal({
   onShareChange
 }) {
   const modalRef = useRef(null);
+  const isAuthenticated = useAuthStore((state) => !!state.token);
 
   useEffect(() => {
     const handleEsc = (e) => {
@@ -114,6 +116,7 @@ export default function CommentModal({
               contentType={contentType}
               contentId={contentId}
               variant="inline"
+              readOnly={!isAuthenticated}
               lockedMessage="Sign in to post a comment."
             />
           </div>

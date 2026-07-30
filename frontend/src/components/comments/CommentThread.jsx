@@ -582,16 +582,16 @@ export default function CommentThread({
         />
       )}
 
-      {isLoading && <div className="collab-empty-panel slim">Loading comments...</div>}
+      {!readOnly && isLoading && <div className="collab-empty-panel slim">Loading comments...</div>}
 
-      {!isLoading && commentsList.length === 0 && (
+      {!readOnly && !isLoading && commentsList.length === 0 && (
         <div className="collab-empty-panel slim">
           <h3>No comments yet</h3>
           <p>Start the discussion and make the first contribution.</p>
         </div>
       )}
 
-      {!isLoading && commentsList.length > 0 && (
+      {!readOnly && !isLoading && commentsList.length > 0 && (
         <div className="comment-thread-upgrade__list">
           {commentsList.map((comment) => (
             <CommentItem

@@ -18,6 +18,7 @@ import OwnerContentControls from "../../components/content/OwnerContentControls"
 import ContentActions from "../../components/interactions/ContentActions";
 import FollowButton from "../../components/interactions/FollowButton";
 import MediaGallery from "../../components/media/MediaGallery";
+import ImageLightbox from "../../components/common/ImageLightbox";
 import { routes } from "../../config/routes";
 import { deleteBlog, listUserBlogs } from "../../services/blog.service";
 import { createConversation } from "../../services/conversation.service";
@@ -211,6 +212,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("activity");
   const [contentFilter, setContentFilter] = useState("All");
   const [connectionSubTab, setConnectionSubTab] = useState("followers");
+  const [lightboxUrl, setLightboxUrl] = useState(null);
 
   useEffect(() => {
     setActiveTab("activity");
@@ -504,7 +506,7 @@ export default function ProfilePage() {
     <div className="profile-shell">
       <section className="card profile-hero-card">
         <div className="profile-cover">
-          {data.coverImage && <img src={data.coverImage} alt={`${getDisplayName(data)} cover`} />}
+          {data.coverImage && <img src={data.coverImage} alt={`${getDisplayName(data)} cover`} onClick={() => setLightboxUrl(data.coverImage)} style={{ cursor: "pointer" }} />}
           {!data.coverImage && <div className="profile-cover-placeholder" />}
           <div className="profile-role-badge">{formatRole(data.role)}</div>
           {isMe && (
@@ -519,7 +521,7 @@ export default function ProfilePage() {
             <div className="profile-identity-block">
               <div className="profile-avatar-large">
                 {data.profileImage ? (
-                  <img src={data.profileImage} alt={getDisplayName(data)} />
+                  <img src={data.profileImage} alt={getDisplayName(data)} onClick={() => setLightboxUrl(data.profileImage)} style={{ cursor: "pointer" }} />
                 ) : (
                   getInitial(getDisplayName(data))
                 )}
@@ -998,6 +1000,10 @@ export default function ProfilePage() {
             </>
           )}
         </section>
+      )}
+
+      {lightboxUrl && (
+        <ImageLightbox url={lightboxUrl} onClose={() => setLightboxUrl(null)} />
       )}
     </div>
   );

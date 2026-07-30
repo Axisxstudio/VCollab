@@ -34,6 +34,7 @@ import { buildShareUrl } from "../../utils/discovery";
 import { formatTimeAgo } from "../../utils/date";
 import useFeedUpdates from "../../websocket/useFeedUpdates";
 import SEO from "../../components/seo/SEO";
+import { toast } from "react-hot-toast";
 
 export default function ProjectDetailPage() {
   const { id } = useParams();
@@ -227,6 +228,7 @@ export default function ProjectDetailPage() {
                  className="btn-contact-owner"
                  onClick={() => {
                     if (!isAuthenticated) {
+                      toast("Please sign in to contact the owner.", { icon: "🔒" });
                       const params = new URLSearchParams({
                         userId: String(data.owner?.id || ""),
                         context: contactContext

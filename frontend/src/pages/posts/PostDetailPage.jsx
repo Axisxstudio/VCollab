@@ -17,10 +17,13 @@ import { useAuthStore } from "../../store/authStore";
 import useFeedUpdates from "../../websocket/useFeedUpdates";
 import { formatTimeAgo } from "../../utils/date";
 import SEO from "../../components/seo/SEO";
+import { toast } from "react-hot-toast";
 
-const getAvatarContent = (author) => {
+import ImageLightbox from "../../components/common/ImageLightbox";
+
+const getAvatarContent = (author, onAvatarClick) => {
   if (author?.profileImage) {
-    return <img src={author.profileImage} alt={author.fullName || author.username} className="detail-page-avatar" />;
+    return <img src={author.profileImage} alt={author.fullName || author.username} className="detail-page-avatar" style={{ cursor: 'pointer' }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAvatarClick?.(author.profileImage); }} />;
   }
   return <div className="detail-page-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: 'var(--color-primary)', fontWeight: 'bold' }}>{(author?.fullName || author?.username || "V").charAt(0).toUpperCase()}</div>;
 };
@@ -34,6 +37,7 @@ export default function PostDetailPage() {
   const currentUser = useAuthStore((state) => state.user);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState(null);
   const isAuthenticated = Boolean(token);
   const { data, isLoading } = useQuery({
     queryKey: ["post", id],
@@ -76,7 +80,7 @@ export default function PostDetailPage() {
   const contactContext = `Post: ${data.content?.substring(0, 30) || "Conversation"}...`;
   const authorLabel = (
     <>
-      {getAvatarContent(data.author)}
+      {getAvatarContent(data.author, setLightboxUrl)}
       <span>{data.author?.fullName || data.author?.username || "Anonymous"}</span>
     </>
   );
@@ -161,7 +165,7 @@ export default function PostDetailPage() {
         <div className="contact-owner-card">
           <div className="contact-owner-info">
             {data.author?.profileImage ? (
-              <img src={data.author.profileImage} alt="Owner" className="contact-owner-avatar" />
+              <img src={data.author.profileImage} alt="Owner" className="contact-owner-avatar" onClick={() => setLightboxUrl(data.author.profileImage)} style={{ cursor: 'pointer' }} />
             ) : (
               <div className="contact-owner-avatar" style={{ background: 'var(--color-primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <User size={24} />
@@ -176,6 +180,7 @@ export default function PostDetailPage() {
             className="btn-contact-owner"
             onClick={() => {
               if (!isAuthenticated) {
+                toast("Please sign in to contact the owner.", { icon: "🔒" });
                 const params = new URLSearchParams({
                   userId: String(data.author?.id || ""),
                   context: contactContext
@@ -233,6 +238,10 @@ export default function PostDetailPage() {
         loginPath={routes.login}
         lockedMessage="Sign in to comment or reply on this post."
       />
+      
+      {lightboxUrl && (
+        <ImageLightbox url={lightboxUrl} onClose={() => setLightboxUrl(null)} />
+      )}
     </div>
   );
 }
