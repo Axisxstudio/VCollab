@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Target, Globe, Code, Users, Rocket, ChevronDown, Mail, ExternalLink, ArrowRight } from "lucide-react";
+import { Target, Globe, Code, Users, Rocket, ChevronDown, Mail, ExternalLink, ArrowRight, MessageCircle, Compass, ShieldCheck } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import PublicFooter from "../../components/public/PublicFooter";
 import SEO from "../../components/seo/SEO";
@@ -171,6 +171,24 @@ export default function AboutPage() {
               <div className="ap-feature-icon-wrapper"><Rocket size={24} /></div>
               <h4>Grow With Trusted Support</h4>
               <p>Connect with a credible community, get real-time feedback, and use optional expert help when a project needs deeper support.</p>
+            </div>
+
+            <div className="ap-feature reveal-up" style={{ "--delay": "300ms" }}>
+              <div className="ap-feature-icon-wrapper"><MessageCircle size={24} /></div>
+              <h4>Real-Time Networking</h4>
+              <p>Communicate instantly through the integrated chat system. Whether it’s coordinating a project or discussing a new idea, connection is just a click away.</p>
+            </div>
+
+            <div className="ap-feature reveal-up" style={{ "--delay": "360ms" }}>
+              <div className="ap-feature-icon-wrapper"><Compass size={24} /></div>
+              <h4>Personalized Discovery</h4>
+              <p>Explore a tailored feed of projects, blogs, and updates relevant to your skills and interests, ensuring you never miss opportunities that align with your goals.</p>
+            </div>
+
+            <div className="ap-feature reveal-up" style={{ "--delay": "420ms" }}>
+              <div className="ap-feature-icon-wrapper"><ShieldCheck size={24} /></div>
+              <h4>Secure & Managed Access</h4>
+              <p>Maintain control over your visibility with robust privacy settings. Share publicly or restrict access to specific academic domains and institutions.</p>
             </div>
           </div>
         </div>

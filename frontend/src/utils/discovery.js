@@ -11,8 +11,7 @@ export const DISCOVERY_SORT_OPTIONS = [
 export const ROLE_FILTER_OPTIONS = [
   { value: "", label: "All roles" },
   { value: "STUDENT", label: "Students" },
-  { value: "INDUSTRIAL_EXPERT", label: "Industrial experts" },
-  { value: "SOFTWARE_ENGINEER", label: "Software engineers" }
+  { value: "SOFTWARE_ENGINEER", label: "Developers" }
 ];
 
 export function createInitialDiscoveryFilters(overrides = {}) {
@@ -83,6 +82,7 @@ export function getProfilePath(username) {
 
 export function formatRole(role) {
   if (!role) return "Contributor";
+  if (role === "SOFTWARE_ENGINEER") return "Developer";
   return role
     .toLowerCase()
     .split("_")

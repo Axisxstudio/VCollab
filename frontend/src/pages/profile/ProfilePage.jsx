@@ -64,6 +64,7 @@ const formatDate = (value) => {
 
 const formatRole = (value) => {
   if (!value) return "";
+  if (value === "SOFTWARE_ENGINEER") return "Developer";
   return value
     .toLowerCase()
     .split("_")

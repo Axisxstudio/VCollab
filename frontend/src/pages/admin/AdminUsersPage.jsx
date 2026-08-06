@@ -42,8 +42,7 @@ import "../../styles/admin-table.css";
 const ROLE_OPTIONS = [
   { value: "", label: "All roles" },
   { value: roles.STUDENT, label: "Student" },
-  { value: roles.INDUSTRIAL_EXPERT, label: "Industrial Expert" },
-  { value: roles.SOFTWARE_ENGINEER, label: "Software Engineer" }
+  { value: roles.SOFTWARE_ENGINEER, label: "Developer" }
 ];
 
 const STATUS_OPTIONS = [
@@ -250,8 +249,7 @@ export default function AdminUsersPage() {
               <input type="password" value={createForm.password} placeholder="Temporary password" onChange={(event) => setCreateForm((previous) => ({ ...previous, password: event.target.value }))} />
               <select value={createForm.role} onChange={(event) => setCreateForm((previous) => ({ ...previous, role: event.target.value }))}>
                 <option value={roles.STUDENT}>Student</option>
-                <option value={roles.INDUSTRIAL_EXPERT}>Industrial Expert</option>
-                <option value={roles.SOFTWARE_ENGINEER}>Software Engineer</option>
+                <option value={roles.SOFTWARE_ENGINEER}>Developer</option>
               </select>
             </div>
             <div className="admin-warning-panel__actions">

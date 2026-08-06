@@ -154,8 +154,7 @@ export default function RegisterPage() {
                 </div>
                 <select id="role" {...register("role")} defaultValue={roles.STUDENT}>
                   <option value={roles.STUDENT}>Student</option>
-                  <option value={roles.INDUSTRIAL_EXPERT}>Industrial Expert</option>
-                  <option value={roles.SOFTWARE_ENGINEER}>Software Engineer</option>
+                  <option value={roles.SOFTWARE_ENGINEER}>Developer</option>
                 </select>
               </div>
               {errors.role && <span className="error-msg">{errors.role.message}</span>}

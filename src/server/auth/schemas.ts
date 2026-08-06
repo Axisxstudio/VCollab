@@ -1,11 +1,10 @@
 import { z } from "zod";
 import { roles } from "./types";
 
-const publicRoles = roles.filter((role) => role !== "SUPER_ADMIN") as [
+const publicRoles = [
   "STUDENT",
-  "INDUSTRIAL_EXPERT",
   "SOFTWARE_ENGINEER",
-];
+] as const;
 
 export const loginSchema = z
   .object({

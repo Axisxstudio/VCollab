@@ -14,7 +14,6 @@ export const registerSchema = z.object({
   password: z.string().min(8),
   role: z.enum([
     roles.STUDENT,
-    roles.INDUSTRIAL_EXPERT,
     roles.SOFTWARE_ENGINEER
   ])
 });
